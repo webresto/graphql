@@ -1,0 +1,13 @@
+{
+  "key": "CUSTOM_FIELDS",
+  "type": "json",
+  "name": "Custom Fields",
+  "description": "",
+  "jsonSchema": {
+    "type": "array",
+    "items": {
+      "type": "string"
+    }
+  },
+  "TODO": "Possibly it is not an array of strings, json schema is not defined yet"
+}

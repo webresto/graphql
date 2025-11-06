@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "emitBOM": false,
+
+    "module": "commonjs",
+    "target": "es2022",
+    "lib": [
+      "dom"
+    ],
+    "types": [
+      "bluebird-global",
+      "mocha",
+      "node",
+      "chai",
+      "@webresto/core"
+    ],
+    "sourceMap": false,
+    "declaration": true,
+    "removeComments": false,
+    "skipLibCheck": true,
+//    "esModuleInterop": true
+    // TODO: ts with "strict": true,
+    // "alwaysStrict": true
+  },
+  "exclude": [
+    "node_modules"
+  ]
+}

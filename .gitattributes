@@ -1,0 +1,3 @@
+*.ejs linguist-detectable=false
+*.js linguist-detectable=false
+*.* text working-tree-encoding=utf-8

@@ -1,0 +1,8 @@
+{
+  "key": "CAPTCHA_TYPE",
+  "type": "string",
+  "name": "Captcha Type",
+  "description": "",
+  "defaultValue": "POW",
+  "isRequired": true
+}
