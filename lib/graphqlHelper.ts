@@ -26,7 +26,7 @@ const replaceList = {};
 const models: Set<string> = new Set();
 
 /**
- * Добавляет модель в список моделей для создания типов схемы graphql
+ * Adds a model to the list of models for creating GraphQL schema types
  *
  *
  * @param modelName string
@@ -46,7 +46,7 @@ function addType(type: string) {
   schemaTypes.push(type);
 }
 /**
- * Мержит новый резолвер с объектом резолверов. Новый резолвер заменит старый при совпадении имен
+ * Merges a new resolver with the resolvers object. The new resolver will replace the old one if names match
  *
  * @param resolvers
  * resolverExample = {
@@ -61,7 +61,7 @@ function addResolvers(resolvers: object) {
 }
 
 /**
- * Сканирует все модели sails и добавляет их в список моделей для создания типов схемы graphql
+ * Scans all sails models and adds them to the list of models for creating GraphQL schema types
  */
 function addAllSailsModels() {
   Object.keys(sails.models).forEach((key) => {
@@ -75,11 +75,11 @@ function addAllSailsModels() {
 }
 
 /**
- * Добавляет массив с исключениями к текущему списку
- * Варианты:
- * 1. ["Order.field"] - исключает поле field в модели Order
- * 2. ["Order"] - исключает модель Order полностью
- * 3. ["field] - исключает поле field из всех моделей
+ * Adds an array of exceptions to the current list
+ * Options:
+ * 1. ["Order.field"] - excludes field in Order model
+ * 2. ["Order"] - excludes Order model completely
+ * 3. ["field"] - excludes field from all models
  *
  * @param list array<string>
  */
@@ -88,8 +88,8 @@ function addToBlackList(list: Array<string>) {
 }
 
 /**
- * Добавляет в указаную модель новое поле
- * Пример: addCustomField("Order", "customField: string")
+ * Adds a new field to the specified model
+ * Example: addCustomField("Order", "customField: string")
  *
  * @param model string
  * @param field string
@@ -100,8 +100,8 @@ function addCustomField(model, field) {
 }
 
 /**
- * Добавляет в список автозамены поле.
- * Пример: addToReplaceList("Dish.image", "image: [Image]");
+ * Adds a field to the auto-replace list.
+ * Example: addToReplaceList("Dish.image", "image: [Image]");
  *
  * @param model string
  * @param field string
@@ -111,7 +111,7 @@ function addToReplaceList(model, field) {
 }
 
 /**
- * Сканирует указанную директорию и добавляет найденные резолверсы в схему graphql
+ * Scans the specified directory and adds found resolvers to the GraphQL schema
  *
  * @param dir
  */
@@ -128,8 +128,8 @@ function addDirResolvers(dir) {
 }
 
 /**
- * Запускает генерацию схемы и резолверсов
- * Возвращает готовые данные для использования при инициализации apollo server
+ * Starts schema and resolvers generation
+ * Returns ready data for use during Apollo server initialization
  *
  * @returns {schemaTypes, schemaResolvers}
  */
@@ -152,7 +152,7 @@ function firstLetterToLowerCase(string) {
 }
 
 /**
- * Перебирает все поля модели и генерирует тип для схемы graphql
+ * Iterates through all model fields and generates a type for the GraphQL schema
  *
  * @param model sails.model
  * @returns string
@@ -252,8 +252,8 @@ function createType(model) {
 }
 
 /**
- * Соеденяет резолверсы и типы. Отделяет от резолверсов описание запросов.
- * Возвращает готовую схему и резолверсы для использования в apollo server
+ * Combines resolvers and types. Separates query descriptions from resolvers.
+ * Returns the ready schema and resolvers for use in Apollo server
  *
  * @param typeDefsObj
  * @returns
@@ -320,7 +320,7 @@ function createSchema(typeDefsObj) {
 
 // AUTOGENERATE RESOLVERS -----------------------------------------------
 
-// генерация резолверсов по списку моделей. Список моделей автоматически добавляется в схему.
+// Generation of resolvers based on the list of models. The list of models is automatically added to the schema.
 const whiteList = {
   // group: ['subscription', 'query'] // order - modelname , 'subscription' - resolver type
 }
@@ -329,7 +329,7 @@ let modelsResolvers: { Query?: object, Subscription?: object } = { Query: {} };
 import { withFilter } from "apollo-server";
 
 /**
- * Патчит waterline criteria во время автогенерации
+ * Patches waterline criteria during auto-generation
  *
  * @param modelname
  * @param criteria
@@ -362,8 +362,8 @@ function sanitizeCriteria(modelname, criteria) {
 }
 
 /**
- * Добавляет whiteList
- * Пример: setWhiteList({
+ * Adds whiteList
+ * Example: setWhiteList({
     page: ['query'],
     promotion: ['query'],
     maintenance: ['query', 'subscription']
@@ -376,7 +376,7 @@ function setWhiteList(list: object) {
 }
 
 /**
- * Генерирует резолвер для модели. Учитывает список исключений и whiteList
+ * Generates a resolver for the model. Takes into account the list of exceptions and whiteList
  *
  * @param modelname string
  * @returns void
@@ -641,7 +641,7 @@ function addModelResolver(modelname) {
             }
             result = (await sails.models[modelname].findOne({ id: parent.id }).populate(key, sortingCriteriaThrough))[key];
             
-            // Это странно для коллекций, но пусть пока будет. Коллекции если будут хранить очередь сортировки то это получается глобально для записи а не для связи
+            // This is strange for collections, but let it be for now. Collections if they will store sorting queue then this turns out to be global for the record, not for the connection
             if (result && modelAttribute.through === undefined && sails.models[modelAttribute[modelRelationType]].attributes.sortOrder) {
               result.sort((a, b) => a.sortOrder - b.sortOrder);
             }
@@ -754,8 +754,8 @@ function addModelResolver(modelname) {
 }
 
 /**
- * Внутренняя функция используется при автогенерации резолверов
- * Модифицирует модель. Добавляет рассылку сообщений при afterUpdate & afterCreate
+ * Internal function used during resolver auto-generation
+ * Modifies the model. Adds message broadcasting on afterUpdate & afterCreate
  *
  * @param modelname
  */

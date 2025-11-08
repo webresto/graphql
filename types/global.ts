@@ -37,7 +37,7 @@ declare global {
     "http-api:before-response-order-update": [Order]
 
     /**
-     * В данном случае надо указывать PopulatedOrder
+     * In this case, you need to specify PopulatedOrder
      */
     "http-api:before-response-order-set-dish-comment": [Order]
     "http-api:before-response-order-set-dish-amount": [Order]
