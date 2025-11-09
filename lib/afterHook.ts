@@ -3,6 +3,8 @@ import bindTranslations from './bindTranslations';
 let cache = null;
 import { getRandom } from "./eventHelper";
 
+declare var sails: any;
+
 export default async function () {
   try {
 
@@ -23,6 +25,8 @@ export default async function () {
       } catch (error) {
         sails.emit('graphql-middleware:error');
         sails.log.error('GraphQL init error:',error);
+        sails.log.error('Critical GraphQL schema error, shutting down application');
+        process.exit(1);
       }
     });
 
