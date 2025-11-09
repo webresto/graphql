@@ -10,10 +10,10 @@ test/fixture/.tmp/localDiskDb/settings.db
 # lib/*.d.ts
 # lib/*.js
 
-src/*.d.ts
-src/*.js
-types/*.js
-types/*.d.ts
+# src/*.d.ts
+# src/*.js
+# types/*.js
+# types/*.d.ts
 .gitlab-ci.yml
 todo.md
 .vscode/extensions.json
