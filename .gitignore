@@ -7,6 +7,8 @@ lib/helper/*.d.ts
 lib/helper/*.js
 src/resolvers/*.d.ts
 src/resolvers/*.js
+lib/*.d.ts
+lib/*.js
 
 src/*.d.ts
 src/*.js
