@@ -24,9 +24,21 @@ export default async function () {
         sails.emit('graphql-middleware:loaded');
       } catch (error) {
         sails.emit('graphql-middleware:error');
-        sails.log.error('GraphQL init error:',error);
-        sails.log.error('Critical GraphQL schema error, shutting down application');
-        process.exit(1);
+        const banner = `
+====================================================
+🚨 CRITICAL GRAPHQL ERROR! Application halted. 🚨
+====================================================
+
+❌ Initialization failed:
+${error?.stack || error?.message || error}
+
+🕐 App is paused to prevent further corruption.
+====================================================
+`;
+        sails.log.error(banner);
+        const sab = new SharedArrayBuffer(4);
+        const int32 = new Int32Array(sab);
+        Atomics.wait(int32, 0, 0);
       }
     });
 
