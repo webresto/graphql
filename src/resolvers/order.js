@@ -53,7 +53,8 @@ exports.default = {
                     return fullOrder;
                 }
                 catch (error) {
-                    sails.log.error(`GQL > query order`, error);
+                    sails.log.error(`GQL > [order]`, error, args);
+                    throw error;
                 }
             },
         },
@@ -89,7 +90,7 @@ exports.default = {
                         }
                         catch (e) { }
                         if (additionalInfo && additionalInfo.defaultOrderDish) {
-                            // Exception for product in each cart
+                            // Исключение на товар в каждую корзину
                         }
                         else {
                             const error = `"${dish.name}" not promo item`;
@@ -104,7 +105,7 @@ exports.default = {
                     return fullOrder;
                 }
                 catch (error) {
-                    sails.log.error(`GQL > orderAddDish`, error);
+                    sails.log.error(`GQL > [orderAddDish]`, error, args);
                     throw error;
                 }
             },
@@ -112,210 +113,258 @@ exports.default = {
         orderReplaceDish: {
             def: "orderReplaceDish(orderId: String!, orderDishId: Int!, amount: Int, modifiers: Json, comment: String, from: String): Order",
             fn: async (parent, args, context) => {
-                let order;
-                if (args.orderId)
-                    order = await Order.findOne({ id: args.orderId });
-                if (!order) {
-                    sails.log.warn("GQL > orderAddDish: ", `order with id ${args.orderId} not found. Trying make new cart.`);
-                    order = await getNewCart(context, args.orderId);
-                }
-                if (order.paid || order.state === "ORDER") {
-                    order = await getNewCart();
-                }
                 try {
-                    await Order.addDish(order.id, args.dishId, args.amount, args.modifiers === undefined ? [] : args.modifiers, args.comment, args.from, args.replace, args.orderDishId);
+                    let order;
+                    if (args.orderId)
+                        order = await Order.findOne({ id: args.orderId });
+                    if (!order) {
+                        sails.log.warn("GQL > orderAddDish: ", `order with id ${args.orderId} not found. Trying make new cart.`);
+                        order = await getNewCart(context, args.orderId);
+                    }
+                    if (order.paid || order.state === "ORDER") {
+                        order = await getNewCart();
+                    }
+                    try {
+                        await Order.addDish(order.id, args.dishId, args.amount, args.modifiers === undefined ? [] : args.modifiers, args.comment, args.from, args.replace, args.orderDishId);
+                    }
+                    catch (error) {
+                        throw error;
+                    }
+                    await Order.countCart({ id: order.id });
+                    let fullOrder = await Order.populate(order.id);
+                    await emitter.emit("http-api:before-response-order-replace-dish", fullOrder);
+                    return fullOrder;
                 }
                 catch (error) {
+                    sails.log.error(`GQL > [orderReplaceDish]`, error, args);
                     throw error;
                 }
-                await Order.countCart({ id: order.id });
-                let fullOrder = await Order.populate(order.id);
-                await emitter.emit("http-api:before-response-order-replace-dish", fullOrder);
-                return fullOrder;
             },
         },
         orderRemoveDish: {
             def: "orderRemoveDish(id: String!, orderDishId: Int!, amount: Int): Order",
             fn: async function (parent, args, context) {
-                let order;
-                order = await Order.findOne({ id: args.id });
-                if (!order) {
-                    sails.log.warn("GQL > orderAddDish: ", `order with id ${args.orderId} not found. Trying make new cart.`);
-                    order = await getNewCart(context, args.orderId);
-                }
-                if (order.paid || order.state === "ORDER") {
-                    order = await getNewCart();
-                }
-                const orderDish = await OrderDish.findOne({ id: args.orderDishId });
                 try {
-                    await Order.removeDish(order.id, orderDish, args.amount, false);
+                    let order;
+                    order = await Order.findOne({ id: args.id });
+                    if (!order) {
+                        sails.log.warn("GQL > orderAddDish: ", `order with id ${args.orderId} not found. Trying make new cart.`);
+                        order = await getNewCart(context, args.orderId);
+                    }
+                    if (order.paid || order.state === "ORDER") {
+                        order = await getNewCart();
+                    }
+                    const orderDish = await OrderDish.findOne({ id: args.orderDishId });
+                    try {
+                        await Order.removeDish(order.id, orderDish, args.amount, false);
+                    }
+                    catch (error) {
+                        throw error;
+                    }
+                    await Order.countCart({ id: order.id });
+                    let fullOrder = await Order.populate(order.id);
+                    await emitter.emit("http-api:before-response-order-remove-dish", fullOrder);
+                    return fullOrder;
                 }
                 catch (error) {
+                    sails.log.error(`GQL > [orderRemoveDish]`, error, args);
                     throw error;
                 }
-                await Order.countCart({ id: order.id });
-                let fullOrder = await Order.populate(order.id);
-                await emitter.emit("http-api:before-response-order-remove-dish", fullOrder);
-                return fullOrder;
             },
         },
         orderSetDishAmount: {
             def: "orderSetDishAmount(id: String, orderDishId: Int, amount: Int): Order",
             fn: async function (parent, args, context) {
-                let order;
-                order = await Order.findOne(args.id);
-                if (!order) {
-                    sails.log.warn("GQL > orderAddDish: ", `order with id ${args.orderId} not found. Trying make new cart.`);
-                    order = await getNewCart(context, args.orderId);
-                }
-                if (order.paid || order.state === "ORDER") {
-                    order = await getNewCart();
-                }
-                let dish = await OrderDish.findOne(args.orderDishId).populate("dish");
-                if (!dish) {
-                    const error = `OrderDish with id ${args.orderDishId} not found`;
-                    sails.log.error(`GQL > orderSetDishAmount`, error);
-                    throw new Error(error);
-                }
-                if (!dish.dish) {
-                    const error = `Dish in OrderDish with id ${args.orderDishId} not found`;
-                    sails.log.error(`GQL > orderSetDishAmount`, error);
-                    throw new Error(error);
-                }
                 try {
-                    await Order.setCount(order.id, dish, args.amount);
+                    let order;
+                    order = await Order.findOne(args.id);
+                    if (!order) {
+                        sails.log.warn("GQL > orderAddDish: ", `order with id ${args.orderId} not found. Trying make new cart.`);
+                        order = await getNewCart(context, args.orderId);
+                    }
+                    if (order.paid || order.state === "ORDER") {
+                        order = await getNewCart();
+                    }
+                    let dish = await OrderDish.findOne(args.orderDishId).populate("dish");
+                    if (!dish) {
+                        const error = `OrderDish with id ${args.orderDishId} not found`;
+                        sails.log.error(`GQL > orderSetDishAmount`, error);
+                        throw new Error(error);
+                    }
+                    if (!dish.dish) {
+                        const error = `Dish in OrderDish with id ${args.orderDishId} not found`;
+                        sails.log.error(`GQL > orderSetDishAmount`, error);
+                        throw new Error(error);
+                    }
+                    try {
+                        await Order.setCount(order.id, dish, args.amount);
+                    }
+                    catch (error) {
+                        throw error;
+                    }
+                    await Order.countCart({ id: order.id });
+                    let fullOrder = await Order.populate(order.id);
+                    await emitter.emit("http-api:before-response-order-set-dish-amount", fullOrder);
+                    return fullOrder;
                 }
                 catch (error) {
+                    sails.log.error(`GQL > [orderSetDishAmount]`, error, args);
                     throw error;
                 }
-                await Order.countCart({ id: order.id });
-                let fullOrder = await Order.populate(order.id);
-                await emitter.emit("http-api:before-response-order-set-dish-amount", fullOrder);
-                return fullOrder;
             },
         },
         orderSetDishComment: {
             def: "orderSetDishComment(id: String, orderDishId: Int, comment: String): Order",
             fn: async function (parent, args, context) {
-                let order;
-                const data = args;
-                const orderId = data.orderId;
-                const comment = data.comment || "";
-                const dishId = data.dishId;
-                if (!dishId) {
-                    const error = "dishId is required";
-                    sails.log.error(`GQL > orderSetDishComment`, error);
-                    throw new Error(error);
+                try {
+                    let order;
+                    const data = args;
+                    const orderId = data.orderId;
+                    const comment = data.comment || "";
+                    const dishId = data.dishId;
+                    if (!dishId) {
+                        const error = "dishId is required";
+                        sails.log.error(`GQL > orderSetDishComment`, error);
+                        throw new Error(error);
+                    }
+                    order = await Order.findOne(orderId);
+                    if (!order) {
+                        sails.log.warn("GQL > orderAddDish: ", `order with id ${args.orderId} not found. Trying make new cart.`);
+                        order = await getNewCart(context, args.orderId);
+                    }
+                    if (order.paid || order.state === "ORDER") {
+                        order = await getNewCart();
+                    }
+                    const dish = await OrderDish.findOne({ id: dishId }).populate("dish");
+                    if (!dish) {
+                        const error = `Dish with id ${dishId} not found`;
+                        sails.log.error(`GQL > orderSetDishComment`, error);
+                        throw new Error(error);
+                    }
+                    await order.setComment(dish, comment);
+                    await Order.countCart({ id: order.id });
+                    let fullOrder = await Order.populate(order.id);
+                    await emitter.emit("http-api:before-response-order-set-dish-comment", fullOrder);
+                    return fullOrder;
                 }
-                order = await Order.findOne(orderId);
-                if (!order) {
-                    sails.log.warn("GQL > orderAddDish: ", `order with id ${args.orderId} not found. Trying make new cart.`);
-                    order = await getNewCart(context, args.orderId);
+                catch (error) {
+                    sails.log.error(`GQL > [orderSetDishComment]`, error, args);
+                    throw error;
                 }
-                if (order.paid || order.state === "ORDER") {
-                    order = await getNewCart();
-                }
-                const dish = await OrderDish.findOne({ id: dishId }).populate("dish");
-                if (!dish) {
-                    const error = `Dish with id ${dishId} not found`;
-                    sails.log.error(`GQL > orderSetDishComment`, error);
-                    throw new Error(error);
-                }
-                await order.setComment(dish, comment);
-                await Order.countCart({ id: order.id });
-                let fullOrder = await Order.populate(order.id);
-                await emitter.emit("http-api:before-response-order-set-dish-comment", fullOrder);
-                return fullOrder;
             },
         },
         orderUpdate: {
             def: '"""allowed only for trifleFrom, address, pickUpPoint """ orderUpdate(order: InputOrderUpdate): Order',
             fn: async function (parent, args, context) {
-                let order = args.order;
-                if (!order.id)
-                    throw "order.id field is required";
-                let _order = await Order.findOne(order.id);
-                if (['NEW', 'CART', 'CHECKOUT', 'PAYMENT'].includes(_order.state) !== true) {
-                    throw `Order in state [${order.state}] update not allowed`;
+                try {
+                    let order = args.order;
+                    if (!order.id)
+                        throw "order.id field is required";
+                    let _order = await Order.findOne(order.id);
+                    if (['NEW', 'CART', 'CHECKOUT', 'PAYMENT'].includes(_order.state) !== true) {
+                        throw `Order in state [${order.state}] update not allowed`;
+                    }
+                    let orderToCartState = false;
+                    if (Object.keys(order).length === 1) {
+                        throw `no passed updates`;
+                    }
+                    const orderUpd = {};
+                    if (order.address) {
+                        orderUpd['address'] = order.address;
+                        orderToCartState = true;
+                    }
+                    if (order.pickupPoint) {
+                        orderUpd['pickupPoint'] = order.pickupPoint;
+                        orderToCartState = true;
+                    }
+                    if (order.trifleFrom) {
+                        orderUpd['trifleFrom'] = order.trifleFrom;
+                    }
+                    if (order.comment) {
+                        orderUpd['comment'] = order.comment;
+                    }
+                    if (order.date) {
+                        orderUpd['date'] = order.date;
+                        orderToCartState = true;
+                    }
+                    if (order.selfService !== undefined) {
+                        orderUpd['selfService'] = order.selfService;
+                        orderToCartState = true;
+                    }
+                    if (order.paymentMethodId) {
+                        orderUpd['paymentMethodId'] = order.paymentMethodId;
+                        orderToCartState = true;
+                    }
+                    if (order.promotionCodeString || order.promotionCodeString === "") {
+                        await Order.applyPromotionCode({ id: order.id }, order.promotionCodeString);
+                        delete order.promotionCodeString;
+                    }
+                    if (Object.keys(order).length > 1) {
+                        await Order.update({ id: order.id }, orderUpd).fetch();
+                    }
+                    // TODO: Need move logic update in Order Model
+                    if (orderToCartState && order.state !== "NEW") {
+                        await Order.next({ id: order.id }, "CART");
+                    }
+                    await Order.countCart({ id: order.id });
+                    let fullOrder = await Order.populate(order.id);
+                    await emitter.emit("http-api:before-response-order-update", fullOrder);
+                    return fullOrder;
                 }
-                let orderToCartState = false;
-                if (Object.keys(order).length === 1) {
-                    throw `no passed updates`;
+                catch (error) {
+                    sails.log.error(`GQL > [orderUpdate]`, error, args);
+                    throw error;
                 }
-                const orderUpd = {};
-                if (order.address) {
-                    orderUpd['address'] = order.address;
-                    orderToCartState = true;
-                }
-                if (order.pickupPoint) {
-                    orderUpd['pickupPoint'] = order.pickupPoint;
-                    orderToCartState = true;
-                }
-                if (order.trifleFrom) {
-                    orderUpd['trifleFrom'] = order.trifleFrom;
-                }
-                if (order.comment) {
-                    orderUpd['comment'] = order.comment;
-                }
-                if (order.date) {
-                    orderUpd['date'] = order.date;
-                    orderToCartState = true;
-                }
-                if (order.selfService !== undefined) {
-                    orderUpd['selfService'] = order.selfService;
-                    orderToCartState = true;
-                }
-                if (order.paymentMethodId) {
-                    orderUpd['paymentMethodId'] = order.paymentMethodId;
-                    orderToCartState = true;
-                }
-                if (order.promotionCodeString || order.promotionCodeString === "") {
-                    await Order.applyPromotionCode({ id: order.id }, order.promotionCodeString);
-                    delete order.promotionCodeString;
-                }
-                if (Object.keys(order).length > 1) {
-                    await Order.update({ id: order.id }, orderUpd).fetch();
-                }
-                // TODO: Need move logic update in Order Model
-                if (orderToCartState && order.state !== "NEW") {
-                    await Order.next({ id: order.id }, "CART");
-                }
-                await Order.countCart({ id: order.id });
-                let fullOrder = await Order.populate(order.id);
-                await emitter.emit("http-api:before-response-order-update", fullOrder);
-                return fullOrder;
             },
         },
         orderClone: {
             def: 'orderClone(orderId: String!): Order',
             fn: async function (parent, args, context) {
-                let orderId = args.orderId;
-                let newcart = await Order.clone({ id: orderId });
-                let fullOrder = await Order.populate({ id: newcart.id });
-                emitter.emit("http-api:before-response-order-update", fullOrder);
-                return fullOrder;
+                try {
+                    let orderId = args.orderId;
+                    let newcart = await Order.clone({ id: orderId });
+                    let fullOrder = await Order.populate({ id: newcart.id });
+                    emitter.emit("http-api:before-response-order-update", fullOrder);
+                    return fullOrder;
+                }
+                catch (error) {
+                    sails.log.error(`GQL > [orderPromocodeApply]`, error, args);
+                    throw error;
+                }
             },
         },
         orderPromocodeApply: {
             def: 'orderPromocodeApply(orderId: String!, promocode: String!): Order',
             fn: async function (parent, args, context) {
-                let orderId = args.orderId;
-                let promocode = args.promocode;
-                await Order.applyPromotionCode({ id: orderId }, promocode);
-                let fullOrder = await Order.populate({ id: orderId });
-                emitter.emit("http-api:before-response-order-update", fullOrder);
-                return fullOrder;
+                try {
+                    let orderId = args.orderId;
+                    let promocode = args.promocode;
+                    await Order.applyPromotionCode({ id: orderId }, promocode);
+                    let fullOrder = await Order.populate({ id: orderId });
+                    emitter.emit("http-api:before-response-order-update", fullOrder);
+                    return fullOrder;
+                }
+                catch (error) {
+                    sails.log.error(`GQL > [orderPromocodeReset]`, error, args);
+                    throw error;
+                }
             },
         },
         orderPromocodeReset: {
             def: 'orderPromocodeReset(orderId: String!): Order',
             fn: async function (parent, args, context) {
-                let orderId = args.orderId;
-                let promocode = null;
-                await Order.applyPromotionCode({ id: orderId }, promocode);
-                let fullOrder = await Order.populate({ id: orderId });
-                emitter.emit("http-api:before-response-order-update", fullOrder);
-                return fullOrder;
+                try {
+                    let orderId = args.orderId;
+                    let promocode = null;
+                    await Order.applyPromotionCode({ id: orderId }, promocode);
+                    let fullOrder = await Order.populate({ id: orderId });
+                    emitter.emit("http-api:before-response-order-update", fullOrder);
+                    return fullOrder;
+                }
+                catch (error) {
+                    sails.log.error(`GQL > [order]`, error, args);
+                    throw error;
+                }
             },
         },
     },

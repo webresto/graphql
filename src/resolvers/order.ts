@@ -62,7 +62,8 @@ export default {
           emitter.emit("http-api:before-response-order", fullOrder);
           return fullOrder
         } catch (error) {
-          sails.log.error(`GQL > query order`,error)          
+          sails.log.error(`GQL > [order]`, error, args);
+          throw error;
         }
       },
     },
@@ -105,7 +106,7 @@ export default {
             } catch (e) {}
               
             if (additionalInfo && additionalInfo.defaultOrderDish) {
-              // Exception for product in each cart
+              // Исключение на товар в каждую корзину
             } else {
               const error = `"${dish.name}" not promo item`
               sails.log.error(`GQL > orderAddDish`,error)
@@ -129,7 +130,7 @@ export default {
           await emitter.emit("http-api:before-response-order-add-dish", fullOrder);
           return fullOrder
         } catch (error) {
-          sails.log.error(`GQL > orderAddDish`, error)
+          sails.log.error(`GQL > [orderAddDish]`, error, args)
           throw error
         }
       },
@@ -137,47 +138,53 @@ export default {
     orderReplaceDish: {
       def: "orderReplaceDish(orderId: String!, orderDishId: Int!, amount: Int, modifiers: Json, comment: String, from: String): Order",
       fn: async (parent, args, context) => {
-        let order;
-        if (args.orderId) order = await Order.findOne({ id: args.orderId });
-
-        if (!order) {
-          sails.log.warn(
-            "GQL > orderAddDish: ",
-            `order with id ${args.orderId} not found. Trying make new cart.`
-          );
-          order = await getNewCart(context, args.orderId);
-        }
-
-
-        if (order.paid || order.state === "ORDER") {
-          order = await getNewCart();
-        }
-
         try {
-          await Order.addDish(
-            order.id,
-            args.dishId,
-            args.amount,
-            args.modifiers === undefined ?  [] : args.modifiers,
-            args.comment,
-            args.from,
-            args.replace,
-            args.orderDishId
-          );
-        } catch (error) {
-          throw error
-        }
+          let order;
+          if (args.orderId) order = await Order.findOne({ id: args.orderId });
 
-        await Order.countCart({id: order.id});
-        let fullOrder = await Order.populate(order.id);
-        await emitter.emit("http-api:before-response-order-replace-dish", fullOrder);
-        return fullOrder
+          if (!order) {
+            sails.log.warn(
+              "GQL > orderAddDish: ",
+              `order with id ${args.orderId} not found. Trying make new cart.`
+            );
+            order = await getNewCart(context, args.orderId);
+          }
+
+
+          if (order.paid || order.state === "ORDER") {
+            order = await getNewCart();
+          }
+
+          try {
+            await Order.addDish(
+              order.id,
+              args.dishId,
+              args.amount,
+              args.modifiers === undefined ?  [] : args.modifiers,
+              args.comment,
+              args.from,
+              args.replace,
+              args.orderDishId
+            );
+          } catch (error) {
+            throw error
+          }
+
+          await Order.countCart({id: order.id});
+          let fullOrder = await Order.populate(order.id);
+          await emitter.emit("http-api:before-response-order-replace-dish", fullOrder);
+          return fullOrder
+        } catch (error) {
+          sails.log.error(`GQL > [orderReplaceDish]`, error, args);
+          throw error;
+        }
       },
     },
     orderRemoveDish: {
       def: "orderRemoveDish(id: String!, orderDishId: Int!, amount: Int): Order",
       fn: async function (parent, args, context) {
-        let order;
+        try {
+          let order;
         order = await Order.findOne({ id: args.id });
 
         if (!order) {
@@ -205,13 +212,18 @@ export default {
         await Order.countCart({id: order.id});
         let fullOrder = await Order.populate(order.id);
         await emitter.emit("http-api:before-response-order-remove-dish", fullOrder);
-        return fullOrder
+          return fullOrder
+        } catch (error) {
+          sails.log.error(`GQL > [orderRemoveDish]`, error, args);
+          throw error;
+        }
       },
     },
     orderSetDishAmount: {
       def: "orderSetDishAmount(id: String, orderDishId: Int, amount: Int): Order",
       fn: async function (parent, args, context) {
-        let order;
+        try {
+          let order;
 
         order = await Order.findOne(args.id);
 
@@ -249,13 +261,18 @@ export default {
         await Order.countCart({id: order.id});
         let fullOrder = await Order.populate(order.id);
         await emitter.emit("http-api:before-response-order-set-dish-amount", fullOrder);
-        return fullOrder
+          return fullOrder
+        } catch (error) {
+          sails.log.error(`GQL > [orderSetDishAmount]`, error, args);
+          throw error;
+        }
       },
     },
     orderSetDishComment: {
       def: "orderSetDishComment(id: String, orderDishId: Int, comment: String): Order",
       fn: async function (parent, args, context) {
-        let order;
+        try {
+          let order;
 
         const data = args;
         const orderId = data.orderId;
@@ -293,15 +310,19 @@ export default {
         await Order.countCart({id: order.id});
         let fullOrder = await Order.populate(order.id);
         await emitter.emit("http-api:before-response-order-set-dish-comment", fullOrder);
-        return fullOrder
+          return fullOrder
+        } catch (error) {
+          sails.log.error(`GQL > [orderSetDishComment]`, error, args);
+          throw error;
+        }
       },
     },
 
     orderUpdate: {
       def: '"""allowed only for trifleFrom, address, pickUpPoint """ orderUpdate(order: InputOrderUpdate): Order',
       fn: async function (parent, args, context) {
-
-        let order = args.order;
+        try {
+          let order = args.order;
         if (!order.id) throw "order.id field is required"
         let _order = await Order.findOne(order.id);
 
@@ -367,43 +388,61 @@ export default {
         await Order.countCart({id: order.id});
         let fullOrder = await Order.populate(order.id);
         await emitter.emit("http-api:before-response-order-update", fullOrder);
-        return fullOrder
+          return fullOrder
+        } catch (error) {
+          sails.log.error(`GQL > [orderUpdate]`, error, args);
+          throw error;
+        }
       },
     },
 
     orderClone: {
       def: 'orderClone(orderId: String!): Order',
       fn: async function (parent, args, context) {
-
-        let orderId = args.orderId;
+        try {
+          let orderId = args.orderId;
         let newcart = await Order.clone({id: orderId});
         let fullOrder = await Order.populate({id: newcart.id});
         emitter.emit("http-api:before-response-order-update", fullOrder);
-        return fullOrder
+          return fullOrder
+        } catch (error) {
+          sails.log.error(`GQL > [orderPromocodeApply]`, error, args);
+          throw error;
+        }
       },
     },
 
     orderPromocodeApply: {
       def: 'orderPromocodeApply(orderId: String!, promocode: String!): Order',
       fn: async function (parent, args, context) {
-        let orderId = args.orderId;
+        try {
+          let orderId = args.orderId;
         let promocode = args.promocode;
         await Order.applyPromotionCode({id: orderId}, promocode)
         let fullOrder = await Order.populate({id: orderId});
         emitter.emit("http-api:before-response-order-update", fullOrder);
-        return fullOrder
+          return fullOrder
+        } catch (error) {
+          sails.log.error(`GQL > [orderPromocodeReset]`, error, args);
+          throw error;
+        }
       },
     },
 
     orderPromocodeReset: {
       def: 'orderPromocodeReset(orderId: String!): Order',
       fn: async function (parent, args, context) {
-        let orderId = args.orderId;
-        let promocode = null;
+        try {
+          let orderId = args.orderId;
+          let promocode = null;
         await Order.applyPromotionCode({id: orderId}, promocode)
         let fullOrder = await Order.populate({id: orderId});
         emitter.emit("http-api:before-response-order-update", fullOrder);
-        return fullOrder
+          return fullOrder
+        } catch (error) {
+          sails.log.error(`GQL > [order]`, error, args);
+          throw error;
+        }
       },
     },
 

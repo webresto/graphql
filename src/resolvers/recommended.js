@@ -44,9 +44,9 @@ exports.default = {
                     result = [...new Set(result.map(dish => dish.id))].map(id => result.find(dish => dish.id === id));
                     return result.splice(0, 24);
                 }
-                catch (e) {
-                    sails.log.error("recommendedForDish", e);
-                    throw e;
+                catch (error) {
+                    sails.log.error(`GQL > [recommended]`, error, args);
+                    throw error;
                 }
             }
         },
@@ -96,9 +96,9 @@ exports.default = {
                     result = [...new Set(result.map(dish => dish.id))].map(id => result.find(dish => dish.id === id));
                     return result.splice(0, 24);
                 }
-                catch (e) {
-                    sails.log.error("recommendedForOrder", e);
-                    throw e;
+                catch (error) {
+                    sails.log.error(`GQL > [recommended]`, error, args);
+                    throw error;
                 }
             }
         }

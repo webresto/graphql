@@ -11,6 +11,7 @@ exports.default = {
                     return true;
                 }
                 catch (error) {
+                    sails.log.error(`GQL > [dialogBoxAnswerProcess]`, error, args);
                     throw new Error(error);
                 }
             }

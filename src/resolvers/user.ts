@@ -83,99 +83,100 @@ export default {
         context: any,
         info: any
       ): Promise<UserResponse> => {
-        // TODO:  this is copied from restrictions need make it from one place
-        if (
-          !(await captchaAdapter).check(
-            payload.captcha,
-            `login:${payload.login}`
+        try {
+          // TODO:  this is copied from restrictions need make it from one place
+          if (
+            !(await captchaAdapter).check(
+              payload.captcha,
+              `login:${payload.login}`
+            )
           )
-        )
-          throw `bad captcha`;
+            throw `bad captcha`;
 
-        // Define password policy
-        let passwordPolicy = (await Settings.get("PASSWORD_POLICY")) as
-          | "required"
-          | "from_otp"
-          | "disabled";
-        if (!passwordPolicy) passwordPolicy = "from_otp";
+          // Define password policy
+          let passwordPolicy = (await Settings.get("PASSWORD_POLICY")) as
+            | "required"
+            | "from_otp"
+            | "disabled";
+          if (!passwordPolicy) passwordPolicy = "from_otp";
 
-        let loginOTPRequired = await Settings.get("LOGIN_OTP_REQUIRED");
-        if (!loginOTPRequired) loginOTPRequired = false;
+          let loginOTPRequired = await Settings.get("LOGIN_OTP_REQUIRED");
+          if (!loginOTPRequired) loginOTPRequired = false;
 
-        let loginField = await Settings.get("CORE_LOGIN_FIELD");
-        if (!loginField) loginField = "phone";
+          let loginField = await Settings.get("CORE_LOGIN_FIELD");
+          if (!loginField) loginField = "phone";
 
-        if (passwordPolicy === "required" && !payload.password) {
-          throw `password is required`;
-        }
+          if (passwordPolicy === "required" && !payload.password) {
+            throw `password is required`;
+          }
 
-        if (loginOTPRequired && !payload.otp) {
-          throw `OTP is required`;
-        }
+          if (loginOTPRequired && !payload.otp) {
+            throw `OTP is required`;
+          }
 
-        // It should have or Password or OTP at one time
-        if (!payload.otp && !payload.password) {
-          throw `or Password or OTP required`;
-        }
+          // It should have or Password or OTP at one time
+          if (!payload.otp && !payload.password) {
+            throw `or Password or OTP required`;
+          }
 
-        checkDeviceId(context);
+          checkDeviceId(context);
 
 
-        // Check phone TODO: move in User
-        if (
-          (await Settings.get("CORE_LOGIN_FIELD")) === undefined ||
-          (await Settings.get("CORE_LOGIN_FIELD")) === "phone"
-        ) {
-          if (!payload.phone) {
-            throw `Phone is required, when login field is phone`;
-          } else {
-            let genLogin = (
-              payload.phone.code +
-              payload.phone.number +
-              payload.phone.additionalNumber
-            ).replace(/\D/g, "");
-            if (genLogin !== payload.login) {
-              throw `Login is: js (payload.phone.code+payload.phone.number+payload.phone.additionalNumber).replace(/\D/g, '')`;
+          // Check phone TODO: move in User
+          if (
+            (await Settings.get("CORE_LOGIN_FIELD")) === undefined ||
+            (await Settings.get("CORE_LOGIN_FIELD")) === "phone"
+          ) {
+            if (!payload.phone) {
+              throw `Phone is required, when login field is phone`;
+            } else {
+              let genLogin = (
+                payload.phone.code +
+                payload.phone.number +
+                payload.phone.additionalNumber
+              ).replace(/\D/g, "");
+              if (genLogin !== payload.login) {
+                throw `Login is: js (payload.phone.code+payload.phone.number+payload.phone.additionalNumber).replace(/\D/g, '')`;
+              }
             }
           }
-        }
 
-        let userDevice = await User.login(
-          payload.login,
-          payload.phone,
-          context.connectionParams.deviceId,
-          "DEVICE NAME",
-          payload.password,
-          payload.otp,
-          context.connectionParams["user-agent"],
-          "IP_"
-        );
+          let userDevice = await User.login(
+            payload.login,
+            payload.phone,
+            context.connectionParams.deviceId,
+            "DEVICE NAME",
+            payload.password,
+            payload.otp,
+            context.connectionParams["user-agent"],
+            "IP_"
+          );
 
-        let authData = {
-          userId: userDevice.user as string,
-          deviceId: userDevice.id as string,
-          sessionId: userDevice.sessionId as string,
-        };
+          let authData = {
+            userId: userDevice.user as string,
+            deviceId: userDevice.id as string,
+            sessionId: userDevice.sessionId as string,
+          };
 
-        const JWTtoken = await JWTAuth.sign(authData);
-        let message: Message = {
-          deviceId: context.connectionParams.deviceId,
-          title: context.i18n.__("Success"),
-          type: "info",
-          message: context.i18n.__("Authorization"),
-        };
-
+          const JWTtoken = await JWTAuth.sign(authData);
+          let message: Message = {
+            deviceId: context.connectionParams.deviceId,
+            title: context.i18n.__("Success"),
+            type: "info",
+            message: context.i18n.__("Authorization"),
+          };
 
 
-        let user = await User.findOne({ id: userDevice.user as string });
-        context.connectionParams.authorization = JWTtoken;
-        let action: Action = {
-          deviceId: context.connectionParams.deviceId,
-          type: "Authorization",
-          data: {
-            token: JWTtoken,
-          },
-        };
+
+          let user = await User.findOne({ id: userDevice.user as string });
+          context.connectionParams.authorization = JWTtoken;
+          let action: Action = {
+            deviceId: context.connectionParams.deviceId,
+            type: "Authorization",
+            data: {
+              token: JWTtoken,
+            },
+          };
 
         // Here should be Emitter for Action And Message modification
 
@@ -184,6 +185,10 @@ export default {
           message: message,
           action: action,
         };
+        } catch (error) {
+          sails.log.error(`GQL > [login]`, error, payload);
+          throw error;
+        }
       },
     },
     restorePassword: {
@@ -209,79 +214,83 @@ export default {
         payload: any,
         context: any
       ): Promise<UserResponse> => {
+        try {
+          checkDeviceId(context);
 
-        checkDeviceId(context);
 
+          // Check password policy
+          let passwordPolicy = (await Settings.get("PASSWORD_POLICY")) as
+            | "required"
+            | "from_otp"
+            | "disabled";
+          if (!passwordPolicy) passwordPolicy = "from_otp";
 
-        // Check password policy
-        let passwordPolicy = (await Settings.get("PASSWORD_POLICY")) as
-          | "required"
-          | "from_otp"
-          | "disabled";
-        if (!passwordPolicy) passwordPolicy = "from_otp";
+          // It should have or Password or OTP at one time
+          if (!payload.otp || !payload.password) {
+            throw `Password and OTP required`;
+          }
 
-        // It should have or Password or OTP at one time
-        if (!payload.otp || !payload.password) {
-          throw `Password and OTP required`;
-        }
+          let userDevice;
+          let user = await User.findOne({ login: payload.login });
+          if (user && user.verified) {
+            userDevice = await User.login(
+              payload.login,
+              payload.phone,
+              context.connectionParams.deviceId,
+              "DEVICE NAME",
+              null,
+              payload.otp,
+              context.connectionParams["user-agent"],
+              "0.0.0.0"
+            );
+            await User.setPassword(user.id, payload.password, null, true, null);
+          } else {
+            return {
+              user: null,
+              message: {
+                deviceId: context.connectionParams.deviceId,
+                title: context.i18n.__("User not found"),
+                type: "error",
+                message: context.i18n.__("Check login please"),
+              },
+              action: null,
+            };
+          }
 
-        let userDevice;
-        let user = await User.findOne({ login: payload.login });
-        if (user && user.verified) {
-          userDevice = await User.login(
-            payload.login,
-            payload.phone,
-            context.connectionParams.deviceId,
-            "DEVICE NAME",
-            null,
-            payload.otp,
-            context.connectionParams["user-agent"],
-            "0.0.0.0"
-          );
-          await User.setPassword(user.id, payload.password, null, true, null);
-        } else {
-          return {
-            user: null,
-            message: {
-              deviceId: context.connectionParams.deviceId,
-              title: context.i18n.__("User not found"),
-              type: "error",
-              message: context.i18n.__("Check login please"),
-            },
-            action: null,
+          let authData = {
+            userId: userDevice.user as string,
+            deviceId: userDevice.id as string,
+            sessionId: userDevice.sessionId as string,
           };
+
+          const JWTtoken = await JWTAuth.sign(authData);
+
+          let message: Message = {
+            deviceId: context.connectionParams.deviceId,
+            title: context.i18n.__("Success"),
+            type: "info",
+            message: context.i18n.__("Password was changed"),
+          };
+
+          let action: Action = {
+            deviceId: context.connectionParams.deviceId,
+            type: "Authorization",
+            data: {
+              token: JWTtoken,
+            },
+          };
+
+          // Here should be Emitter for Action And Message modification
+
+          return {
+            user: user,
+            message: message,
+            action: action,
+          };
+        } catch (error) {
+          sails.log.error(`GQL > [restorePassword]`, error, payload);
+          throw error;
         }
-
-        let authData = {
-          userId: userDevice.user as string,
-          deviceId: userDevice.id as string,
-          sessionId: userDevice.sessionId as string,
-        };
-
-        const JWTtoken = await JWTAuth.sign(authData);
-
-        let message: Message = {
-          deviceId: context.connectionParams.deviceId,
-          title: context.i18n.__("Success"),
-          type: "info",
-          message: context.i18n.__("Password was changed"),
-        };
-
-        let action: Action = {
-          deviceId: context.connectionParams.deviceId,
-          type: "Authorization",
-          data: {
-            token: JWTtoken,
-          },
-        };
-
-        // Here should be Emitter for Action And Message modification
-
-        return {
-          user: user,
-          message: message,
-          action: action,
-        };
       },
     },
 
@@ -423,7 +432,7 @@ export default {
             action: null,
           };
         } catch (error) {
-          sails.log.error(error);
+          sails.log.error(`GQL > [registration]`, error, payload);
           throw new Error(error);
         }
       },
@@ -441,44 +450,48 @@ export default {
         payload: { deviceId: any },
         context: { connectionParams: { authorization: string }, i18n: any }
       ): Promise<Response> => {
+        try {
+          const auth = await JWTAuth.verify(
+            context.connectionParams.authorization
+          );
+          let deviceId: string;
+          if (!payload.deviceId) {
+            deviceId = auth.deviceId;
+          } else {
+            let ud = await UserDevice.findOne({ name: payload.deviceId });
+            deviceId = ud.id;
+          }
 
-        const auth = await JWTAuth.verify(
-          context.connectionParams.authorization
-        );
-        let deviceId: string;
-        if (!payload.deviceId) {
-          deviceId = auth.deviceId;
-        } else {
-          let ud = await UserDevice.findOne({ name: payload.deviceId });
-          deviceId = ud.id;
+          if (
+            !(await UserDevice.checkSession(auth.sessionId, auth.userId, {
+              lastIP: "IP",
+              userAgent: context.connectionParams["user-agent"],
+            }))
+          ) {
+            throw `Authentication failed`;
+          }
+
+          await UserDevice.update({ id: deviceId }, { isLoggedIn: false }).fetch();
+
+          let message: Message = {
+            deviceId: deviceId,
+            title: context.i18n.__("Success"),
+            type: "info",
+            message: context.i18n.__("Logout"),
+          };
+
+          let action: Action = undefined;
+
+          // Here should be Emitter for Action And Message modification
+
+          return {
+            message: message,
+            action: action,
+          };
+        } catch (error) {
+          sails.log.error(`GQL > [logout]`, error, payload);
+          throw error;
         }
-
-        if (
-          !(await UserDevice.checkSession(auth.sessionId, auth.userId, {
-            lastIP: "IP",
-            userAgent: context.connectionParams["user-agent"],
-          }))
-        ) {
-          throw `Authentication failed`;
-        }
-
-        await UserDevice.update({ id: deviceId }, { isLoggedIn: false }).fetch();
-
-        let message: Message = {
-          deviceId: deviceId,
-          title: context.i18n.__("Success"),
-          type: "info",
-          message: context.i18n.__("Logout"),
-        };
-
-        let action: Action = undefined;
-
-        // Here should be Emitter for Action And Message modification
-
-        return {
-          message: message,
-          action: action,
-        };
       },
     },
 
@@ -489,36 +502,41 @@ export default {
         payload: any,
         context: any
       ): Promise<Response> => {
-        const auth = await JWTAuth.verify(
-          context.connectionParams.authorization
-        );
+        try {
+          const auth = await JWTAuth.verify(
+            context.connectionParams.authorization
+          );
 
-        if (
-          !(await UserDevice.checkSession(auth.sessionId, auth.userId, {
-            lastIP: "IP",
-            userAgent: context.connectionParams["user-agent"],
-          }))
-        ) {
-          throw `Authentication failed`;
+          if (
+            !(await UserDevice.checkSession(auth.sessionId, auth.userId, {
+              lastIP: "IP",
+              userAgent: context.connectionParams["user-agent"],
+            }))
+          ) {
+            throw `Authentication failed`;
+          }
+
+          UserDevice.update({ user: auth.userId }, { isLoggedIn: false }).fetch();
+
+          let message: Message = {
+            deviceId: null,
+            title: context.i18n.__("Success"),
+            type: "info",
+            message: context.i18n.__("Logout from all devices"),
+          };
+
+          let action: Action = undefined;
+
+          // Here should be Emitter for Action And Message modification
+
+          return {
+            message: message,
+            action: action,
+          };
+        } catch (error) {
+          sails.log.error(`GQL > [logoutFromAllDevices]`, error, payload);
+          throw error;
         }
-
-        UserDevice.update({ user: auth.userId }, { isLoggedIn: false }).fetch();
-
-        let message: Message = {
-          deviceId: null,
-          title: context.i18n.__("Success"),
-          type: "info",
-          message: context.i18n.__("Logout from all devices"),
-        };
-
-        let action: Action = undefined;
-
-        // Here should be Emitter for Action And Message modification
-
-        return {
-          message: message,
-          action: action,
-        };
       },
     },
 
@@ -533,13 +551,17 @@ export default {
         payload: { dishId: string },
         context: { connectionParams: { authorization: string } }
       ): Promise<boolean> => {
+        try {
+          const auth = await JWTAuth.verify(
+            context.connectionParams.authorization
+          );
 
-        const auth = await JWTAuth.verify(
-          context.connectionParams.authorization
-        );
-
-        await User.handleFavoriteDish(auth.userId, payload.dishId)
-        return true
+          await User.handleFavoriteDish(auth.userId, payload.dishId)
+          return true
+        } catch (error) {
+          sails.log.error(`GQL > [favoriteDish]`, error, payload);
+          throw error;
+        }
       },
     },
 
@@ -556,26 +578,31 @@ export default {
         payload: { user: InputUser },
         context: any
       ): Promise<UserResponse> => {
-        const auth = await JWTAuth.verify(
-          context.connectionParams.authorization
-        );
+        try {
+          const auth = await JWTAuth.verify(
+            context.connectionParams.authorization
+          );
 
-        let user = await User.updateOne({ id: auth.userId }, payload.user)
+          let user = await User.updateOne({ id: auth.userId }, payload.user)
 
-        let message: Message = {
-          deviceId: null,
-          title: context.i18n.__("Success"),
-          type: "info",
-          message: context.i18n.__("User was updated"),
-        };
+          let message: Message = {
+            deviceId: null,
+            title: context.i18n.__("Success"),
+            type: "info",
+            message: context.i18n.__("User was updated"),
+          };
 
-        // Here should be Emitter for Action And Message modification
+          // Here should be Emitter for Action And Message modification
 
-        return {
-          user: user,
-          message: message,
-          action: null,
-        };
+          return {
+            user: user,
+            message: message,
+            action: null,
+          };
+        } catch (error) {
+          sails.log.error(`GQL > [userUpdate]`, error, payload);
+          throw error;
+        }
       },
     },
     userDelete: {
@@ -592,27 +619,31 @@ export default {
         context: any,
         info: any
       ): Promise<Response> => {
+        try {
+          const auth = await JWTAuth.verify(
+            context.connectionParams.authorization
+          );
 
-        const auth = await JWTAuth.verify(
-          context.connectionParams.authorization
-        );
+          await User.delete(auth.userId, payload.otp, false);
 
-        await User.delete(auth.userId, payload.otp, false);
+          let message: Message = {
+            deviceId: null,
+            title: context.i18n.__("Success"),
+            type: "info",
+            message: context.i18n.__("The user will be deleted"),
+          };
 
-        let message: Message = {
-          deviceId: null,
-          title: context.i18n.__("Success"),
-          type: "info",
-          message: context.i18n.__("The user will be deleted"),
-        };
+          let action: Action = null
+          // Here should be Emitter for Action And Message modification
 
-        let action: Action = null
-        // Here should be Emitter for Action And Message modification
-
-        return {
-          message: message,
-          action: action,
-        };
+          return {
+            message: message,
+            action: action,
+          };
+        } catch (error) {
+          sails.log.error(`GQL > [userDelete]`, error, payload);
+          throw error;
+        }
       },
     },
   },

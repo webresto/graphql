@@ -13,7 +13,15 @@ exports.default = {
     Query: {
         telemetry: {
             def: 'telemetry: Telemetry',
-            fn: () => ({})
+            fn: () => {
+                try {
+                    return ({});
+                }
+                catch (error) {
+                    sails.log.error(`GQL > [telemetry]`, error, {});
+                    throw error;
+                }
+            }
         }
     },
     Telemetry: {

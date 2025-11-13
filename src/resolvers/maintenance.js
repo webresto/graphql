@@ -5,7 +5,13 @@ exports.default = {
         maintenance: {
             def: 'maintenance: Maintenance',
             fn: async function (parent, args, context) {
-                return await Maintenance.getActiveMaintenance();
+                try {
+                    return await Maintenance.getActiveMaintenance();
+                }
+                catch (error) {
+                    sails.log.error(`GQL > [maintenance]`, error, args);
+                    throw error;
+                }
             }
         }
     }

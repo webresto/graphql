@@ -15,8 +15,8 @@ export default {
                   await emitter.emit('graphql-return-payment-method', orderId, data);
                   return data;
                 } catch (e) {
-                  sails.log.error(e); 
-                  throw `${JSON.stringify(e)}`
+                  sails.log.error(e, args); 
+                  throw e
                 }
             }
         }

@@ -82,7 +82,15 @@ exports.default = {
     Query: {
         restrictions: {
             def: 'restrictions: Restrictions',
-            fn: () => ({})
+            fn: () => {
+                try {
+                    return ({});
+                }
+                catch (error) {
+                    sails.log.error(`GQL > [restrictions]`, error, {});
+                    throw error;
+                }
+            }
         }
     },
     Restrictions: {

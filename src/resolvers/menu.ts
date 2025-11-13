@@ -3,7 +3,12 @@ export default {
     menu: {
       def: "menu(concept: String, topLevelGroupId: String): [Group]",
       fn: async (parent, args, context, info) => {
-        return await Group.getMenuGroups(args.concept, args.topLevelGroupId);
+        try {
+          return await Group.getMenuGroups(args.concept, args.topLevelGroupId);
+        } catch (error) {
+          sails.log.error(`GQL > [menu]`, error, args);
+          throw error;
+        }
       }
     }
   }

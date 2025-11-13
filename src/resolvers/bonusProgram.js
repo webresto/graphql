@@ -25,7 +25,7 @@ exports.default = {
                     return data;
                 }
                 catch (e) {
-                    sails.log.error(e);
+                    sails.log.error(`GQL > [bonusProgramAlived]`, e, args);
                     throw `${JSON.stringify(e)}`;
                 }
             }
@@ -39,9 +39,15 @@ exports.default = {
           bonusProgramId: String!
         ): UserBonusProgram`,
             fn: async (parent, payload, context) => {
-                const auth = await jwt_1.JWTAuth.verify(context.connectionParams.authorization);
-                let adapter = await BonusProgram.getAdapter(payload.bonusProgramId);
-                return await UserBonusProgram.registration(auth.userId, adapter.id);
+                try {
+                    const auth = await jwt_1.JWTAuth.verify(context.connectionParams.authorization);
+                    let adapter = await BonusProgram.getAdapter(payload.bonusProgramId);
+                    return await UserBonusProgram.registration(auth.userId, adapter.id);
+                }
+                catch (error) {
+                    sails.log.error(`GQL > [userRegistrationInBonusProgram]`, error, payload);
+                    throw error;
+                }
             }
         },
         // Authentication required
@@ -58,6 +64,7 @@ exports.default = {
                     return true;
                 }
                 catch (error) {
+                    sails.log.error(`GQL > [userDeleteInBonusProgram]`, error, payload);
                     throw `Error deleting user in bonus program`;
                 }
             }

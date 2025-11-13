@@ -24,7 +24,7 @@ export default {
                 await emitter.emit('graphql-return-bonus-program', orderId, data);
                 return data;
               } catch (e) {
-                sails.log.error(e); 
+                sails.log.error(`GQL > [bonusProgramAlived]`, e, args); 
                 throw `${JSON.stringify(e)}`
               }
             }
@@ -42,13 +42,17 @@ export default {
           payload: { bonusProgramId: string },
           context: { connectionParams: { authorization: string } }
         ): Promise<UserBonusProgram> => {
-
-          const auth = await JWTAuth.verify(
-            context.connectionParams.authorization
-          );
-          let adapter = await BonusProgram.getAdapter(payload.bonusProgramId);
-          
-          return await UserBonusProgram.registration(auth.userId, adapter.id);
+          try {
+            const auth = await JWTAuth.verify(
+              context.connectionParams.authorization
+            );
+            let adapter = await BonusProgram.getAdapter(payload.bonusProgramId);
+            
+            return await UserBonusProgram.registration(auth.userId, adapter.id);
+          } catch (error) {
+            sails.log.error(`GQL > [userRegistrationInBonusProgram]`, error, payload);
+            throw error;
+          }
         }
       },
       // Authentication required
@@ -71,6 +75,7 @@ export default {
             await UserBonusProgram.delete(auth.userId, adapter.id);
             return true
           } catch (error) {
+            sails.log.error(`GQL > [userDeleteInBonusProgram]`, error, payload);
             throw `Error deleting user in bonus program`
           }
         }

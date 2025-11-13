@@ -15,8 +15,13 @@ exports.default = {
       pickuppoints: {
             def: "pickuppoints: [PickupPoint]",
             fn: async () => {
-                let result = await Place.find({ isPickupPoint: true, enable: true });
-                return result;
+                try {
+                    let result = await Place.find({ isPickupPoint: true, enable: true });
+                    return result;
+                } catch (error) {
+                    sails.log.error(`GQL > [pickupPoint]`, error, {});
+                    throw error;
+                }
             }
         }
     }

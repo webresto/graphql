@@ -52,8 +52,14 @@ exports.default = {
         initCheckout: {
             def: 'initCheckout(orderId: String): InitCheckout',
             fn: async function (_, { orderId }, ctx) {
-                let populatedOrder = await Order.populate(orderId);
-                return await OrderHelper_1.OrderHelper.initCheckout(populatedOrder);
+                try {
+                    let populatedOrder = await Order.populate(orderId);
+                    return await OrderHelper_1.OrderHelper.initCheckout(populatedOrder);
+                }
+                catch (error) {
+                    sails.log.error(`GQL > [initCheckout]`, error, { orderId });
+                    throw error;
+                }
             }
         },
     },
@@ -192,7 +198,7 @@ exports.default = {
                     };
                 }
                 catch (e) {
-                    sails.log.error(`Checkout error`, e);
+                    sails.log.error(`GQL > [checkOrder]`, e, args);
                     let cleanErrorMessage = e.message ? e.message?.replace(/[^\w\s]/gi, '').slice(0, 128) : null;
                     let message = {
                         type: "error",
@@ -245,7 +251,7 @@ exports.default = {
                             : context.i18n.__(`Problem when checking the order: %s`, e);
                     }
                     order = await Order.findOne(data.orderId);
-                    sails.log.error(e);
+                    sails.log.error(`GQL > [checkOrder]`, e, args);
                     eventHelper.sendMessage(message);
                     return {
                         order,
@@ -270,7 +276,7 @@ exports.default = {
                         title: context.i18n.__("Order not found"),
                         message: errorMessage,
                     });
-                    sails.log.error(`${errorMessage}`);
+                    sails.log.error(`${errorMessage}`, args);
                     throw new Error(errorMessage);
                 }
                 if (!order.isPaymentPromise) {
@@ -295,7 +301,7 @@ exports.default = {
                             message: context.i18n.__("The payment of the payment has ended unsuccessfully"),
                         });
                         const error = `External payment: ${e}`;
-                        sails.log.error(error);
+                        sails.log.error(`GQL > [sendOrder]`, error, args);
                         throw new Error(error);
                     }
                 }
@@ -312,7 +318,7 @@ exports.default = {
                 }
                 catch (e) {
                     const error = `Order finalize error:, ${e}`;
-                    sails.log.error(error);
+                    sails.log.error(`GQL > [sendOrder]`, error, args);
                     throw new Error(error);
                 }
             },

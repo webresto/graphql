@@ -41,7 +41,12 @@ export default {
     streets: {
       def: "streets: [Street]",
       fn: async () => {
-        return await Street.find({ isDeleted: false });
+        try {
+          return await Street.find({ isDeleted: false });
+        } catch (error) {
+          sails.log.error(`GQL > [streets]`, error, {});
+          throw error;
+        }
       },
     },
   },
@@ -53,6 +58,7 @@ export default {
           const adapter = await DeliveryAdapter.getAdapter();
           return await adapter.checkAbility(args.address);
         } catch (error) {
+          sails.log.error(`GQL > [checkDeliveryAbility]`, error, args);
           return {
             deliveryTimeMinutes: 0,
             allowed: false,

@@ -26,31 +26,37 @@ exports.default = {
 
         ): OTPResponse`,
             fn: async (parent, payload, context) => {
-                // console.log(!(await captchaAdapter).check(payload.captcha, `otprequest:${payload.login}`))
-                let captchaAdapter = await adapters_1.Captcha.getAdapter();
-                if (await captchaAdapter.check(payload.captcha, `otpRequest:${payload.login}`) === false) {
-                    throw `bad captcha`;
+                try {
+                    // console.log(!(await captchaAdapter).check(payload.captcha, `otprequest:${payload.login}`))
+                    let captchaAdapter = await adapters_1.Captcha.getAdapter();
+                    if (await captchaAdapter.check(payload.captcha, `otpRequest:${payload.login}`) === false) {
+                        throw `bad captcha`;
+                    }
+                    let OTPAdapter = await adapters_2.OTP.getAdapter();
+                    let otp = await OTPAdapter.get(payload.login);
+                    let message = {
+                        deviceId: null,
+                        title: context.i18n.__("Success"),
+                        type: "info",
+                        message: context.i18n.__("OTP sended")
+                    };
+                    // Here should be Emmiter for midificate Action And Message
+                    let action = {
+                        deviceId: null,
+                        type: "",
+                        data: {}
+                    };
+                    return {
+                        id: otp.id,
+                        nextOTPSeconds: 300,
+                        message: message,
+                        action: action
+                    };
                 }
-                let OTPAdapter = await adapters_2.OTP.getAdapter();
-                let otp = await OTPAdapter.get(payload.login);
-                let message = {
-                    deviceId: null,
-                    title: context.i18n.__("Success"),
-                    type: "info",
-                    message: context.i18n.__("OTP sended")
-                };
-                // Here should be Emmiter for midificate Action And Message
-                let action = {
-                    deviceId: null,
-                    type: "",
-                    data: {}
-                };
-                return {
-                    id: otp.id,
-                    nextOTPSeconds: 300,
-                    message: message,
-                    action: action
-                };
+                catch (error) {
+                    sails.log.error(`GQL > [userOTPrequest]`, error, payload);
+                    throw error;
+                }
             },
         }
     }

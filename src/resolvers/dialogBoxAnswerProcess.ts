@@ -12,6 +12,7 @@ export default {
           DialogBox.answerProcess(args.askId, args.answerId);
           return true 
         } catch (error) {
+          sails.log.error(`GQL > [dialogBoxAnswerProcess]`, error, args);
           throw new Error(error);
         }
       }

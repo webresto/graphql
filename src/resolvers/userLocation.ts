@@ -66,18 +66,23 @@ export default {
         payload: { location: InputLocation },
         context: { connectionParams: { authorization: string } }
       ): Promise<boolean> => {
-        const auth = await JWTAuth.verify(
-          context.connectionParams.authorization
-        );
-        
-        if (!payload.location.streetId && !payload.location.street) throw 'streetId or street are required'
+        try {
+          const auth = await JWTAuth.verify(
+            context.connectionParams.authorization
+          );
+          
+          if (!payload.location.streetId && !payload.location.street) throw 'streetId or street are required'
 
-        const userLocation = {
-          ...payload.location,
-          ...{street: payload.location.streetId}
+          const userLocation = {
+            ...payload.location,
+            ...{street: payload.location.streetId}
+          }
+          await UserLocation.create({...userLocation, user: auth.userId}).fetch()
+          return true
+        } catch (error) {
+          sails.log.error(`GQL > [locationCreate]`, error, payload);
+          throw error;
         }
-        await UserLocation.create({...userLocation, user: auth.userId}).fetch()
-        return true
       }
     },
     // Authentication required
@@ -91,15 +96,20 @@ export default {
         payload: { locationId: string },
         context: { connectionParams: { authorization: string } }
       ): Promise<boolean> => {
-        const auth = await JWTAuth.verify(
-          context.connectionParams.authorization
-        );
+        try {
+          const auth = await JWTAuth.verify(
+            context.connectionParams.authorization
+          );
 
-        const user = (await UserLocation.findOne({id: payload.locationId})).user as string
-        if (user !== auth.userId) throw `User location not found`
+          const user = (await UserLocation.findOne({id: payload.locationId})).user as string
+          if (user !== auth.userId) throw `User location not found`
 
-        await UserLocation.update({id: payload.locationId}, {isDefault: true}).fetch()
-        return true
+          await UserLocation.update({id: payload.locationId}, {isDefault: true}).fetch()
+          return true
+        } catch (error) {
+          sails.log.error(`GQL > [locationSetIsDefault]`, error, payload);
+          throw error;
+        }
       }
     },
     // Authentication required
@@ -113,12 +123,17 @@ export default {
         payload: { locationId: string },
         context: { connectionParams: { authorization: string } }
       ): Promise<boolean> => {
-        const auth = await JWTAuth.verify(
-          context.connectionParams.authorization
-        );
-        
-        await UserLocation.destroy({id: payload.locationId}).fetch()
-        return true
+        try {
+          const auth = await JWTAuth.verify(
+            context.connectionParams.authorization
+          );
+          
+          await UserLocation.destroy({id: payload.locationId}).fetch()
+          return true
+        } catch (error) {
+          sails.log.error(`GQL > [locationDelete]`, error, payload);
+          throw error;
+        }
       }
     }
   }

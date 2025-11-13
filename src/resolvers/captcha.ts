@@ -7,7 +7,7 @@ export default {
         try {
           return (await Captcha.getAdapter()).getJob(args.label)
         } catch (error) {
-          sails.log.error(error)
+          sails.log.error(`GQL > [captchaGetJob]`, error, args)
           throw error
         }
       }

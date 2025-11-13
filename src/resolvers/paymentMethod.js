@@ -17,8 +17,8 @@ exports.default = {
                     return data;
                 }
                 catch (e) {
-                    sails.log.error(e);
-                    throw `${JSON.stringify(e)}`;
+                    sails.log.error(e, args);
+                    throw e;
                 }
             }
         }
