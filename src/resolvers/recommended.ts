@@ -10,7 +10,7 @@ export default {
                 let listOfAllowedGroups = null;
                 let recommendedByDefault = [];
 
-                const currentDish = await Dish.findOne({id: args.dishId});
+                const currentDish = (await Dish.find({id: args.dishId}).limit(1))[0];
                 const RECOMMENDED_GROUPID_FOR_DISHES = await Settings.get("RECOMMENDED_GROUPID_FOR_DISHES")
                 const RECOMMENDED_FORCE_DISHES_IDS = (await Settings.get("RECOMMENDED_FORCE_DISHES"))?.split(";")
 
@@ -68,7 +68,10 @@ export default {
               const RECOMMENDED_FORCE_DISHES_IDS = (await Settings.get("RECOMMENDED_FORCE_DISHES"))?.split(";")
               const recommendedByForce = RECOMMENDED_FORCE_DISHES_IDS?.length ? await Dish.find({id: RECOMMENDED_FORCE_DISHES_IDS}): [];
 
-              let orderDishes = await OrderDish.find({order: args.orderId}).populate("dish");
+              let orderDishes = [];
+              if (args.orderId) {
+                orderDishes = await OrderDish.find({order: args.orderId}).populate("dish");
+              }
               const orderDishIds = orderDishes.map(orderDish => orderDish.dish.id);
             
               const orderDishParentGroupIds = orderDishes
