@@ -31,6 +31,7 @@ export default {
                       { 'balance': { "!=": 0 } },
                       { 'modifier': false },
                       { 'isDeleted': false },
+                      { 'enable': true },
                       { 'visible': true }
                     ]
                   };
@@ -95,6 +96,7 @@ export default {
                     { 'balance': { "!=": 0 } },
                     { 'modifier': false },
                     { 'isDeleted': false },
+                    { 'enable': true },
                     { 'visible': true }
                   ]
                 };
