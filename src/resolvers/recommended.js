@@ -10,7 +10,7 @@ exports.default = {
                     let defaultGroup = null;
                     let listOfAllowedGroups = null;
                     let recommendedByDefault = [];
-                    const currentDish = await Dish.findOne({ id: args.dishId });
+                    const currentDish = (await Dish.find({ id: args.dishId }).limit(1))[0];
                     const RECOMMENDED_GROUPID_FOR_DISHES = await Settings.get("RECOMMENDED_GROUPID_FOR_DISHES");
                     const RECOMMENDED_FORCE_DISHES_IDS = (await Settings.get("RECOMMENDED_FORCE_DISHES"))?.split(";");
                     const recommendedForDish = currentDish.id && await Dish.getRecommended([currentDish.id]) || [];
@@ -25,6 +25,7 @@ exports.default = {
                                 { 'balance': { "!=": 0 } },
                                 { 'modifier': false },
                                 { 'isDeleted': false },
+                                { 'enable': true },
                                 { 'visible': true }
                             ]
                         };
@@ -57,7 +58,10 @@ exports.default = {
                     const RECOMMENDED_GROUPID_FOR_ORDER = await Settings.get("RECOMMENDED_GROUPID_FOR_ORDER");
                     const RECOMMENDED_FORCE_DISHES_IDS = (await Settings.get("RECOMMENDED_FORCE_DISHES"))?.split(";");
                     const recommendedByForce = RECOMMENDED_FORCE_DISHES_IDS?.length ? await Dish.find({ id: RECOMMENDED_FORCE_DISHES_IDS }) : [];
-                    let orderDishes = await OrderDish.find({ order: args.orderId }).populate("dish");
+                    let orderDishes = [];
+                    if (args.orderId) {
+                        orderDishes = await OrderDish.find({ order: args.orderId }).populate("dish");
+                    }
                     const orderDishIds = orderDishes.map(orderDish => orderDish.dish.id);
                     const orderDishParentGroupIds = orderDishes
                         .map(orderDish => orderDish.dish.parentGroup)
@@ -76,6 +80,7 @@ exports.default = {
                                 { 'balance': { "!=": 0 } },
                                 { 'modifier': false },
                                 { 'isDeleted': false },
+                                { 'enable': true },
                                 { 'visible': true }
                             ]
                         };

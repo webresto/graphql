@@ -65,6 +65,7 @@ declare const _default: {
                 hash?: string;
                 user?: import("@webresto/core").UserRecord | string;
                 customData?: any;
+                logs?: import("@webresto/core").OrderLogEntry[];
             }>;
         };
     };
@@ -134,6 +135,7 @@ declare const _default: {
                 hash?: string;
                 user?: import("@webresto/core").UserRecord | string;
                 customData?: any;
+                logs?: import("@webresto/core").OrderLogEntry[];
             }>;
         };
         orderReplaceDish: {
@@ -201,6 +203,7 @@ declare const _default: {
                 hash?: string;
                 user?: import("@webresto/core").UserRecord | string;
                 customData?: any;
+                logs?: import("@webresto/core").OrderLogEntry[];
             }>;
         };
         orderRemoveDish: {
@@ -268,6 +271,7 @@ declare const _default: {
                 hash?: string;
                 user?: import("@webresto/core").UserRecord | string;
                 customData?: any;
+                logs?: import("@webresto/core").OrderLogEntry[];
             }>;
         };
         orderSetDishAmount: {
@@ -335,6 +339,7 @@ declare const _default: {
                 hash?: string;
                 user?: import("@webresto/core").UserRecord | string;
                 customData?: any;
+                logs?: import("@webresto/core").OrderLogEntry[];
             }>;
         };
         orderSetDishComment: {
@@ -402,6 +407,7 @@ declare const _default: {
                 hash?: string;
                 user?: import("@webresto/core").UserRecord | string;
                 customData?: any;
+                logs?: import("@webresto/core").OrderLogEntry[];
             }>;
         };
         orderUpdate: {
@@ -469,6 +475,7 @@ declare const _default: {
                 hash?: string;
                 user?: import("@webresto/core").UserRecord | string;
                 customData?: any;
+                logs?: import("@webresto/core").OrderLogEntry[];
             }>;
         };
         orderClone: {
@@ -536,6 +543,7 @@ declare const _default: {
                 hash?: string;
                 user?: import("@webresto/core").UserRecord | string;
                 customData?: any;
+                logs?: import("@webresto/core").OrderLogEntry[];
             }>;
         };
         orderPromocodeApply: {
@@ -603,6 +611,7 @@ declare const _default: {
                 hash?: string;
                 user?: import("@webresto/core").UserRecord | string;
                 customData?: any;
+                logs?: import("@webresto/core").OrderLogEntry[];
             }>;
         };
         orderPromocodeReset: {
@@ -670,6 +679,7 @@ declare const _default: {
                 hash?: string;
                 user?: import("@webresto/core").UserRecord | string;
                 customData?: any;
+                logs?: import("@webresto/core").OrderLogEntry[];
             }>;
         };
     };

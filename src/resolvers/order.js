@@ -121,7 +121,7 @@ exports.default = {
                         sails.log.warn("GQL > orderAddDish: ", `order with id ${args.orderId} not found. Trying make new cart.`);
                         order = await getNewCart(context, args.orderId);
                     }
-                    if (order.paid || order.state === "ORDER") {
+                    if (order.paid || Order.isOrderedState(order.state)) {
                         order = await getNewCart();
                     }
                     try {
@@ -151,7 +151,7 @@ exports.default = {
                         sails.log.warn("GQL > orderAddDish: ", `order with id ${args.orderId} not found. Trying make new cart.`);
                         order = await getNewCart(context, args.orderId);
                     }
-                    if (order.paid || order.state === "ORDER") {
+                    if (order.paid || Order.isOrderedState(order.state)) {
                         order = await getNewCart();
                     }
                     const orderDish = await OrderDish.findOne({ id: args.orderDishId });
@@ -182,7 +182,7 @@ exports.default = {
                         sails.log.warn("GQL > orderAddDish: ", `order with id ${args.orderId} not found. Trying make new cart.`);
                         order = await getNewCart(context, args.orderId);
                     }
-                    if (order.paid || order.state === "ORDER") {
+                    if (order.paid || Order.isOrderedState(order.state)) {
                         order = await getNewCart();
                     }
                     let dish = await OrderDish.findOne(args.orderDishId).populate("dish");
@@ -232,7 +232,7 @@ exports.default = {
                         sails.log.warn("GQL > orderAddDish: ", `order with id ${args.orderId} not found. Trying make new cart.`);
                         order = await getNewCart(context, args.orderId);
                     }
-                    if (order.paid || order.state === "ORDER") {
+                    if (order.paid || Order.isOrderedState(order.state)) {
                         order = await getNewCart();
                     }
                     const dish = await OrderDish.findOne({ id: dishId }).populate("dish");

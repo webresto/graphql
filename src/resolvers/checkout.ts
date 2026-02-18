@@ -138,7 +138,7 @@ export default {
             if(!data.address && !data.locationId) throw `Address is required for non self service orders`
           }
 
-          if (order.state === "ORDER") {
+          if (Order.isOrderedState(order.state)) {
             message = eventHelper.sendMessage({
               deviceId: context.connectionParams.deviceId,
               type: "error",

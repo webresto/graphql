@@ -151,7 +151,7 @@ export default {
           }
 
 
-          if (order.paid || order.state === "ORDER") {
+          if (order.paid || Order.isOrderedState(order.state)) {
             order = await getNewCart();
           }
 
@@ -196,7 +196,7 @@ export default {
         }
 
 
-        if (order.paid || order.state === "ORDER") {
+        if (order.paid || Order.isOrderedState(order.state)) {
           order = await getNewCart();
         }
 
@@ -236,7 +236,7 @@ export default {
         }
 
 
-        if (order.paid || order.state === "ORDER") {
+        if (order.paid || Order.isOrderedState(order.state)) {
           order = await getNewCart();
         }
 
@@ -295,7 +295,7 @@ export default {
         }
 
 
-        if (order.paid || order.state === "ORDER") {
+        if (order.paid || Order.isOrderedState(order.state)) {
           order = await getNewCart();
         }
 
