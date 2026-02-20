@@ -10,6 +10,7 @@ exports.default = {
                     let defaultGroup = null;
                     let listOfAllowedGroups = null;
                     let recommendedByDefault = [];
+                    const dishHasEnable = Boolean(sails.models?.dish?.attributes?.enable);
                     const currentDish = (await Dish.find({ id: args.dishId }).limit(1))[0];
                     const RECOMMENDED_GROUPID_FOR_DISHES = await Settings.get("RECOMMENDED_GROUPID_FOR_DISHES");
                     const RECOMMENDED_FORCE_DISHES_IDS = (await Settings.get("RECOMMENDED_FORCE_DISHES"))?.split(";");
@@ -25,10 +26,12 @@ exports.default = {
                                 { 'balance': { "!=": 0 } },
                                 { 'modifier': false },
                                 { 'isDeleted': false },
-                                { 'enable': true },
                                 { 'visible': true }
                             ]
                         };
+                        if (dishHasEnable) {
+                            criteria['where']['and'].push({ 'enable': true });
+                        }
                         if (RECOMMENDED_GROUPID_FOR_DISHES) {
                             defaultGroup = await Group.find({ id: RECOMMENDED_GROUPID_FOR_DISHES });
                             listOfAllowedGroups = await Group.getMenuTree(defaultGroup);
@@ -55,6 +58,7 @@ exports.default = {
             def: 'recommendedForOrder(orderId: String): [Dish]',
             fn: async function (parent, args, context) {
                 try {
+                    const dishHasEnable = Boolean(sails.models?.dish?.attributes?.enable);
                     const RECOMMENDED_GROUPID_FOR_ORDER = await Settings.get("RECOMMENDED_GROUPID_FOR_ORDER");
                     const RECOMMENDED_FORCE_DISHES_IDS = (await Settings.get("RECOMMENDED_FORCE_DISHES"))?.split(";");
                     const recommendedByForce = RECOMMENDED_FORCE_DISHES_IDS?.length ? await Dish.find({ id: RECOMMENDED_FORCE_DISHES_IDS }) : [];
@@ -80,10 +84,12 @@ exports.default = {
                                 { 'balance': { "!=": 0 } },
                                 { 'modifier': false },
                                 { 'isDeleted': false },
-                                { 'enable': true },
                                 { 'visible': true }
                             ]
                         };
+                        if (dishHasEnable) {
+                            criteria['where']['and'].push({ 'enable': true });
+                        }
                         if (RECOMMENDED_GROUPID_FOR_ORDER) {
                             defaultGroup = await Group.find({ id: RECOMMENDED_GROUPID_FOR_ORDER });
                             listOfAllowedGroups = await Group.getMenuTree(defaultGroup);
