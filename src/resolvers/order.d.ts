@@ -7,6 +7,8 @@ declare const _default: {
                 updatedAt?: Date | undefined;
                 id?: string;
                 shortId?: string;
+                orderedAt?: number;
+                completedAt?: number;
                 state?: string;
                 concept?: string[];
                 isMixedConcept?: boolean;
@@ -77,6 +79,8 @@ declare const _default: {
                 updatedAt?: Date | undefined;
                 id?: string;
                 shortId?: string;
+                orderedAt?: number;
+                completedAt?: number;
                 state?: string;
                 concept?: string[];
                 isMixedConcept?: boolean;
@@ -145,6 +149,8 @@ declare const _default: {
                 updatedAt?: Date | undefined;
                 id?: string;
                 shortId?: string;
+                orderedAt?: number;
+                completedAt?: number;
                 state?: string;
                 concept?: string[];
                 isMixedConcept?: boolean;
@@ -213,6 +219,8 @@ declare const _default: {
                 updatedAt?: Date | undefined;
                 id?: string;
                 shortId?: string;
+                orderedAt?: number;
+                completedAt?: number;
                 state?: string;
                 concept?: string[];
                 isMixedConcept?: boolean;
@@ -281,6 +289,8 @@ declare const _default: {
                 updatedAt?: Date | undefined;
                 id?: string;
                 shortId?: string;
+                orderedAt?: number;
+                completedAt?: number;
                 state?: string;
                 concept?: string[];
                 isMixedConcept?: boolean;
@@ -349,6 +359,8 @@ declare const _default: {
                 updatedAt?: Date | undefined;
                 id?: string;
                 shortId?: string;
+                orderedAt?: number;
+                completedAt?: number;
                 state?: string;
                 concept?: string[];
                 isMixedConcept?: boolean;
@@ -417,6 +429,8 @@ declare const _default: {
                 updatedAt?: Date | undefined;
                 id?: string;
                 shortId?: string;
+                orderedAt?: number;
+                completedAt?: number;
                 state?: string;
                 concept?: string[];
                 isMixedConcept?: boolean;
@@ -485,6 +499,8 @@ declare const _default: {
                 updatedAt?: Date | undefined;
                 id?: string;
                 shortId?: string;
+                orderedAt?: number;
+                completedAt?: number;
                 state?: string;
                 concept?: string[];
                 isMixedConcept?: boolean;
@@ -553,6 +569,8 @@ declare const _default: {
                 updatedAt?: Date | undefined;
                 id?: string;
                 shortId?: string;
+                orderedAt?: number;
+                completedAt?: number;
                 state?: string;
                 concept?: string[];
                 isMixedConcept?: boolean;
@@ -621,6 +639,8 @@ declare const _default: {
                 updatedAt?: Date | undefined;
                 id?: string;
                 shortId?: string;
+                orderedAt?: number;
+                completedAt?: number;
                 state?: string;
                 concept?: string[];
                 isMixedConcept?: boolean;

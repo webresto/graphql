@@ -35,8 +35,8 @@ declare const _default: {
         customFields: () => Promise<string[]>;
         passwordPolicy: () => Promise<string | true | string[]>;
         allowedPhoneCountries: () => Promise<any[]>;
-        linkToProcessingPersonalData: () => string;
-        linkToUserAgreement: () => string;
+        linkToProcessingPersonalData: () => Promise<string | boolean | string[]>;
+        linkToUserAgreement: () => Promise<string | boolean | string[]>;
         OTPlength: () => number;
         allowBonusSpending: () => Promise<string | boolean | string[]>;
     };

@@ -188,8 +188,8 @@ exports.default = {
             }
             return allowedPhoneCountriesList;
         },
-        linkToProcessingPersonalData: () => "/static/processing_personal_data",
-        linkToUserAgreement: () => "/static/user_agreement",
+        linkToProcessingPersonalData: async () => await Settings.get("LINK_TO_PROCESSING_PERSONAL_DATA") ?? null,
+        linkToUserAgreement: async () => await Settings.get("LINK_TO_USER_AGREEMENT") ?? null,
         OTPlength: () => 6,
         allowBonusSpending: async () => {
             return await Settings.get("ALLOW_BONUS_SPENDING") ?? true;
