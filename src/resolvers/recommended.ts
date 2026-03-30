@@ -31,8 +31,7 @@ export default {
                     'and': [
                       { 'balance': { "!=": 0 } },
                       { 'modifier': false },
-                      { 'isDeleted': false },
-                      { 'visible': true }
+                      { 'isDeleted': false }
                     ]
                   };
                   if (dishHasEnable) {
@@ -99,8 +98,7 @@ export default {
                   'and': [
                     { 'balance': { "!=": 0 } },
                     { 'modifier': false },
-                    { 'isDeleted': false },
-                    { 'visible': true }
+                    { 'isDeleted': false }
                   ]
                 };
                 if (dishHasEnable) {

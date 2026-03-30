@@ -338,9 +338,6 @@ import { withFilter } from "apollo-server";
 function sanitizeCriteria(modelname, criteria) {
   let where = criteria.where !== undefined ? criteria.where : criteria;
 
-  if (sails.models[modelname].attributes.visible) {
-    where.visible = true;
-  }
 
   if (sails.models[modelname].attributes.enable) {
     where.enable = true;
