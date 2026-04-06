@@ -10,6 +10,7 @@ import { SpendBonus } from "@webresto/core/interfaces/SpendBonus";
 interface InputOrderCheckout {
     orderId: string;
     paymentMethodId: string;
+    platform?: string;
     selfService?: boolean;
     pickupPointId?: string;
     address?: Address;

@@ -20,6 +20,7 @@ import { JWTAuth } from "../../lib/jwt";
 interface InputOrderCheckout {
   orderId: string 
   paymentMethodId: string 
+  platform?: string
   selfService?: boolean
   pickupPointId?: string 
   address?: Address
@@ -36,6 +37,7 @@ graphqlHelper.addType(`#graphql
   input InputOrderCheckout {
     orderId: String! 
     paymentMethodId: String!
+    platform: String
     customer: Customer! 
     spendBonus: InputSpendBonus 
     selfService: Boolean
@@ -208,7 +210,8 @@ export default {
             data.address,
             data.paymentMethodId,
             userId,
-            data.spendBonus !== undefined && userId !== null ? data.spendBonus : null
+            data.spendBonus !== undefined && userId !== null ? data.spendBonus : null,
+            data.platform
           );
 
           order = await Order.findOne({id: data.orderId});

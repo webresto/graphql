@@ -9,6 +9,7 @@ graphqlHelper_1.default.addType(`#graphql
   input InputOrderCheckout {
     orderId: String! 
     paymentMethodId: String!
+    platform: String
     customer: Customer! 
     spendBonus: InputSpendBonus 
     selfService: Boolean
@@ -162,7 +163,7 @@ exports.default = {
                     if (context && context.connectionParams.authorization) {
                         userId = (await jwt_1.JWTAuth.verify(context.connectionParams.authorization)).userId;
                     }
-                    await Order.check({ id: order.id }, data.customer, isSelfService, data.address, data.paymentMethodId, userId, data.spendBonus !== undefined && userId !== null ? data.spendBonus : null);
+                    await Order.check({ id: order.id }, data.customer, isSelfService, data.address, data.paymentMethodId, userId, data.spendBonus !== undefined && userId !== null ? data.spendBonus : null, data.platform);
                     order = await Order.findOne({ id: data.orderId });
                     if (!order) {
                         throw new Error(`Order with id: \`${data.orderId}\` not found`);
