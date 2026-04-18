@@ -26,6 +26,23 @@ graphqlHelper.addType(`#graphql
 
 export default {
   Query: {
+    orders: {
+      def: `#graphql
+      """ Returns multiple orders by array of orderIds """
+      orders(orderIds: [String!]!): [Order!]!`,
+
+      fn: async function (parent, args, context) {
+        try {
+          const found = await Order.find({ id: args.orderIds });
+          const populated = await Promise.all(found.map((o) => Order.populate(o.id)));
+          return populated;
+        } catch (error) {
+          sails.log.error(`GQL > [orders]`, error, args);
+          throw error;
+        }
+      },
+    },
+
     order: {
       def: `#graphql
       """ if orderId is not set, a new cart will be returned """

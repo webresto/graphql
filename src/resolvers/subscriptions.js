@@ -4,6 +4,24 @@ const apollo_server_1 = require("apollo-server");
 const checkDeviceId_1 = require("../../lib/helper/checkDeviceId");
 exports.default = {
     Subscription: {
+        orders: {
+            def: `#graphql
+      "Subscribe to updates for multiple orders by orderIds. Returns the single changed Order."
+      orders(orderIds: [String!]!, deviceId: String): Order
+      `,
+            fn: {
+                subscribe: (0, apollo_server_1.withFilter)((rootValue, args, context, info) => {
+                    if (args.deviceId) {
+                        context.connectionParams.deviceId = args.deviceId;
+                    }
+                    (0, checkDeviceId_1.default)(context);
+                    return context.pubsub.asyncIterator('order-changed');
+                }, (payload, args, context, info) => {
+                    return Array.isArray(args.orderIds) && args.orderIds.includes(payload.id);
+                }),
+                resolve: payload => payload,
+            }
+        },
         order: {
             def: `#graphql
       "If you authorized you should send Authorization header;"

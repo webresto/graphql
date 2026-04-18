@@ -1,5 +1,76 @@
 declare const _default: {
     Query: {
+        orders: {
+            def: string;
+            fn: (parent: any, args: any, context: any) => Promise<{
+                createdAt?: Date | undefined;
+                updatedAt?: Date | undefined;
+                id?: string;
+                shortId?: string;
+                orderedAt?: number;
+                completedAt?: number;
+                state?: string;
+                concept?: string[];
+                isMixedConcept?: boolean;
+                dishes?: import("@webresto/core").OrderDishRecord[] | number[];
+                paymentMethod?: import("@webresto/core").PaymentMethodRecord | string;
+                paymentMethodTitle?: string;
+                paid?: boolean;
+                isPaymentPromise?: boolean;
+                promotionState?: import("@webresto/core").PromotionState[];
+                promotionErrors?: object | object[];
+                promotionCode?: import("@webresto/core/models/PromotionCode").PromotionCodeRecord | string;
+                promotionCodeDescription?: string;
+                promotionCodeString?: string;
+                promotionFlatDiscount?: number;
+                promotionDelivery?: import("@webresto/core/adapters/delivery/DeliveryAdapter").Delivery;
+                promotionCodeCheckValidTill?: string;
+                promotionUnorderable?: boolean;
+                isPromoting?: boolean;
+                dishesCount?: number;
+                uniqueDishes?: number;
+                modifiers?: any;
+                customer?: import("@webresto/core/interfaces/Customer").default;
+                address?: import("@webresto/core/interfaces/Address").default;
+                comment?: string;
+                personsCount?: string;
+                date?: string;
+                problem?: boolean;
+                rmsDelivered?: boolean;
+                rmsId?: string;
+                rmsOrderNumber?: string;
+                rmsOrderData?: any;
+                rmsDeliveryDate?: string;
+                rmsErrorMessage?: string;
+                rmsErrorCode?: string;
+                rmsStatusCode?: string;
+                rmsOrderStatus?: string;
+                pickupPoint?: import("@webresto/core").PlaceRecord | string;
+                selfService?: boolean;
+                delivery?: import("@webresto/core/adapters/delivery/DeliveryAdapter").Delivery | null;
+                deliveryDescription?: string;
+                message?: string;
+                deliveryItem?: import("@webresto/core").DishRecord | string;
+                deliveryCost?: number;
+                totalWeight?: number;
+                trifleFrom?: number;
+                bonusesTotal?: number;
+                spendBonus?: import("@webresto/core/interfaces/SpendBonus").SpendBonus;
+                total?: number;
+                basketTotal?: number;
+                orderTotal?: number;
+                discountTotal?: number;
+                orderDate?: string;
+                tag?: string;
+                deviceId?: string;
+                orderedOnPlatform?: string;
+                nonce?: number;
+                hash?: string;
+                user?: import("@webresto/core").UserRecord | string;
+                customData?: any;
+                logs?: import("@webresto/core").OrderLogEntry[];
+            }[]>;
+        };
         order: {
             def: string;
             fn: (parent: any, args: any, context: any) => Promise<{
@@ -63,6 +134,7 @@ declare const _default: {
                 orderDate?: string;
                 tag?: string;
                 deviceId?: string;
+                orderedOnPlatform?: string;
                 nonce?: number;
                 hash?: string;
                 user?: import("@webresto/core").UserRecord | string;
@@ -135,6 +207,7 @@ declare const _default: {
                 orderDate?: string;
                 tag?: string;
                 deviceId?: string;
+                orderedOnPlatform?: string;
                 nonce?: number;
                 hash?: string;
                 user?: import("@webresto/core").UserRecord | string;
@@ -205,6 +278,7 @@ declare const _default: {
                 orderDate?: string;
                 tag?: string;
                 deviceId?: string;
+                orderedOnPlatform?: string;
                 nonce?: number;
                 hash?: string;
                 user?: import("@webresto/core").UserRecord | string;
@@ -275,6 +349,7 @@ declare const _default: {
                 orderDate?: string;
                 tag?: string;
                 deviceId?: string;
+                orderedOnPlatform?: string;
                 nonce?: number;
                 hash?: string;
                 user?: import("@webresto/core").UserRecord | string;
@@ -345,6 +420,7 @@ declare const _default: {
                 orderDate?: string;
                 tag?: string;
                 deviceId?: string;
+                orderedOnPlatform?: string;
                 nonce?: number;
                 hash?: string;
                 user?: import("@webresto/core").UserRecord | string;
@@ -415,6 +491,7 @@ declare const _default: {
                 orderDate?: string;
                 tag?: string;
                 deviceId?: string;
+                orderedOnPlatform?: string;
                 nonce?: number;
                 hash?: string;
                 user?: import("@webresto/core").UserRecord | string;
@@ -485,6 +562,7 @@ declare const _default: {
                 orderDate?: string;
                 tag?: string;
                 deviceId?: string;
+                orderedOnPlatform?: string;
                 nonce?: number;
                 hash?: string;
                 user?: import("@webresto/core").UserRecord | string;
@@ -555,6 +633,7 @@ declare const _default: {
                 orderDate?: string;
                 tag?: string;
                 deviceId?: string;
+                orderedOnPlatform?: string;
                 nonce?: number;
                 hash?: string;
                 user?: import("@webresto/core").UserRecord | string;
@@ -625,6 +704,7 @@ declare const _default: {
                 orderDate?: string;
                 tag?: string;
                 deviceId?: string;
+                orderedOnPlatform?: string;
                 nonce?: number;
                 hash?: string;
                 user?: import("@webresto/core").UserRecord | string;
@@ -695,6 +775,7 @@ declare const _default: {
                 orderDate?: string;
                 tag?: string;
                 deviceId?: string;
+                orderedOnPlatform?: string;
                 nonce?: number;
                 hash?: string;
                 user?: import("@webresto/core").UserRecord | string;

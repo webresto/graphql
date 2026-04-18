@@ -3,6 +3,28 @@ import checkDeviceId from '../../lib/helper/checkDeviceId';
 
 export default {
   Subscription: {
+    orders: {
+      def: `#graphql
+      "Subscribe to updates for multiple orders by orderIds. Returns the single changed Order."
+      orders(orderIds: [String!]!, deviceId: String): Order
+      `,
+      fn: {
+        subscribe: withFilter(
+          (rootValue, args, context, info) => {
+            if (args.deviceId) {
+              context.connectionParams.deviceId = args.deviceId;
+            }
+            checkDeviceId(context);
+            return context.pubsub.asyncIterator('order-changed');
+          },
+          (payload, args, context, info) => {
+            return Array.isArray(args.orderIds) && args.orderIds.includes(payload.id);
+          }
+        ),
+        resolve: payload => payload,
+      }
+    },
+
     order: {
       def: `#graphql
       "If you authorized you should send Authorization header;"

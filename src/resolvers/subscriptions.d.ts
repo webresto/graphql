@@ -1,5 +1,12 @@
 declare const _default: {
     Subscription: {
+        orders: {
+            def: string;
+            fn: {
+                subscribe: import("apollo-server").ResolverFn;
+                resolve: (payload: any) => any;
+            };
+        };
         order: {
             def: string;
             fn: {
