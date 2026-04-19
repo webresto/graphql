@@ -13,6 +13,19 @@ const eventHelper_1 = require("../lib/eventHelper");
 const pubsub = new apollo_server_1.PubSub();
 sails.graphql = { pubsub };
 let server;
+const orderUpdateTimers = new Map();
+function publishOrderDebounced(order, delay = 300) {
+    const id = order.id;
+    if (!id)
+        return;
+    const existing = orderUpdateTimers.get(id);
+    if (existing)
+        clearTimeout(existing);
+    orderUpdateTimers.set(id, setTimeout(() => {
+        orderUpdateTimers.delete(id);
+        pubsub.publish("order-changed", order);
+    }, delay));
+}
 const AdditionalResolvers = {};
 exports.default = {
     getPubsub: () => pubsub,
@@ -177,7 +190,10 @@ exports.default = {
         helper.addToReplaceList("Order.delivery", "delivery: OrderDeliveryState");
         const { typeDefs, resolvers } = helper.getSchema();
         emitter.on("core:order-after-count", "graphql", function (order) {
-            pubsub.publish("order-changed", order);
+            publishOrderDebounced(order);
+        });
+        emitter.on("core:order-after-update", "graphql", function (order) {
+            publishOrderDebounced(order);
         });
         emitter.on("send-message", "graphql", function ({ orderId, message }) {
             pubsub.publish("message", { orderId, message });
