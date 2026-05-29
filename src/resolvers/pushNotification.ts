@@ -23,9 +23,15 @@ export default {
         checkDeviceId(context);
         const deviceId = context.connectionParams.deviceId;
 
-        const device = await UserDevice.findOne({ id: deviceId });
+        let device = await UserDevice.findOne({ id: deviceId });
         if (!device) {
-          throw new Error("Device not found");
+          // A device always exists on the client side, but it may not be registered yet and has no user
+          // until login. Create it empty (user === null) so guests can receive push notifications;
+          // it will be bound to the user later in User.authDevice on login.
+          device = await UserDevice.create({
+            id: deviceId,
+            userAgent: context.connectionParams?.["user-agent"] ?? undefined,
+          }).fetch();
         }
 
         await UserDevice.setNotificationToken(deviceId, {
