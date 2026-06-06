@@ -102,16 +102,20 @@ export default {
         possibleToOrderInMinutes: async () => isNaN(await Settings.get('POSSIBLE_TO_ORDER_IN_MINUTES')) ? 7 * 24 * 60 : await Settings.get('POSSIBLE_TO_ORDER_IN_MINUTES'),
         minDeliveryTimeInMinutes: async () => isNaN(await Settings.get('MIN_DELIVERY_TIME_IN_MINUTES')) ? 40 : await Settings.get('MIN_DELIVERY_TIME_IN_MINUTES'),
         timezone: async () => {
-            return await Settings.get('TZ') ?? 'Etc/GMT'
+            // Timezone may be unset — propagate null to the frontend instead of a fake default.
+            const tz = await Settings.get('TZ');
+            return (typeof tz === 'string' && tz.trim() !== '') ? tz : null;
         },
 
         utcOffsetInSeconds: async () => {
-            let tz = await Settings.get('TZ') ?? 'Etc/GMT'
+            const tz = await Settings.get('TZ');
+            if (!(typeof tz === 'string' && tz.trim() !== '')) return null;
             return TimeZoneIdentifier.getTimeZoneOffsetInSeconds(TimeZoneIdentifier.getTimeZoneGMTOffset(tz))
         },
 
         utcOffset: async () => {
-            let tz = await Settings.get('TZ') ?? 'Etc/GMT'
+            const tz = await Settings.get('TZ');
+            if (!(typeof tz === 'string' && tz.trim() !== '')) return null;
             return TimeZoneIdentifier.getTimeZoneGMTOffset(tz)
         },
 
