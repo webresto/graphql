@@ -43,9 +43,16 @@ ${error?.stack || error?.message || error}
     });
 
 
-    if (!await Settings.get("JWT_SECRET")) {
+    let jwtSecret = await Settings.get("JWT_SECRET");
+    if (!jwtSecret) {
       const random = getRandom(36);
       await Settings.set("JWT_SECRET", {key: "JWT_SECRET", value: random})
+      jwtSecret = random;
+    }
+
+    // process.env.JWT_SECRET is read directly by JWTAuth, so make sure it matches the value from Settings
+    if (!process.env.JWT_SECRET) {
+      process.env.JWT_SECRET = jwtSecret as string;
     }
 
 
