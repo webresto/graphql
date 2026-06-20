@@ -10,6 +10,51 @@ import graphqlHelper from "../../lib/graphqlHelper";
 import checkDeviceId from "../../lib/helper/checkDeviceId";
 import { OrderRecord } from "@webresto/core";
 
+type PromotionCodeResponse = {
+  order: OrderRecord;
+  promocodeValid: boolean | null;
+  promotionCodeString: string | null;
+  promotionCodeDescription: string | null;
+  message: { title: string; type: "success" | "error" | "info"; message: string };
+};
+
+/**
+ * Build a PromotionCodeResponse from an order after applyPromotionCode ran.
+ * Validity is derived from order fields (core does not throw for invalid codes):
+ *  - promotionCode != null            -> valid (promotion attached)
+ *  - promotionCode == null & code set -> invalid/expired
+ *  - no code at all                   -> reset (neutral)
+ */
+function buildPromotionCodeResponse(order: OrderRecord, context: any): PromotionCodeResponse {
+  const i18n = (s: string) => (context?.i18n?.__ ? context.i18n.__(s) : s);
+  const codeString = order.promotionCodeString || null;
+  const description = order.promotionCodeDescription || null;
+  // promotionCode may come populated or as id string; both mean "found"
+  const hasPromotion = order.promotionCode !== null && order.promotionCode !== undefined && order.promotionCode !== "";
+
+  let promocodeValid: boolean | null;
+  let message: PromotionCodeResponse["message"];
+
+  if (!codeString) {
+    promocodeValid = null;
+    message = { title: i18n("Promo code"), type: "info", message: description || i18n("Promo code removed") };
+  } else if (hasPromotion) {
+    promocodeValid = true;
+    message = { title: i18n("Promo code applied"), type: "success", message: description || i18n("Promo code applied") };
+  } else {
+    promocodeValid = false;
+    message = { title: i18n("Invalid promo code"), type: "error", message: description || i18n("Promo code is expired or not valid") };
+  }
+
+  return {
+    order,
+    promocodeValid,
+    promotionCodeString: codeString,
+    promotionCodeDescription: description,
+    message,
+  };
+}
+
 graphqlHelper.addType(`#graphql
   input InputOrderUpdate {
     id: String!
@@ -21,6 +66,20 @@ graphqlHelper.addType(`#graphql
     promotionCodeString: String
     address: AddressInput
     pickupPoint: String
+  }
+  `);
+
+graphqlHelper.addType(`#graphql
+  """ Result of applying/resetting a promotion code: order + useful info about the code """
+  type PromotionCodeResponse {
+    order: Order
+    """ true — code found and a promotion was attached; false — invalid/expired; null — code was reset """
+    promocodeValid: Boolean
+    """ the code string the user submitted (echoed back even when invalid) """
+    promotionCodeString: String
+    """ human-readable description / error text from the order """
+    promotionCodeDescription: String
+    message: Message
   }
   `);
 
@@ -430,34 +489,34 @@ export default {
     },
 
     orderPromocodeApply: {
-      def: 'orderPromocodeApply(orderId: String!, promocode: String!): Order',
-      fn: async function (parent, args, context) {
+      def: 'orderPromocodeApply(orderId: String!, promocode: String!): PromotionCodeResponse',
+      fn: async function (parent, args, context): Promise<PromotionCodeResponse> {
         try {
           let orderId = args.orderId;
-        let promocode = args.promocode;
-        await Order.applyPromotionCode({id: orderId}, promocode)
-        let fullOrder = await Order.populate({id: orderId});
-        emitter.emit("http-api:before-response-order-update", fullOrder);
-          return fullOrder
+          let promocode = args.promocode;
+          await Order.applyPromotionCode({id: orderId}, promocode)
+          let fullOrder = await Order.populate({id: orderId});
+          emitter.emit("http-api:before-response-order-update", fullOrder);
+          return buildPromotionCodeResponse(fullOrder, context);
         } catch (error) {
-          sails.log.error(`GQL > [orderPromocodeReset]`, error, args);
+          sails.log.error(`GQL > [orderPromocodeApply]`, error, args);
           throw error;
         }
       },
     },
 
     orderPromocodeReset: {
-      def: 'orderPromocodeReset(orderId: String!): Order',
-      fn: async function (parent, args, context) {
+      def: 'orderPromocodeReset(orderId: String!): PromotionCodeResponse',
+      fn: async function (parent, args, context): Promise<PromotionCodeResponse> {
         try {
           let orderId = args.orderId;
           let promocode = null;
-        await Order.applyPromotionCode({id: orderId}, promocode)
-        let fullOrder = await Order.populate({id: orderId});
-        emitter.emit("http-api:before-response-order-update", fullOrder);
-          return fullOrder
+          await Order.applyPromotionCode({id: orderId}, promocode)
+          let fullOrder = await Order.populate({id: orderId});
+          emitter.emit("http-api:before-response-order-update", fullOrder);
+          return buildPromotionCodeResponse(fullOrder, context);
         } catch (error) {
-          sails.log.error(`GQL > [order]`, error, args);
+          sails.log.error(`GQL > [orderPromocodeReset]`, error, args);
           throw error;
         }
       },
