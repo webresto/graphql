@@ -95,10 +95,8 @@ export default {
         worktime: async () => await Settings.get('WORK_TIME') ?? [],
         /**
          * GQL compatibility version
-         * As soon as the frontend breaks with the current scheme, this version should be switched
-         * On backend this up by 1000 step, in frontend up bu 1
          */
-        gqlSchemaMinVersion: () => 4000,
+        gqlSchemaMinVersion: () => 5000,
         possibleToOrderInMinutes: async () => isNaN(await Settings.get('POSSIBLE_TO_ORDER_IN_MINUTES')) ? 7 * 24 * 60 : await Settings.get('POSSIBLE_TO_ORDER_IN_MINUTES'),
         minDeliveryTimeInMinutes: async () => isNaN(await Settings.get('MIN_DELIVERY_TIME_IN_MINUTES')) ? 40 : await Settings.get('MIN_DELIVERY_TIME_IN_MINUTES'),
         timezone: async () => {
