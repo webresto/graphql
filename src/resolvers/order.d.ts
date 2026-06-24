@@ -1,4 +1,5 @@
 import { OrderRecord } from "@webresto/core";
+import { ResolvedCaptcha } from "@webresto/core/adapters/captcha/CaptchaAdapter";
 type PromotionCodeResponse = {
     order: OrderRecord;
     promocodeValid: boolean | null;
@@ -9,6 +10,11 @@ type PromotionCodeResponse = {
         type: "success" | "error" | "info";
         message: string;
     };
+};
+type PromotionCodeApplyPayload = {
+    orderId: string;
+    promocode: string;
+    captcha: ResolvedCaptcha;
 };
 declare const _default: {
     Query: {
@@ -655,7 +661,7 @@ declare const _default: {
         };
         orderPromocodeApply: {
             def: string;
-            fn: (parent: any, args: any, context: any) => Promise<PromotionCodeResponse>;
+            fn: (parent: any, args: PromotionCodeApplyPayload, context: any) => Promise<PromotionCodeResponse>;
         };
         orderPromocodeReset: {
             def: string;

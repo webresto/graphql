@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const checkExpression_1 = require("@webresto/core/libs/checkExpression");
+const adapters_1 = require("@webresto/core/adapters");
 // todo: fix types model instance to {%ModelName%}Record for Order"
 const jwt_1 = require("../../lib/jwt");
 const graphqlHelper_1 = require("@webresto/graphql/lib/graphqlHelper");
@@ -8,6 +9,7 @@ const graphqlHelper_1 = require("@webresto/graphql/lib/graphqlHelper");
 (0, graphqlHelper_1.addToReplaceList)("Order.pickupPoint", "pickupPoint: PickupPoint");
 const graphqlHelper_2 = require("../../lib/graphqlHelper");
 const checkDeviceId_1 = require("../../lib/helper/checkDeviceId");
+let captchaAdapter = adapters_1.Captcha.getAdapter();
 /**
  * Build a PromotionCodeResponse from an order after applyPromotionCode ran.
  * Validity is derived from order fields (core does not throw for invalid codes):
@@ -402,12 +404,16 @@ exports.default = {
       orderPromocodeApply(
         orderId: String!,
         promocode: String!,
-        captcha: Captcha
+        "Solved captcha for label 'orderPromocodeApply:%orderId%:%promocode%'"
+        captcha: Captcha!
       ): PromotionCodeResponse`,
             fn: async function (parent, args, context) {
                 try {
                     let orderId = args.orderId;
                     let promocode = args.promocode;
+                    if (!(await captchaAdapter).check(args.captcha, `orderPromocodeApply:${orderId}:${promocode}`)) {
+                        throw `bad captcha`;
+                    }
                     await Order.applyPromotionCode({ id: orderId }, promocode);
                     let fullOrder = await Order.populate({ id: orderId });
                     emitter.emit("http-api:before-response-order-update", fullOrder);
