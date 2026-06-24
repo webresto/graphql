@@ -398,7 +398,12 @@ exports.default = {
             },
         },
         orderPromocodeApply: {
-            def: 'orderPromocodeApply(orderId: String!, promocode: String!): PromotionCodeResponse',
+            def: `#graphql
+      orderPromocodeApply(
+        orderId: String!,
+        promocode: String!,
+        captcha: Captcha
+      ): PromotionCodeResponse`,
             fn: async function (parent, args, context) {
                 try {
                     let orderId = args.orderId;
