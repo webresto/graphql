@@ -1,5 +1,7 @@
 import * as eventHelper from "@webresto/graphql";
 import checkExpression from "@webresto/core/libs/checkExpression";
+import { Captcha } from "@webresto/core/adapters";
+import { ResolvedCaptcha } from "@webresto/core/adapters/captcha/CaptchaAdapter";
 // todo: fix types model instance to {%ModelName%}Record for Order"
 import { JWTAuth } from "../../lib/jwt";
 
@@ -10,12 +12,20 @@ import graphqlHelper from "../../lib/graphqlHelper";
 import checkDeviceId from "../../lib/helper/checkDeviceId";
 import { OrderRecord } from "@webresto/core";
 
+let captchaAdapter = Captcha.getAdapter();
+
 type PromotionCodeResponse = {
   order: OrderRecord;
   promocodeValid: boolean | null;
   promotionCodeString: string | null;
   promotionCodeDescription: string | null;
   message: { title: string; type: "success" | "error" | "info"; message: string };
+};
+
+type PromotionCodeApplyPayload = {
+  orderId: string;
+  promocode: string;
+  captcha: ResolvedCaptcha;
 };
 
 /**
@@ -493,12 +503,16 @@ export default {
       orderPromocodeApply(
         orderId: String!,
         promocode: String!,
-        captcha: Captcha
+        "Solved captcha for label 'orderPromocodeApply:%orderId%:%promocode%'"
+        captcha: Captcha!
       ): PromotionCodeResponse`,
-      fn: async function (parent, args, context): Promise<PromotionCodeResponse> {
+      fn: async function (parent, args: PromotionCodeApplyPayload, context): Promise<PromotionCodeResponse> {
         try {
           let orderId = args.orderId;
           let promocode = args.promocode;
+          if (!(await captchaAdapter).check(args.captcha, `orderPromocodeApply:${orderId}:${promocode}`)) {
+            throw `bad captcha`;
+          }
           await Order.applyPromotionCode({id: orderId}, promocode)
           let fullOrder = await Order.populate({id: orderId});
           emitter.emit("http-api:before-response-order-update", fullOrder);
