@@ -97,21 +97,25 @@ exports.default = {
         worktime: async () => await Settings.get('WORK_TIME') ?? [],
         /**
          * GQL compatibility version
-         * As soon as the frontend breaks with the current scheme, this version should be switched
-         * On backend this up by 1000 step, in frontend up bu 1
          */
-        gqlSchemaMinVersion: () => 4000,
+        gqlSchemaMinVersion: () => 5000,
         possibleToOrderInMinutes: async () => isNaN(await Settings.get('POSSIBLE_TO_ORDER_IN_MINUTES')) ? 7 * 24 * 60 : await Settings.get('POSSIBLE_TO_ORDER_IN_MINUTES'),
         minDeliveryTimeInMinutes: async () => isNaN(await Settings.get('MIN_DELIVERY_TIME_IN_MINUTES')) ? 40 : await Settings.get('MIN_DELIVERY_TIME_IN_MINUTES'),
         timezone: async () => {
-            return await Settings.get('TZ') ?? 'Etc/GMT';
+            // Timezone may be unset — propagate null to the frontend instead of a fake default.
+            const tz = await Settings.get('TZ');
+            return (typeof tz === 'string' && tz.trim() !== '') ? tz : null;
         },
         utcOffsetInSeconds: async () => {
-            let tz = await Settings.get('TZ') ?? 'Etc/GMT';
+            const tz = await Settings.get('TZ');
+            if (!(typeof tz === 'string' && tz.trim() !== ''))
+                return null;
             return worktime_1.TimeZoneIdentifier.getTimeZoneOffsetInSeconds(worktime_1.TimeZoneIdentifier.getTimeZoneGMTOffset(tz));
         },
         utcOffset: async () => {
-            let tz = await Settings.get('TZ') ?? 'Etc/GMT';
+            const tz = await Settings.get('TZ');
+            if (!(typeof tz === 'string' && tz.trim() !== ''))
+                return null;
             return worktime_1.TimeZoneIdentifier.getTimeZoneGMTOffset(tz);
         },
         dateFormat: async () => {
