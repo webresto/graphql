@@ -9,13 +9,11 @@ declare const _default: {
         worktime: () => Promise<string | boolean | string[]>;
         /**
          * GQL compatibility version
-         * As soon as the frontend breaks with the current scheme, this version should be switched
-         * On backend this up by 1000 step, in frontend up bu 1
          */
         gqlSchemaMinVersion: () => number;
         possibleToOrderInMinutes: () => Promise<string | number | boolean | string[]>;
         minDeliveryTimeInMinutes: () => Promise<string | boolean | string[] | 40>;
-        timezone: () => Promise<string | boolean | string[]>;
+        timezone: () => Promise<string>;
         utcOffsetInSeconds: () => Promise<number>;
         utcOffset: () => Promise<string>;
         dateFormat: () => Promise<string | boolean | string[]>;

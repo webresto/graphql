@@ -14,7 +14,7 @@ const pubsub = new apollo_server_1.PubSub();
 sails.graphql = { pubsub };
 let server;
 const orderUpdateTimers = new Map();
-function publishOrderDebounced(order, delay = 300) {
+function publishOrderDebounced(order, delay = 700) {
     const id = order.id;
     if (!id)
         return;
