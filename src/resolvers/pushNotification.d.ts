@@ -14,6 +14,12 @@ declare const _default: {
                 id: string;
             }, context: any) => Promise<boolean>;
         };
+        markNotificationDelivered: {
+            def: string;
+            fn: (_: any, { id }: {
+                id: string;
+            }) => Promise<boolean>;
+        };
     };
 };
 export default _default;

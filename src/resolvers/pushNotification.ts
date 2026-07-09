@@ -80,5 +80,32 @@ export default {
         return true;
       },
     },
+
+    markNotificationDelivered: {
+      def: `#graphql
+      """
+      Acknowledge that the device received and displayed the notification (deliveredAt),
+      independent of read. Idempotent. No JWT check: possession of the UUID id already
+      proves receipt, and the ack may come from an unauthenticated context (service worker).
+      """
+      markNotificationDelivered(id: ID!): Boolean`,
+      fn: async (_: any, { id }: { id: string }) => {
+        const notification = await Notification.findOne({ id });
+        if (!notification) {
+          return false;
+        }
+
+        if (notification.deliveredAt) {
+          return true;
+        }
+
+        await Notification.updateOne({ id }).set({
+          deliveredAt: Date.now(),
+        });
+        await Notification.log({ id }, "info", "delivery", "Delivery acknowledged by device (markNotificationDelivered)");
+
+        return true;
+      },
+    },
   },
 };
