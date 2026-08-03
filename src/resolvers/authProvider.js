@@ -1,13 +1,10 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 const jwt_1 = require("../../lib/jwt");
-const graphqlHelper_1 = __importDefault(require("../../lib/graphqlHelper"));
-const checkDeviceId_1 = __importDefault(require("../../lib/helper/checkDeviceId"));
+const graphqlHelper_1 = require("../../lib/graphqlHelper");
+const checkDeviceId_1 = require("../../lib/helper/checkDeviceId");
 const adapters_1 = require("@webresto/core/adapters");
-const AuthService_1 = __importDefault(require("@webresto/core/libs/AuthService"));
+const AuthService_1 = require("@webresto/core/libs/AuthService");
 /** Turn a resolved UserDevice into a UserResponse with an Authorization action carrying the JWT. */
 async function buildAuthResponse(userDevice, context) {
     const authData = {

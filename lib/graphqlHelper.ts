@@ -268,11 +268,11 @@ function createSchema(typeDefsObj) {
   for (let model of models) {
     const sailsModel = sails.models[model];
     if (!sailsModel) {
-      sails.log.error(`GraphQL: Skipping model ${model} - not found in sails.models`);
+      sails.log.debug(`GraphQL: Skipping model ${model} - not found in sails.models`);
       continue;
     }
     if (!sailsModel.globalId) {
-      sails.log.error(`GraphQL: Skipping model ${model} - no globalId defined`);
+      sails.log.debug(`GraphQL: Skipping model ${model} - no globalId defined`);
       continue;
     }
     const typeString = createType(sailsModel);

@@ -1,5 +1,5 @@
-import { OrderRecord } from "@webresto/core";
 import { ResolvedCaptcha } from "@webresto/core/adapters/captcha/CaptchaAdapter";
+import { OrderRecord } from "@webresto/core";
 type PromotionCodeResponse = {
     order: OrderRecord;
     promocodeValid: boolean | null;
