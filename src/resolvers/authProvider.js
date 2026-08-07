@@ -34,7 +34,7 @@ graphqlHelper_1.default.addType(`#graphql
     "slug, passed to startAuth"
     adapter: String!
     title: String!
-    "oauth2 | oidc | telegram_bot | max_bot | telegram_widget | email_link | phone_otp"
+    "oauth2 | oidc | signed_widget | bot_dialog | email_link | phone_otp"
     kind: String!
     iconUrl: String
     buttonColor: String
@@ -82,7 +82,7 @@ exports.default = {
         },
         authStatus: {
             def: `#graphql
-      """Poll the status of an in-flight login (telegram_bot / max_bot / QR / OAuth redirect)."""
+      """Poll the status of an in-flight login (bot_dialog / QR / OAuth redirect)."""
       authStatus(stateId: String!): AuthStatusPayload!`,
             fn: async function (parent, args, context) {
                 try {
@@ -160,7 +160,7 @@ exports.default = {
         completeAuth: {
             def: `#graphql
       """Finish a login for flows whose data arrives on the frontend
-         (telegram_widget / email_link). OAuth2 finishes via the HTTP callback instead."""
+         (signed_widget / email_link). OAuth2 finishes via the HTTP callback instead."""
       completeAuth(provider: String!, stateId: String!, data: Json!): UserResponse!`,
             fn: async function (parent, args, context) {
                 try {
