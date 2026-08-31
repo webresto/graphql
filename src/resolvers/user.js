@@ -45,7 +45,7 @@ exports.default = {
             fn: async (parent, payload, context, info) => {
                 try {
                     // TODO:  this is copied from restrictions need make it from one place
-                    if (!(await captchaAdapter).check(payload.captcha, `login:${payload.login}`))
+                    if (!(await (await captchaAdapter).check(payload.captcha, `login:${payload.login}`)))
                         throw `bad captcha`;
                     // Define password policy
                     let passwordPolicy = (await Settings.get("PASSWORD_POLICY"));
@@ -223,7 +223,7 @@ exports.default = {
             fn: async (parent, payload, context, info) => {
                 (0, checkDeviceId_1.default)(context);
                 try {
-                    if (!(await captchaAdapter).check(payload.captcha, `registration:${payload.login}`))
+                    if (!(await (await captchaAdapter).check(payload.captcha, `registration:${payload.login}`)))
                         throw `bad captcha`;
                     if (!payload.password && !payload.otp) {
                         throw `(password || otp) is required`;

@@ -86,10 +86,10 @@ export default {
         try {
           // TODO:  this is copied from restrictions need make it from one place
           if (
-            !(await captchaAdapter).check(
+            !(await (await captchaAdapter).check(
               payload.captcha,
               `login:${payload.login}`
-            )
+            ))
           )
             throw `bad captcha`;
 
@@ -330,10 +330,10 @@ export default {
 
         try {
           if (
-            !(await captchaAdapter).check(
+            !(await (await captchaAdapter).check(
               payload.captcha,
               `registration:${payload.login}`
-            )
+            ))
           )
             throw `bad captcha`;
 
