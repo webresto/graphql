@@ -64,8 +64,8 @@
     "hookName": "restographql"
   },
   "scripts": {
-    "test": "mocha -r ts-node/register test/bootstrap.ts './test/{,!(fixture)/**}/*.test.ts' --exit",
-    "test:pattern": "mocha -r ts-node/register test/bootstrap.ts './test/{,!(fixture)/**}/*.test.ts' --exit --grep=${PATTERN}",
+    "test": "mocha -r tsx/cjs test/bootstrap.ts './test/{,!(fixture)/**}/*.test.ts' --exit",
+    "test:pattern": "mocha -r tsx/cjs test/bootstrap.ts './test/{,!(fixture)/**}/*.test.ts' --exit --grep=${PATTERN}",
     "test:js": "mocha test/bootstrap.js './test/{,!(fixture)/**}/*.test.js' --exit",
     "test:init": "cd ./test/fixture && npm i --no-package-lock --prefix ./ && cd -"
   },

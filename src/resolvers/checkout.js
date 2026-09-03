@@ -1,9 +1,45 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const eventHelper = require("../../lib/eventHelper");
+const eventHelper = __importStar(require("../../lib/eventHelper"));
 // todo: fix types model instance to {%ModelName%}Record for Order"
 const OrderHelper_1 = require("@webresto/core/libs/helpers/OrderHelper");
-const graphqlHelper_1 = require("../../lib/graphqlHelper");
+const graphqlHelper_1 = __importDefault(require("../../lib/graphqlHelper"));
 const jwt_1 = require("../../lib/jwt");
 graphqlHelper_1.default.addType(`#graphql    
   input InputOrderCheckout {
@@ -17,7 +53,9 @@ graphqlHelper_1.default.addType(`#graphql
     locationId: String
     address: Address
     date: String
-    comment: String 
+    """Longest the customer will wait, in minutes. Mutually exclusive with date."""
+    maxWaitMinutes: Int
+    comment: String
     personsCount: Int
     customData: Json
   }
@@ -134,7 +172,10 @@ exports.default = {
                                 address = data.address;
                             }
                             address = {
-                                city: address.city || await Settings.use("city"),
+                                // The customer's city verbatim. There is no installation-wide
+                                // city to fall back on any more, and substituting one is what
+                                // used to send an address to the wrong town.
+                                city: address.city,
                                 street: address.street,
                                 ...address.streetId && { streetId: address.streetId },
                                 home: address.home,
@@ -152,6 +193,11 @@ exports.default = {
                     if (data.comment)
                         order.comment = data.comment;
                     order.date = data.date;
+                    // Written even when absent, so clearing it clears it. The two timing
+                    // modes are mutually exclusive and `Order.checkDate` refuses an order
+                    // carrying both — a stale value left behind here would be that refusal
+                    // firing at a customer who had already switched modes.
+                    order.maxWaitMinutes = typeof data.maxWaitMinutes === "number" ? data.maxWaitMinutes : null;
                     // callback: boolean -call back to clarify details
                     if (data.customData && data.customData.callback) {
                         if (!order.customData)
@@ -245,6 +291,20 @@ exports.default = {
                     }
                     else if (e.code === 17) {
                         message.message = context.i18n.__("The date should account for the minimum delivery time; choose a slightly later time");
+                    }
+                    else if (e.code === 20) {
+                        message.message = context.i18n.__("Choose either a delivery time or a maximum wait, not both");
+                    }
+                    else if (e.code === 22) {
+                        // Not the customer's problem and not something they can act on, so
+                        // they are told the order cannot be taken rather than why. The code
+                        // and the route are in the order's journal for the operator.
+                        message.message = context.i18n.__("This order cannot be prepared as one order right now. Please contact us.");
+                    }
+                    else if (e.code === 21) {
+                        // The estimate itself is in `e.error`; it is the one number that makes
+                        // this actionable, so it is shown rather than replaced by a generic line.
+                        message.message = e.error ?? context.i18n.__("The order cannot be ready that quickly");
                     }
                     else {
                         message.message = e.error

@@ -1,6 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const slugify_1 = require("slugify");
 const graphqlHelper_1 = require("../../lib/graphqlHelper");
 const worktime_1 = require("@webresto/worktime");
 graphqlHelper_1.default.addType(`#graphql
@@ -68,12 +67,9 @@ graphqlHelper_1.default.addType(`#graphql
       "Fields needed to create new order"  
       fieldsForOrderInitialization: [String]
 
-      "City for current restoapp server"  
-      city: City
+      "Cities this installation delivers in. The customer picks one; it travels with the address and is what qualifies it for the geocoder."
+      cities: [City]
 
-      "The server is part of the several city delivery chain"
-      multipleCities: Boolean
-      
       "Group User restrictions"
       user: UserRestrictions
     }
@@ -135,20 +131,10 @@ exports.default = {
         fieldsForOrderInitialization: async () => {
             return await Settings.get("FIELDS_FOR_ORDER_INITIALIZATION") ?? [];
         },
-        city: async () => {
-            let cityName = await Settings.get("CITY");
-            if (!cityName)
-                return null;
-            let slug = (0, slugify_1.default)(cityName, { remove: /[*+~.()'"!:@\\\/]/g, lower: true, strict: true, locale: 'en' });
-            let city = (await City.find({ slug }))[0];
-            if (!city && cityName !== undefined) {
-                //@ts-ignore
-                city = { name: cityName, slug: slug };
-            }
-            return city;
-        },
-        multipleCities: async () => {
-            return (await City.count({ isDeleted: false })) > 1;
+        cities: async () => {
+            // Real rows only. The synthetic city this used to invent from the
+            // `CITY` setting could not be ordered in: nothing points at it.
+            return await City.find({ where: { isDeleted: { "!=": true } }, sort: "name ASC" });
         },
         user: () => ({}), // Dummy resolver to nest the fields below
     },

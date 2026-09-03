@@ -1,15 +1,52 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const helper = require("../lib/graphqlHelper");
+const helper = __importStar(require("../lib/graphqlHelper"));
 const _ = require("lodash");
 const additionalResolvers_1 = require("./additionalResolvers");
-const langParser = require("accept-language-parser");
+const langParser = __importStar(require("accept-language-parser"));
 const apollo_server_express_1 = require("apollo-server-express");
 const fs = require("fs");
 const path = require("path");
 var i18nFactory = require('i18n-2');
 const apollo_server_1 = require("apollo-server");
-const eventHelper_1 = require("../lib/eventHelper");
+const eventHelper_1 = __importDefault(require("../lib/eventHelper"));
+const product_availability_1 = require("@webresto/core/lib/product-availability");
 const pubsub = new apollo_server_1.PubSub();
 sails.graphql = { pubsub };
 let server;
@@ -172,11 +209,34 @@ exports.default = {
         helper.addCustomField("Dish", "salePrice: Float");
         helper.addCustomField("Group", "discount: String");
         /**
+         * Stock of a product.
+         *
+         * It stopped being a column of `dish` and became a property of the pair
+         * "product + cooking point", so it is computed per request instead of read
+         * off the record. The field itself stays: storefronts read it to grey out a
+         * product, and `-1` still means unlimited while `0` still means stopped.
+         *
+         * The point comes from the menu adapter, the same one that decides which
+         * products are in the list at all. Reading it from `DEFAULT_COOKING_PLACE`
+         * here while the list was narrowed somewhere else is how a storefront ends
+         * up showing one kitchen's products with another kitchen's stock.
+         */
+        helper.addCustomField("Dish", "balance: Int");
+        helper.addResolvers({
+            Dish: {
+                balance: async (parent) => {
+                    const adapter = await Menu.getAdapter();
+                    const context = await adapter.resolveContext({});
+                    return (0, product_availability_1.getEffectiveBalanceAcross)(String(parent?.id), context.placeIds);
+                },
+            },
+        });
+        /**
          * Types of complex order fields
          */
         helper.addType(`#graphql
       type OrderDeliveryState {
-        "Time it will take for delivery"
+        "The delivery leg alone, in minutes. The totals below include cooking."
         deliveryTimeMinutes: Int
         "If disabled, then delivery is not allowed and will be processed"
         allowed: Boolean
@@ -186,6 +246,16 @@ exports.default = {
         item: String
         "Server message for current delivery"
         message: String
+        "The zone whose terms produced this result, when one matched"
+        zoneId: String
+        "Cooking time for this basket. Only products of type dish count."
+        preparationMinutes: Int
+        "The whole promise: cooking + the road + the safety margin. One number."
+        totalTimeMinutes: Int
+        "Straight-line kilometres from the kitchen, when both coordinates were known"
+        distanceKm: Float
+        "How the road was estimated: haversine, a provider name, or none"
+        travelTimeSource: String
       }`);
         helper.addToReplaceList("Order.delivery", "delivery: OrderDeliveryState");
         const { typeDefs, resolvers } = helper.getSchema();

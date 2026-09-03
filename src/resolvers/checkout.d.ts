@@ -17,6 +17,8 @@ interface InputOrderCheckout {
     locationId: string;
     customer: Customer;
     date?: string;
+    /** ASAP with a ceiling, in minutes. Mutually exclusive with `date`. */
+    maxWaitMinutes?: number;
     personsCount?: number;
     comment: string;
     spendBonus: SpendBonus;
@@ -43,23 +45,23 @@ declare const _default: {
         sendOrder: {
             def: string;
             fn: (parent: any, args: any, context: any) => Promise<{
-                order: import("@webresto/core").OrderRecord;
+                order: import("@webresto/core/models/Order").OrderRecord;
                 action: {
                     deviceId: any;
                     type: string;
                     data: {
-                        link: string;
+                        link: string | undefined;
                     };
                 };
                 message?: undefined;
             } | {
-                order: import("@webresto/core").OrderRecord;
+                action?: undefined;
+                order: import("@webresto/core/models/Order").OrderRecord;
                 message: {
                     type: string;
                     title: any;
                     message: any;
                 };
-                action?: undefined;
             }>;
         };
     };

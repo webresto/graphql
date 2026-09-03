@@ -1,10 +1,10 @@
 import Address from "@webresto/core/interfaces/Address";
-import { Delivery } from "@webresto/core/adapters/delivery/DeliveryAdapter";
+import { Delivery } from "@webresto/core/adapters/delivery/contracts";
 declare const _default: {
     Query: {
         streets: {
             def: string;
-            fn: () => Promise<import("@webresto/core").StreetRecord[]>;
+            fn: () => Promise<import("@webresto/core/models/Street").StreetRecord[]>;
         };
     };
     Mutation: {

@@ -1,7 +1,22 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.additionalResolver = void 0;
+const cooking_place_1 = require("@webresto/core/lib/cooking-place");
+const dish_place_balance_1 = require("@webresto/core/lib/dish-place-balance");
 const DataLoader = require('dataloader');
+/**
+ * Drops products stopped at the cooking point the menu is served for.
+ *
+ * Stock is no longer a column of the dish model, so `balance: { '!=': 0 }` can
+ * not be part of the criteria any more. Until the menu carries a real point
+ * (iteration 4) the configured default one is used.
+ */
+async function withoutStopped(rows) {
+    if (!Array.isArray(rows) || !rows.length)
+        return rows;
+    const balances = await (0, dish_place_balance_1.getEffectiveBalances)(rows.map((row) => String(row.id)), await (0, cooking_place_1.getDefaultCookingPlaceId)());
+    return rows.filter((row) => !(0, dish_place_balance_1.isStopped)((0, dish_place_balance_1.readEffectiveBalance)(balances, row.id)));
+}
 exports.additionalResolver = {
     GroupModifier: {
         modifierId: async (parent, args, context, info) => {
@@ -57,9 +72,9 @@ exports.additionalResolver = {
             let dl = dataloaders.get(info.fieldNodes);
             if (!dl) {
                 dl = new DataLoader(async (id) => {
-                    const rows = await Dish.find({
-                        rmsId: id, balance: { "!=": 0 }, isDeleted: false
-                    });
+                    const rows = await withoutStopped(await Dish.find({
+                        rmsId: id, isDeleted: false
+                    }));
                     const sortedInIdsOrder = id.map((id) => rows.find(x => {
                         return x.rmsId === id;
                     }));
@@ -78,11 +93,11 @@ exports.additionalResolver = {
             let dl = dataloaders.get(info.fieldNodes);
             if (!dl) {
                 dl = new DataLoader(async (id) => {
-                    const rows = await Dish.find({ where: { or: [
-                                { id: id, balance: { "!=": 0 }, isDeleted: false },
-                                { rmsId: id, balance: { "!=": 0 }, isDeleted: false }
+                    const rows = await withoutStopped(await Dish.find({ where: { or: [
+                                { id: id, isDeleted: false },
+                                { rmsId: id, isDeleted: false }
                             ] }
-                    });
+                    }));
                     const sortedInIdsOrder = id.map((id) => rows.find(x => {
                         return x.id === id ? x.id === id : x.rmsId === id ? x.rmsId === id : false;
                     }));
@@ -97,12 +112,12 @@ exports.additionalResolver = {
         dish: async (parent, args, context, info) => {
             if (!parent.id && !parent.modifierId)
                 return null;
-            return (await Dish.find({ where: { or: [
-                        { id: parent.id, balance: { "!=": 0 }, isDeleted: false },
-                        { rmsId: parent.id, balance: { "!=": 0 }, isDeleted: false }
+            return (await withoutStopped(await Dish.find({ where: { or: [
+                        { id: parent.id, isDeleted: false },
+                        { rmsId: parent.id, isDeleted: false }
                     ] }
                 // @ts-ignore //TODO: Deprecated populateAll 
-            }).populateAll())[0];
+            }).populateAll()))[0];
         },
         group: async (parent, args) => {
             if (!parent.id && !parent.groupId)

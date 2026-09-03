@@ -27,6 +27,8 @@ interface InputOrderCheckout {
   locationId: string
   customer: Customer 
   date?: string
+  /** ASAP with a ceiling, in minutes. Mutually exclusive with `date`. */
+  maxWaitMinutes?: number
   personsCount?: number
   comment: string
   spendBonus: SpendBonus
@@ -45,7 +47,9 @@ graphqlHelper.addType(`#graphql
     locationId: String
     address: Address
     date: String
-    comment: String 
+    """Longest the customer will wait, in minutes. Mutually exclusive with date."""
+    maxWaitMinutes: Int
+    comment: String
     personsCount: Int
     customData: Json
   }
@@ -170,7 +174,10 @@ export default {
               }
   
               address = {
-                city: address.city || (await Settings.use("city") as string),
+                // The customer's city verbatim. There is no installation-wide
+                // city to fall back on any more, and substituting one is what
+                // used to send an address to the wrong town.
+                city: address.city,
                 street: address.street,
                 ...address.streetId && {streetId: address.streetId},
                 home: address.home,
@@ -189,6 +196,11 @@ export default {
           if (data.comment) order.comment = data.comment;
 
           order.date = data.date;
+          // Written even when absent, so clearing it clears it. The two timing
+          // modes are mutually exclusive and `Order.checkDate` refuses an order
+          // carrying both — a stale value left behind here would be that refusal
+          // firing at a customer who had already switched modes.
+          order.maxWaitMinutes = typeof data.maxWaitMinutes === "number" ? data.maxWaitMinutes : null;
 
           // callback: boolean -call back to clarify details
           if (data.customData && data.customData.callback) {
@@ -286,7 +298,18 @@ export default {
           } else if (e.code === 16) {
             message.message = context.i18n.__("Date not allowed");
           } else if (e.code === 17) {
-            message.message = context.i18n.__("The date should account for the minimum delivery time; choose a slightly later time");              
+            message.message = context.i18n.__("The date should account for the minimum delivery time; choose a slightly later time");
+          } else if (e.code === 20) {
+            message.message = context.i18n.__("Choose either a delivery time or a maximum wait, not both");
+          } else if (e.code === 22) {
+            // Not the customer's problem and not something they can act on, so
+            // they are told the order cannot be taken rather than why. The code
+            // and the route are in the order's journal for the operator.
+            message.message = context.i18n.__("This order cannot be prepared as one order right now. Please contact us.");
+          } else if (e.code === 21) {
+            // The estimate itself is in `e.error`; it is the one number that makes
+            // this actionable, so it is shown rather than replaced by a generic line.
+            message.message = e.error ?? context.i18n.__("The order cannot be ready that quickly");
           } else {
             message.message = e.error
               ? e.error

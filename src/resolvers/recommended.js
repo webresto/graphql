@@ -1,6 +1,20 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const getRecommended_1 = require("../../lib/getRecommended");
+const cooking_place_1 = require("@webresto/core/lib/cooking-place");
+const dish_place_balance_1 = require("@webresto/core/lib/dish-place-balance");
+/**
+ * Drops products stopped at the cooking point the menu is served for.
+ *
+ * Stock left the dish model for the pair "product + cooking point", so it can
+ * no longer be asked for in the criteria above.
+ */
+async function withoutStopped(rows) {
+    if (!Array.isArray(rows) || !rows.length)
+        return rows;
+    const balances = await (0, dish_place_balance_1.getEffectiveBalances)(rows.map((row) => String(row.id)), await (0, cooking_place_1.getDefaultCookingPlaceId)());
+    return rows.filter((row) => !(0, dish_place_balance_1.isStopped)((0, dish_place_balance_1.readEffectiveBalance)(balances, row.id)));
+}
 exports.default = {
     Query: {
         recommendedForDish: {
@@ -23,7 +37,6 @@ exports.default = {
                         let criteria = {};
                         criteria['where'] = {
                             'and': [
-                                { 'balance': { "!=": 0 } },
                                 { 'modifier': false },
                                 { 'isDeleted': false }
                             ]
@@ -41,7 +54,7 @@ exports.default = {
                         criteria['where']['and'].push({ 'parentGroup': { 'in': listOfAllowedGroups } });
                         if (currentDish)
                             criteria['where']['and'].push({ 'parentGroup': { "!=": currentDish.parentGroup } });
-                        recommendedByDefault = (0, getRecommended_1.getRecommendElements)(await Dish.find(criteria), 8);
+                        recommendedByDefault = (0, getRecommended_1.getRecommendElements)(await withoutStopped(await Dish.find(criteria)), 8);
                     }
                     result = result.concat(recommendedByDefault);
                     result = [...new Set(result.map(dish => dish.id))].map(id => result.find(dish => dish.id === id));
@@ -80,7 +93,6 @@ exports.default = {
                         let criteria = {};
                         criteria['where'] = {
                             'and': [
-                                { 'balance': { "!=": 0 } },
                                 { 'modifier': false },
                                 { 'isDeleted': false }
                             ]
@@ -99,7 +111,7 @@ exports.default = {
                         if (orderDishIds.length) {
                             criteria["where"]["and"].push({ id: { "!=": orderDishIds } });
                         }
-                        recommendedByDefault = (0, getRecommended_1.getRecommendElements)(await Dish.find(criteria), 8);
+                        recommendedByDefault = (0, getRecommended_1.getRecommendElements)(await withoutStopped(await Dish.find(criteria)), 8);
                     }
                     result = result.concat(recommendedByDefault);
                     result = [...new Set(result.map(dish => dish.id))].map(id => result.find(dish => dish.id === id));

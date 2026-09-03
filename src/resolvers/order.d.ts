@@ -41,7 +41,7 @@ declare const _default: {
                 promotionCodeDescription?: string;
                 promotionCodeString?: string;
                 promotionFlatDiscount?: number;
-                promotionDelivery?: import("@webresto/core/adapters/delivery/DeliveryAdapter").Delivery;
+                promotionDelivery?: import("@webresto/core/adapters/delivery/contracts").Delivery;
                 promotionCodeCheckValidTill?: string;
                 promotionUnorderable?: boolean;
                 isPromoting?: boolean;
@@ -65,7 +65,7 @@ declare const _default: {
                 rmsOrderStatus?: string;
                 pickupPoint?: import("@webresto/core").PlaceRecord | string;
                 selfService?: boolean;
-                delivery?: import("@webresto/core/adapters/delivery/DeliveryAdapter").Delivery | null;
+                delivery?: import("@webresto/core/adapters/delivery/contracts").Delivery | null;
                 deliveryDescription?: string;
                 message?: string;
                 deliveryItem?: import("@webresto/core").DishRecord | string;
@@ -112,7 +112,7 @@ declare const _default: {
                 promotionCodeDescription?: string;
                 promotionCodeString?: string;
                 promotionFlatDiscount?: number;
-                promotionDelivery?: import("@webresto/core/adapters/delivery/DeliveryAdapter").Delivery;
+                promotionDelivery?: import("@webresto/core/adapters/delivery/contracts").Delivery;
                 promotionCodeCheckValidTill?: string;
                 promotionUnorderable?: boolean;
                 isPromoting?: boolean;
@@ -136,7 +136,7 @@ declare const _default: {
                 rmsOrderStatus?: string;
                 pickupPoint?: import("@webresto/core").PlaceRecord | string;
                 selfService?: boolean;
-                delivery?: import("@webresto/core/adapters/delivery/DeliveryAdapter").Delivery | null;
+                delivery?: import("@webresto/core/adapters/delivery/contracts").Delivery | null;
                 deliveryDescription?: string;
                 message?: string;
                 deliveryItem?: import("@webresto/core").DishRecord | string;
@@ -185,7 +185,7 @@ declare const _default: {
                 promotionCodeDescription?: string;
                 promotionCodeString?: string;
                 promotionFlatDiscount?: number;
-                promotionDelivery?: import("@webresto/core/adapters/delivery/DeliveryAdapter").Delivery;
+                promotionDelivery?: import("@webresto/core/adapters/delivery/contracts").Delivery;
                 promotionCodeCheckValidTill?: string;
                 promotionUnorderable?: boolean;
                 isPromoting?: boolean;
@@ -209,7 +209,7 @@ declare const _default: {
                 rmsOrderStatus?: string;
                 pickupPoint?: import("@webresto/core").PlaceRecord | string;
                 selfService?: boolean;
-                delivery?: import("@webresto/core/adapters/delivery/DeliveryAdapter").Delivery | null;
+                delivery?: import("@webresto/core/adapters/delivery/contracts").Delivery | null;
                 deliveryDescription?: string;
                 message?: string;
                 deliveryItem?: import("@webresto/core").DishRecord | string;
@@ -256,7 +256,7 @@ declare const _default: {
                 promotionCodeDescription?: string;
                 promotionCodeString?: string;
                 promotionFlatDiscount?: number;
-                promotionDelivery?: import("@webresto/core/adapters/delivery/DeliveryAdapter").Delivery;
+                promotionDelivery?: import("@webresto/core/adapters/delivery/contracts").Delivery;
                 promotionCodeCheckValidTill?: string;
                 promotionUnorderable?: boolean;
                 isPromoting?: boolean;
@@ -280,7 +280,7 @@ declare const _default: {
                 rmsOrderStatus?: string;
                 pickupPoint?: import("@webresto/core").PlaceRecord | string;
                 selfService?: boolean;
-                delivery?: import("@webresto/core/adapters/delivery/DeliveryAdapter").Delivery | null;
+                delivery?: import("@webresto/core/adapters/delivery/contracts").Delivery | null;
                 deliveryDescription?: string;
                 message?: string;
                 deliveryItem?: import("@webresto/core").DishRecord | string;
@@ -327,7 +327,7 @@ declare const _default: {
                 promotionCodeDescription?: string;
                 promotionCodeString?: string;
                 promotionFlatDiscount?: number;
-                promotionDelivery?: import("@webresto/core/adapters/delivery/DeliveryAdapter").Delivery;
+                promotionDelivery?: import("@webresto/core/adapters/delivery/contracts").Delivery;
                 promotionCodeCheckValidTill?: string;
                 promotionUnorderable?: boolean;
                 isPromoting?: boolean;
@@ -351,7 +351,7 @@ declare const _default: {
                 rmsOrderStatus?: string;
                 pickupPoint?: import("@webresto/core").PlaceRecord | string;
                 selfService?: boolean;
-                delivery?: import("@webresto/core/adapters/delivery/DeliveryAdapter").Delivery | null;
+                delivery?: import("@webresto/core/adapters/delivery/contracts").Delivery | null;
                 deliveryDescription?: string;
                 message?: string;
                 deliveryItem?: import("@webresto/core").DishRecord | string;
@@ -398,7 +398,7 @@ declare const _default: {
                 promotionCodeDescription?: string;
                 promotionCodeString?: string;
                 promotionFlatDiscount?: number;
-                promotionDelivery?: import("@webresto/core/adapters/delivery/DeliveryAdapter").Delivery;
+                promotionDelivery?: import("@webresto/core/adapters/delivery/contracts").Delivery;
                 promotionCodeCheckValidTill?: string;
                 promotionUnorderable?: boolean;
                 isPromoting?: boolean;
@@ -422,7 +422,7 @@ declare const _default: {
                 rmsOrderStatus?: string;
                 pickupPoint?: import("@webresto/core").PlaceRecord | string;
                 selfService?: boolean;
-                delivery?: import("@webresto/core/adapters/delivery/DeliveryAdapter").Delivery | null;
+                delivery?: import("@webresto/core/adapters/delivery/contracts").Delivery | null;
                 deliveryDescription?: string;
                 message?: string;
                 deliveryItem?: import("@webresto/core").DishRecord | string;
@@ -469,7 +469,7 @@ declare const _default: {
                 promotionCodeDescription?: string;
                 promotionCodeString?: string;
                 promotionFlatDiscount?: number;
-                promotionDelivery?: import("@webresto/core/adapters/delivery/DeliveryAdapter").Delivery;
+                promotionDelivery?: import("@webresto/core/adapters/delivery/contracts").Delivery;
                 promotionCodeCheckValidTill?: string;
                 promotionUnorderable?: boolean;
                 isPromoting?: boolean;
@@ -493,7 +493,7 @@ declare const _default: {
                 rmsOrderStatus?: string;
                 pickupPoint?: import("@webresto/core").PlaceRecord | string;
                 selfService?: boolean;
-                delivery?: import("@webresto/core/adapters/delivery/DeliveryAdapter").Delivery | null;
+                delivery?: import("@webresto/core/adapters/delivery/contracts").Delivery | null;
                 deliveryDescription?: string;
                 message?: string;
                 deliveryItem?: import("@webresto/core").DishRecord | string;
@@ -540,7 +540,7 @@ declare const _default: {
                 promotionCodeDescription?: string;
                 promotionCodeString?: string;
                 promotionFlatDiscount?: number;
-                promotionDelivery?: import("@webresto/core/adapters/delivery/DeliveryAdapter").Delivery;
+                promotionDelivery?: import("@webresto/core/adapters/delivery/contracts").Delivery;
                 promotionCodeCheckValidTill?: string;
                 promotionUnorderable?: boolean;
                 isPromoting?: boolean;
@@ -564,7 +564,7 @@ declare const _default: {
                 rmsOrderStatus?: string;
                 pickupPoint?: import("@webresto/core").PlaceRecord | string;
                 selfService?: boolean;
-                delivery?: import("@webresto/core/adapters/delivery/DeliveryAdapter").Delivery | null;
+                delivery?: import("@webresto/core/adapters/delivery/contracts").Delivery | null;
                 deliveryDescription?: string;
                 message?: string;
                 deliveryItem?: import("@webresto/core").DishRecord | string;
@@ -611,7 +611,7 @@ declare const _default: {
                 promotionCodeDescription?: string;
                 promotionCodeString?: string;
                 promotionFlatDiscount?: number;
-                promotionDelivery?: import("@webresto/core/adapters/delivery/DeliveryAdapter").Delivery;
+                promotionDelivery?: import("@webresto/core/adapters/delivery/contracts").Delivery;
                 promotionCodeCheckValidTill?: string;
                 promotionUnorderable?: boolean;
                 isPromoting?: boolean;
@@ -635,7 +635,7 @@ declare const _default: {
                 rmsOrderStatus?: string;
                 pickupPoint?: import("@webresto/core").PlaceRecord | string;
                 selfService?: boolean;
-                delivery?: import("@webresto/core/adapters/delivery/DeliveryAdapter").Delivery | null;
+                delivery?: import("@webresto/core/adapters/delivery/contracts").Delivery | null;
                 deliveryDescription?: string;
                 message?: string;
                 deliveryItem?: import("@webresto/core").DishRecord | string;

@@ -23,8 +23,7 @@ declare const _default: {
         captchaType: () => Promise<string>;
         deliveryDescription: () => Promise<string | boolean | string[]>;
         fieldsForOrderInitialization: () => Promise<string | boolean | string[]>;
-        city: () => Promise<import("@webresto/core").CityRecord>;
-        multipleCities: () => Promise<boolean>;
+        cities: () => Promise<import("@webresto/core").CityRecord[]>;
         user: () => {};
     };
     UserRestrictions: {

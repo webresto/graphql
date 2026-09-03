@@ -1,4 +1,22 @@
 import { getRecommendElements } from "../../lib/getRecommended";
+import { getDefaultCookingPlaceId } from "@webresto/core/lib/cooking-place";
+import { getEffectiveBalances, isStopped, readEffectiveBalance } from "@webresto/core/lib/dish-place-balance";
+
+/**
+ * Drops products stopped at the cooking point the menu is served for.
+ *
+ * Stock left the dish model for the pair "product + cooking point", so it can
+ * no longer be asked for in the criteria above.
+ */
+async function withoutStopped(rows: any[]): Promise<any[]> {
+  if (!Array.isArray(rows) || !rows.length) return rows;
+
+  const balances = await getEffectiveBalances(
+    rows.map((row) => String(row.id)),
+    await getDefaultCookingPlaceId(),
+  );
+  return rows.filter((row) => !isStopped(readEffectiveBalance(balances, row.id)));
+}
 
 export default {
     Query: {
@@ -29,7 +47,6 @@ export default {
                   let criteria = {}
                   criteria['where'] = {
                     'and': [
-                      { 'balance': { "!=": 0 } },
                       { 'modifier': false },
                       { 'isDeleted': false }
                     ]
@@ -47,7 +64,7 @@ export default {
                   
                   criteria['where']['and'].push({ 'parentGroup': { 'in': listOfAllowedGroups } })
                   if (currentDish) criteria['where']['and'].push({'parentGroup': { "!=": currentDish.parentGroup}})
-                  recommendedByDefault = getRecommendElements(await Dish.find(criteria), 8);                
+                  recommendedByDefault = getRecommendElements(await withoutStopped(await Dish.find(criteria)), 8);                
                 }
                 
 
@@ -96,7 +113,6 @@ export default {
                 let criteria = {}
                 criteria['where'] = {
                   'and': [
-                    { 'balance': { "!=": 0 } },
                     { 'modifier': false },
                     { 'isDeleted': false }
                   ]
@@ -116,7 +132,7 @@ export default {
                 if (orderDishIds.length) {
                   criteria["where"]["and"].push({id : {"!=": orderDishIds}})
                 }
-                recommendedByDefault = getRecommendElements(await Dish.find(criteria), 8);                
+                recommendedByDefault = getRecommendElements(await withoutStopped(await Dish.find(criteria)), 8);                
               }
               result = result.concat(recommendedByDefault)
                 

@@ -1,7 +1,10 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const index_1 = require("@webresto/core/adapters/index");
-const graphqlHelper_1 = require("../../lib/graphqlHelper");
+const graphqlHelper_1 = __importDefault(require("../../lib/graphqlHelper"));
 graphqlHelper_1.default.addType(`#graphql
   input AddressInput {
     buildingName: String
@@ -25,6 +28,7 @@ graphqlHelper_1.default.addType(`#graphql
   }
 
   type Delivery {
+    """The delivery leg alone, in minutes. Unchanged; the totals below include cooking."""
     deliveryTimeMinutes: Int
     allowed: Boolean!
     cost: Float
@@ -32,6 +36,16 @@ graphqlHelper_1.default.addType(`#graphql
     message: String!
     deliveryLocationUnrecognized: Boolean
     hasError: Boolean
+    """The zone whose terms produced this result, when one matched."""
+    zoneId: String
+    """Cooking time for this basket. Only products of type dish count."""
+    preparationMinutes: Int
+    """The whole promise: cooking + the road + the safety margin. One number."""
+    totalTimeMinutes: Int
+    """Straight-line kilometres from the kitchen, when both coordinates were known."""
+    distanceKm: Float
+    """How the road was estimated: haversine, a provider's name, or none."""
+    travelTimeSource: String
   }
 `);
 exports.default = {
