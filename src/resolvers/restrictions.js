@@ -37,7 +37,7 @@ graphqlHelper_1.default.addType(`#graphql
 
       "Time possible for order from now"
       possibleToOrderInMinutes: Int
-      timezone: String 
+      timezone: String
       "Server timezone utc offset in seconds"
       utcOffsetInSeconds: Int
 
@@ -52,7 +52,7 @@ graphqlHelper_1.default.addType(`#graphql
 
       "The backend checks the phone strictly based on the mask"
       strictPhoneInput: Boolean
-      
+
       "Allows you to make shipping calculations optional. Shipping calculations will occur. But it won't throw an error"
       softDeliveryCalculation: Boolean
 
@@ -64,7 +64,7 @@ graphqlHelper_1.default.addType(`#graphql
       "The minimum time for which delivery of the order is possible"
       minDeliveryTimeInMinutes: Int
 
-      "Fields needed to create new order"  
+      "Fields needed to create new order"
       fieldsForOrderInitialization: [String]
 
       "Cities this installation delivers in. The customer picks one; it travels with the address and is what qualifies it for the geocoder."
@@ -94,7 +94,7 @@ exports.default = {
         /**
          * GQL compatibility version
          */
-        gqlSchemaMinVersion: () => 5000,
+        gqlSchemaMinVersion: () => 6000,
         possibleToOrderInMinutes: async () => isNaN(await Settings.get('POSSIBLE_TO_ORDER_IN_MINUTES')) ? 7 * 24 * 60 : await Settings.get('POSSIBLE_TO_ORDER_IN_MINUTES'),
         minDeliveryTimeInMinutes: async () => isNaN(await Settings.get('MIN_DELIVERY_TIME_IN_MINUTES')) ? 40 : await Settings.get('MIN_DELIVERY_TIME_IN_MINUTES'),
         timezone: async () => {
