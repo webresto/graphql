@@ -42,6 +42,8 @@ graphqlHelper.addType(`#graphql
     totalTimeMinutes: Int
     """Straight-line kilometres from the kitchen, when both coordinates were known."""
     distanceKm: Float
+    """How the result was reached: which zone or point matched and why. For operators, not for customers."""
+    diagnostics: [String]
     """How the road was estimated: haversine, a provider's name, or none."""
     travelTimeSource: String
   }
