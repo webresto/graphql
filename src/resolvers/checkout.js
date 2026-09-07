@@ -210,7 +210,7 @@ exports.default = {
                         userId = (await jwt_1.JWTAuth.verify(context.connectionParams.authorization)).userId;
                     }
                     await Order.check({ id: order.id }, data.customer, isSelfService, data.address, data.paymentMethodId, userId, data.spendBonus !== undefined && userId !== null ? data.spendBonus : null, data.platform);
-                    order = await Order.findOne({ id: data.orderId });
+                    order = await Order.populate(data.orderId);
                     if (!order) {
                         throw new Error(`Order with id: \`${data.orderId}\` not found`);
                     }
@@ -311,7 +311,7 @@ exports.default = {
                             ? e.error
                             : context.i18n.__(`Problem when checking the order: %s`, e);
                     }
-                    order = await Order.findOne(data.orderId);
+                    order = await Order.populate(data.orderId);
                     sails.log.error(`GQL > [checkOrder]`, e, args);
                     eventHelper.sendMessage(message);
                     return {

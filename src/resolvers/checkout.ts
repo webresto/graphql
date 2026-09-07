@@ -226,7 +226,7 @@ export default {
             data.platform
           );
 
-          order = await Order.findOne({id: data.orderId});
+          order = await Order.populate(data.orderId);
           
           if(!order) {
             throw new Error(`Order with id: \`${data.orderId}\` not found`)
@@ -316,7 +316,7 @@ export default {
               : context.i18n.__(`Problem when checking the order: %s`, e);
           }
 
-          order = await Order.findOne(data.orderId);
+          order = await Order.populate(data.orderId);
           sails.log.error(`GQL > [checkOrder]`, e, args)
           eventHelper.sendMessage(message);
           return { 
