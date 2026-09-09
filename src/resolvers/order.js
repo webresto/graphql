@@ -51,7 +51,8 @@ graphqlHelper_2.default.addType(`#graphql
     trifleFrom: Int
     comment: String
     date: String
-    selfService: Boolean
+    """How the customer gets the food: delivery, pickup or dine-in."""
+    serviceType: String
     paymentMethodId: String
     promotionCodeString: String
     address: AddressInput
@@ -353,8 +354,8 @@ exports.default = {
                         orderUpd['date'] = order.date;
                         orderToCartState = true;
                     }
-                    if (order.selfService !== undefined) {
-                        orderUpd['selfService'] = order.selfService;
+                    if (order.serviceType !== undefined) {
+                        orderUpd['serviceType'] = order.serviceType;
                         orderToCartState = true;
                     }
                     if (order.paymentMethodId) {

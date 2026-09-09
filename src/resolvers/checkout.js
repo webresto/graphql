@@ -48,8 +48,9 @@ graphqlHelper_1.default.addType(`#graphql
     platform: String
     customer: Customer! 
     spendBonus: InputSpendBonus 
-    selfService: Boolean
-    pickupPointId: String 
+    """How the customer gets the food: delivery, pickup or dine-in. Defaults to delivery."""
+    serviceType: String
+    pickupPointId: String
     locationId: String
     address: Address
     date: String
@@ -119,7 +120,7 @@ exports.default = {
                 //     data.date = date.format('YYYY-MM-DD HH:mm:ss');
                 //     }
                 // }
-                let isSelfService;
+                const serviceType = data.serviceType ?? "delivery";
                 let address = null;
                 let message;
                 try {
@@ -133,15 +134,13 @@ exports.default = {
                             message: context.i18n.__("Order with id %s not found", data.orderId),
                         });
                     }
-                    //@ts-ignore
-                    if (data.selfService) {
-                        isSelfService = true;
+                    if (serviceType !== "delivery") {
                         order.pickupPoint = data.pickupPointId;
                     }
                     else {
                         order.pickupPoint = null;
                         if (!data.address && !data.locationId)
-                            throw `Address is required for non self service orders`;
+                            throw `Address is required for delivery orders`;
                     }
                     if (Order.isOrderedState(order.state)) {
                         message = eventHelper.sendMessage({
@@ -161,7 +160,7 @@ exports.default = {
                             });
                         }
                     }
-                    if (!data.selfService) {
+                    if (serviceType === "delivery") {
                         if (data.locationId) {
                             address = await UserLocation.findOne({ id: data.locationId });
                             if (!address)
@@ -209,7 +208,7 @@ exports.default = {
                     if (context && context.connectionParams.authorization) {
                         userId = (await jwt_1.JWTAuth.verify(context.connectionParams.authorization)).userId;
                     }
-                    await Order.check({ id: order.id }, data.customer, isSelfService, data.address, data.paymentMethodId, userId, data.spendBonus !== undefined && userId !== null ? data.spendBonus : null, data.platform);
+                    await Order.check({ id: order.id }, data.customer, serviceType, data.address, data.paymentMethodId, userId, data.spendBonus !== undefined && userId !== null ? data.spendBonus : null, data.platform);
                     order = await Order.populate(data.orderId);
                     if (!order) {
                         throw new Error(`Order with id: \`${data.orderId}\` not found`);
@@ -305,6 +304,14 @@ exports.default = {
                         // The estimate itself is in `e.error`; it is the one number that makes
                         // this actionable, so it is shown rather than replaced by a generic line.
                         message.message = e.error ?? context.i18n.__("The order cannot be ready that quickly");
+                    }
+                    else if (e.code === 23) {
+                        message.message = context.i18n.__("The chosen location is closed right now");
+                    }
+                    else if (e.code === 24) {
+                        // Which point and which service type are in `e.error` and the order's
+                        // journal; the customer only needs to know to choose another one.
+                        message.message = context.i18n.__("The chosen location does not take these orders");
                     }
                     else {
                         message.message = e.error

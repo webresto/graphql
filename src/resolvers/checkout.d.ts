@@ -11,7 +11,7 @@ interface InputOrderCheckout {
     orderId: string;
     paymentMethodId: string;
     platform?: string;
-    selfService?: boolean;
+    serviceType?: "delivery" | "pickup" | "dine-in";
     pickupPointId?: string;
     address?: Address;
     locationId: string;
@@ -32,7 +32,7 @@ declare const _default: {
             def: string;
             fn: (_: any, { orderId }: {
                 orderId: any;
-            }, ctx: any) => Promise<import("@webresto/core/libs/helpers/OrderHelper").InitCheckout>;
+            }, ctx: any) => Promise<import("@webresto/core").InitCheckout>;
         };
     };
     Mutation: {
@@ -45,7 +45,7 @@ declare const _default: {
         sendOrder: {
             def: string;
             fn: (parent: any, args: any, context: any) => Promise<{
-                order: import("@webresto/core/models/Order").OrderRecord;
+                order: import("@webresto/core").OrderRecord;
                 action: {
                     deviceId: any;
                     type: string;
@@ -56,7 +56,7 @@ declare const _default: {
                 message?: undefined;
             } | {
                 action?: undefined;
-                order: import("@webresto/core/models/Order").OrderRecord;
+                order: import("@webresto/core").OrderRecord;
                 message: {
                     type: string;
                     title: any;

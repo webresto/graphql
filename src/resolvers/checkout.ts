@@ -21,8 +21,8 @@ interface InputOrderCheckout {
   orderId: string 
   paymentMethodId: string 
   platform?: string
-  selfService?: boolean
-  pickupPointId?: string 
+  serviceType?: "delivery" | "pickup" | "dine-in"
+  pickupPointId?: string
   address?: Address
   locationId: string
   customer: Customer 
@@ -42,8 +42,9 @@ graphqlHelper.addType(`#graphql
     platform: String
     customer: Customer! 
     spendBonus: InputSpendBonus 
-    selfService: Boolean
-    pickupPointId: String 
+    """How the customer gets the food: delivery, pickup or dine-in. Defaults to delivery."""
+    serviceType: String
+    pickupPointId: String
     locationId: String
     address: Address
     date: String
@@ -119,7 +120,7 @@ export default {
         //     }
         // }
 
-        let isSelfService: boolean;
+        const serviceType = data.serviceType ?? "delivery";
         let address: Address = null
 
         let message;
@@ -135,13 +136,11 @@ export default {
             });
           }
 
-          //@ts-ignore
-          if (data.selfService) {
-            isSelfService = true;
+          if (serviceType !== "delivery") {
             order.pickupPoint = data.pickupPointId;
           } else {
             order.pickupPoint = null;
-            if(!data.address && !data.locationId) throw `Address is required for non self service orders`
+            if(!data.address && !data.locationId) throw `Address is required for delivery orders`
           }
 
           if (Order.isOrderedState(order.state)) {
@@ -164,7 +163,7 @@ export default {
             }
           }
 
-          if (!data.selfService) {
+          if (serviceType === "delivery") {
             if (data.locationId) {
               address = await UserLocation.findOne({id: data.locationId}) as Address;
               if (!address) throw `locationId not found`
@@ -218,7 +217,7 @@ export default {
           await Order.check(
             {id: order.id},
             data.customer,
-            isSelfService,
+            serviceType,
             data.address,
             data.paymentMethodId,
             userId,
@@ -310,6 +309,12 @@ export default {
             // The estimate itself is in `e.error`; it is the one number that makes
             // this actionable, so it is shown rather than replaced by a generic line.
             message.message = e.error ?? context.i18n.__("The order cannot be ready that quickly");
+          } else if (e.code === 23) {
+            message.message = context.i18n.__("The chosen location is closed right now");
+          } else if (e.code === 24) {
+            // Which point and which service type are in `e.error` and the order's
+            // journal; the customer only needs to know to choose another one.
+            message.message = context.i18n.__("The chosen location does not take these orders");
           } else {
             message.message = e.error
               ? e.error

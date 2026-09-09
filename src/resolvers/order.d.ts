@@ -64,7 +64,7 @@ declare const _default: {
                 rmsStatusCode?: string;
                 rmsOrderStatus?: string;
                 pickupPoint?: import("@webresto/core").PlaceRecord | string;
-                selfService?: boolean;
+                serviceType?: string;
                 delivery?: import("@webresto/core/adapters/delivery/contracts").Delivery | null;
                 deliveryDescription?: string;
                 message?: string;
@@ -135,7 +135,7 @@ declare const _default: {
                 rmsStatusCode?: string;
                 rmsOrderStatus?: string;
                 pickupPoint?: import("@webresto/core").PlaceRecord | string;
-                selfService?: boolean;
+                serviceType?: string;
                 delivery?: import("@webresto/core/adapters/delivery/contracts").Delivery | null;
                 deliveryDescription?: string;
                 message?: string;
@@ -208,7 +208,7 @@ declare const _default: {
                 rmsStatusCode?: string;
                 rmsOrderStatus?: string;
                 pickupPoint?: import("@webresto/core").PlaceRecord | string;
-                selfService?: boolean;
+                serviceType?: string;
                 delivery?: import("@webresto/core/adapters/delivery/contracts").Delivery | null;
                 deliveryDescription?: string;
                 message?: string;
@@ -279,7 +279,7 @@ declare const _default: {
                 rmsStatusCode?: string;
                 rmsOrderStatus?: string;
                 pickupPoint?: import("@webresto/core").PlaceRecord | string;
-                selfService?: boolean;
+                serviceType?: string;
                 delivery?: import("@webresto/core/adapters/delivery/contracts").Delivery | null;
                 deliveryDescription?: string;
                 message?: string;
@@ -350,7 +350,7 @@ declare const _default: {
                 rmsStatusCode?: string;
                 rmsOrderStatus?: string;
                 pickupPoint?: import("@webresto/core").PlaceRecord | string;
-                selfService?: boolean;
+                serviceType?: string;
                 delivery?: import("@webresto/core/adapters/delivery/contracts").Delivery | null;
                 deliveryDescription?: string;
                 message?: string;
@@ -421,7 +421,7 @@ declare const _default: {
                 rmsStatusCode?: string;
                 rmsOrderStatus?: string;
                 pickupPoint?: import("@webresto/core").PlaceRecord | string;
-                selfService?: boolean;
+                serviceType?: string;
                 delivery?: import("@webresto/core/adapters/delivery/contracts").Delivery | null;
                 deliveryDescription?: string;
                 message?: string;
@@ -492,7 +492,7 @@ declare const _default: {
                 rmsStatusCode?: string;
                 rmsOrderStatus?: string;
                 pickupPoint?: import("@webresto/core").PlaceRecord | string;
-                selfService?: boolean;
+                serviceType?: string;
                 delivery?: import("@webresto/core/adapters/delivery/contracts").Delivery | null;
                 deliveryDescription?: string;
                 message?: string;
@@ -563,7 +563,7 @@ declare const _default: {
                 rmsStatusCode?: string;
                 rmsOrderStatus?: string;
                 pickupPoint?: import("@webresto/core").PlaceRecord | string;
-                selfService?: boolean;
+                serviceType?: string;
                 delivery?: import("@webresto/core/adapters/delivery/contracts").Delivery | null;
                 deliveryDescription?: string;
                 message?: string;
@@ -634,7 +634,7 @@ declare const _default: {
                 rmsStatusCode?: string;
                 rmsOrderStatus?: string;
                 pickupPoint?: import("@webresto/core").PlaceRecord | string;
-                selfService?: boolean;
+                serviceType?: string;
                 delivery?: import("@webresto/core/adapters/delivery/contracts").Delivery | null;
                 deliveryDescription?: string;
                 message?: string;
