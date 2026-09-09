@@ -12,7 +12,7 @@
     "Enter the customer's phone": "กรอกเบอร์โทรศัพท์ของลูกค้า",
     "The wrong format of the name of the customer": "รูปแบบชื่อของลูกค้าไม่ถูกต้อง",
     "The wrong format of the customer phone number": "รูปแบบเบอร์โทรศัพท์ของลูกค้าไม่ถูกต้อง",
-    "No point of Street": "ไม่มีการระบุชื่อถนน",
+    "No address given": "ไม่ได้ระบุที่อยู่",
     "Not indicated the house number": "ไม่ได้ระบุเลขที่บ้าน",
     "The city is not indicated": "ไม่ได้ระบุชื่อเมือง",
     "The payment system is not available": "ระบบชำระเงินไม่พร้อมใช้งาน",

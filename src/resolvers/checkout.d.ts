@@ -4,7 +4,7 @@ type CheckResponse = {
     message: Message;
     action?: Action;
 };
-import Address from "@webresto/core/interfaces/Address";
+import OrderAddress from "@webresto/core/interfaces/Address";
 import Customer from "@webresto/core/interfaces/Customer";
 import { SpendBonus } from "@webresto/core/interfaces/SpendBonus";
 interface InputOrderCheckout {
@@ -13,7 +13,7 @@ interface InputOrderCheckout {
     platform?: string;
     serviceType?: "delivery" | "pickup" | "dine-in";
     pickupPointId?: string;
-    address?: Address;
+    address?: OrderAddress;
     locationId: string;
     customer: Customer;
     date?: string;

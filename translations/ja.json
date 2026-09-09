@@ -12,7 +12,7 @@
     "Enter the customer's phone": "顧客の電話番号を入力してください",
     "The wrong format of the name of the customer": "顧客名の形式が間違っています",
     "The wrong format of the customer phone number": "顧客の電話番号の形式が間違っています",
-    "No point of Street": "住所（通り）が指定されていません",
+    "No address given": "住所が指定されていません",
     "Not indicated the house number": "建物番号が指定されていません",
     "The city is not indicated": "都市が指定されていません",
     "The payment system is not available": "決済システムが利用できません",

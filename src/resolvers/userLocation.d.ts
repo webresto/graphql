@@ -1,6 +1,5 @@
 interface InputLocation {
-    street: string;
-    streetId: string;
+    node: string;
     home: string;
     name?: string;
     city?: string;

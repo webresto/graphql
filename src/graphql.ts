@@ -69,19 +69,6 @@ export default {
       number: String!
       additionalNumber: String
     }
-    input Address {
-      streetId: String
-      home: String
-      comment: String
-      city: String
-      street: String
-      housing: String
-      index: String
-      entrance: String
-      floor: String
-      apartment: String
-      doorphone: String
-    }
     type Message {
       id: String
       title: String

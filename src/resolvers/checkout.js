@@ -52,7 +52,7 @@ graphqlHelper_1.default.addType(`#graphql
     serviceType: String
     pickupPointId: String
     locationId: String
-    address: Address
+    address: AddressInput
     date: String
     """Longest the customer will wait, in minutes. Mutually exclusive with date."""
     maxWaitMinutes: Int
@@ -175,15 +175,15 @@ exports.default = {
                                 // city to fall back on any more, and substituting one is what
                                 // used to send an address to the wrong town.
                                 city: address.city,
-                                street: address.street,
-                                ...address.streetId && { streetId: address.streetId },
-                                home: address.home,
+                                node: address.node ?? null,
+                                formatted: address.formatted,
+                                ...address.home && { home: address.home },
+                                ...address.coordinate && { coordinate: address.coordinate },
                                 ...address.housing && { housing: address.housing },
                                 ...address.apartment && { apartment: address.apartment },
-                                ...address.index && { index: address.index },
                                 ...address.entrance && { entrance: address.entrance },
                                 ...address.floor && { floor: address.floor },
-                                ...address.apartment && { apartment: address.apartment },
+                                ...address.doorphone && { doorphone: address.doorphone },
                                 ...address.comment && { comment: address.comment },
                             };
                         }
@@ -265,7 +265,7 @@ exports.default = {
                         message.message = context.i18n.__("The wrong format of the customer phone number");
                     }
                     else if (e.code === 5) {
-                        message.message = context.i18n.__("No point of Street");
+                        message.message = context.i18n.__("No address given");
                     }
                     else if (e.code === 6) {
                         message.message = context.i18n.__("Not indicated the house number");

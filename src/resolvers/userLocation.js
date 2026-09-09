@@ -1,16 +1,19 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 // const userAuth = sails.config.restographql.authService;
 const jwt_1 = require("../../lib/jwt");
 // todo: fix types model instance to {%ModelName%}Record for User";
 const adapters_1 = require("@webresto/core/adapters");
 let captchaAdapter = adapters_1.Captcha.getAdapter();
-const graphqlHelper_1 = require("../../lib/graphqlHelper");
+const graphqlHelper_1 = __importDefault(require("../../lib/graphqlHelper"));
 graphqlHelper_1.default.addType(`#graphql    
   input InputLocation {
-    street: String
-    streetId: String
-    home: String!
+    """Catalog node this saved address points at."""
+    node: String!
+    home: String
     name: String
     city: String
     housing: String
@@ -35,13 +38,7 @@ exports.default = {
             fn: async (parent, payload, context) => {
                 try {
                     const auth = await jwt_1.JWTAuth.verify(context.connectionParams.authorization);
-                    if (!payload.location.streetId && !payload.location.street)
-                        throw 'streetId or street are required';
-                    const userLocation = {
-                        ...payload.location,
-                        ...{ street: payload.location.streetId }
-                    };
-                    await UserLocation.create({ ...userLocation, user: auth.userId }).fetch();
+                    await UserLocation.create({ ...payload.location, user: auth.userId }).fetch();
                     return true;
                 }
                 catch (error) {

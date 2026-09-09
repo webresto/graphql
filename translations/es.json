@@ -12,7 +12,7 @@
   "Enter the customer's phone": "Ingrese el teléfono del cliente",
   "The wrong format of the name of the customer": "Formato incorrecto del nombre del cliente",
   "The wrong format of the customer phone number": "Formato incorrecto del número de teléfono del cliente",
-  "No point of Street": "Calle no especificada",
+  "No address given": "No se ha indicado la dirección",
   "Not indicated the house number": "Número de casa no especificado",
   "The city is not indicated": "La ciudad no está especificada",
   "The payment system is not available": "El sistema de pago no está disponible",

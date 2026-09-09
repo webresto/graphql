@@ -12,7 +12,7 @@
     "Enter the customer's phone": "고객 전화번호를 입력하세요",
     "The wrong format of the name of the customer": "고객 이름의 형식이 잘못되었습니다",
     "The wrong format of the customer phone number": "고객 전화번호 형식이 잘못되었습니다",
-    "No point of Street": "도로가 입력되지 않았습니다",
+    "No address given": "주소가 입력되지 않았습니다",
     "Not indicated the house number": "집 번호가 입력되지 않았습니다",
     "The city is not indicated": "도시가 입력되지 않았습니다",
     "The payment system is not available": "결제 시스템을 사용할 수 없습니다",

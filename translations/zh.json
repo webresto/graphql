@@ -12,7 +12,7 @@
     "Enter the customer's phone": "请输入客户电话",
     "The wrong format of the name of the customer": "客户姓名格式错误",
     "The wrong format of the customer phone number": "客户电话号码格式错误",
-    "No point of Street": "未指定街道",
+    "No address given": "未填写地址",
     "Not indicated the house number": "未指定门牌号",
     "The city is not indicated": "未指定城市",
     "The payment system is not available": "支付系统不可用",

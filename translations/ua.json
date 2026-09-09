@@ -12,7 +12,7 @@
 	"Enter the customer's phone": "Введіть номер телефону клієнта",
 	"The wrong format of the name of the customer": "Неправильний формат імені клієнта",
 	"The wrong format of the customer phone number": "Неправильний формат номера телефону клієнта",
-	"No point of Street": "Не вказано вулицю",
+	"No address given": "Адресу не вказано",
 	"Not indicated the house number": "Не вказано номер будинку",
 	"The city is not indicated": "Не вказано місто",
 	"The payment system is not available": "Платіжна система недоступна",

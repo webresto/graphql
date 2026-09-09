@@ -6,25 +6,36 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const index_1 = require("@webresto/core/adapters/index");
 const graphqlHelper_1 = __importDefault(require("../../lib/graphqlHelper"));
 graphqlHelper_1.default.addType(`#graphql
+  """The address of an order: a node of the city catalog plus what no catalog knows."""
   input AddressInput {
-    buildingName: String
-    coordinate: CoordinateInput
-    streetId: String
-    home: String!
-    comment: String
+    """Deepest catalog node the customer chose. Null when they typed the line themselves."""
+    node: String
+    """The whole address line. Rebuilt from the node path on save when there is a node."""
+    formatted: String
     city: String
-    street: String!
+    home: String
     housing: String
-    index: String
+    apartment: String
     entrance: String
     floor: String
-    apartment: String
     doorphone: String
+    comment: String
+    """Set only when the client already knows it. A chosen node carries its own point."""
+    coordinate: CoordinateInput
   }
 
   input CoordinateInput {
-    lon: String!
-    lat: String!
+    lat: Float!
+    lng: Float!
+  }
+
+  """One node of a city address catalog. The parent field is the id of the node above, null at the root."""
+  type AddressNode {
+    id: String
+    type: String
+    name: String
+    parent: String
+    point: Json
   }
 
   type Delivery {
@@ -50,16 +61,43 @@ graphqlHelper_1.default.addType(`#graphql
     travelTimeSource: String
   }
 `);
+/** A catalog row as the storefront reads it: the parent is an id, never an object. */
+function asNode(node) {
+    return {
+        id: node.id,
+        type: node.type,
+        name: node.name,
+        parent: typeof node.parent === "string" ? node.parent : node.parent?.id ?? null,
+        point: node.point,
+    };
+}
 exports.default = {
     Query: {
-        streets: {
-            def: "streets: [Street]",
-            fn: async () => {
+        // What to offer for what the customer has typed. Without `parent` the
+        // search starts at the city and only sees types that stand on their own;
+        // with one it sees that node's children.
+        addressSearch: {
+            def: "addressSearch(city: String!, parent: String, query: String!): [AddressNode]",
+            fn: async (_parent, args) => {
                 try {
-                    return await Street.find({ isDeleted: false });
+                    return (await Address.search(args)).map(asNode);
                 }
                 catch (error) {
-                    sails.log.error(`GQL > [streets]`, error, {});
+                    sails.log.error(`GQL > [addressSearch]`, error, args);
+                    throw error;
+                }
+            },
+        },
+        // The nodes from the city down to this one, in that order: the chips the
+        // storefront shows in front of the input.
+        addressPath: {
+            def: "addressPath(id: String!): [AddressNode]",
+            fn: async (_parent, args) => {
+                try {
+                    return (await Address.path(args.id)).map(asNode);
+                }
+                catch (error) {
+                    sails.log.error(`GQL > [addressPath]`, error, args);
                     throw error;
                 }
             },

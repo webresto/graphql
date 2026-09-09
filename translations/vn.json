@@ -12,7 +12,7 @@
     "Enter the customer's phone": "Nhập số điện thoại khách hàng",
     "The wrong format of the name of the customer": "Định dạng tên khách hàng sai",
     "The wrong format of the customer phone number": "Định dạng số điện thoại khách hàng sai",
-    "No point of Street": "Chưa chỉ rõ tên đường",
+    "No address given": "Chưa nhập địa chỉ",
     "Not indicated the house number": "Chưa chỉ rõ số nhà",
     "The city is not indicated": "Chưa chỉ rõ thành phố",
     "The payment system is not available": "Hệ thống thanh toán không khả dụng",

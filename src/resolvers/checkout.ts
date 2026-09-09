@@ -11,7 +11,7 @@ type CheckResponse = {
 }
 
 import graphqlHelper from "../../lib/graphqlHelper";
-import Address from "@webresto/core/interfaces/Address";
+import OrderAddress from "@webresto/core/interfaces/Address";
 import Customer from "@webresto/core/interfaces/Customer";
 import { SpendBonus } from "@webresto/core/interfaces/SpendBonus";
 import { JWTAuth } from "../../lib/jwt";
@@ -23,7 +23,7 @@ interface InputOrderCheckout {
   platform?: string
   serviceType?: "delivery" | "pickup" | "dine-in"
   pickupPointId?: string
-  address?: Address
+  address?: OrderAddress
   locationId: string
   customer: Customer 
   date?: string
@@ -46,7 +46,7 @@ graphqlHelper.addType(`#graphql
     serviceType: String
     pickupPointId: String
     locationId: String
-    address: Address
+    address: AddressInput
     date: String
     """Longest the customer will wait, in minutes. Mutually exclusive with date."""
     maxWaitMinutes: Int
@@ -121,7 +121,7 @@ export default {
         // }
 
         const serviceType = data.serviceType ?? "delivery";
-        let address: Address = null
+        let address: OrderAddress = null
 
         let message;
         try {
@@ -165,7 +165,7 @@ export default {
 
           if (serviceType === "delivery") {
             if (data.locationId) {
-              address = await UserLocation.findOne({id: data.locationId}) as Address;
+              address = await UserLocation.findOne({id: data.locationId}) as OrderAddress;
               if (!address) throw `locationId not found`
             } else {
               if (data.address) {
@@ -177,15 +177,15 @@ export default {
                 // city to fall back on any more, and substituting one is what
                 // used to send an address to the wrong town.
                 city: address.city,
-                street: address.street,
-                ...address.streetId && {streetId: address.streetId},
-                home: address.home,
+                node: address.node ?? null,
+                formatted: address.formatted,
+                ...address.home && {home: address.home},
+                ...address.coordinate && {coordinate: address.coordinate},
                 ...address.housing && {housing: address.housing},
                 ...address.apartment && {apartment: address.apartment},
-                ...address.index && {index: address.index},
                 ...address.entrance && {entrance: address.entrance},
                 ...address.floor && {floor: address.floor},
-                ...address.apartment && {apartment: address.apartment},
+                ...address.doorphone && {doorphone: address.doorphone},
                 ...address.comment && {comment: address.comment},
               }  
             }
@@ -281,7 +281,7 @@ export default {
           } else if (e.code === 4) {
             message.message = context.i18n.__("The wrong format of the customer phone number");
           } else if (e.code === 5) {
-            message.message = context.i18n.__("No point of Street");
+            message.message = context.i18n.__("No address given");
           } else if (e.code === 6) {
             message.message = context.i18n.__("Not indicated the house number");
           } else if (e.code === 7) {

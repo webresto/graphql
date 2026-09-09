@@ -16,8 +16,7 @@ interface UserResponse extends Response {
 
 
 interface InputLocation {
-  street: string
-  streetId: string
+  node: string
   home: string
   name?: string
   city?: string
@@ -36,9 +35,9 @@ interface InputLocation {
 
 graphqlHelper.addType(`#graphql    
   input InputLocation {
-    street: String
-    streetId: String
-    home: String!
+    """Catalog node this saved address points at."""
+    node: String!
+    home: String
     name: String
     city: String
     housing: String
@@ -71,13 +70,7 @@ export default {
             context.connectionParams.authorization
           );
           
-          if (!payload.location.streetId && !payload.location.street) throw 'streetId or street are required'
-
-          const userLocation = {
-            ...payload.location,
-            ...{street: payload.location.streetId}
-          }
-          await UserLocation.create({...userLocation, user: auth.userId}).fetch()
+          await UserLocation.create({...payload.location, user: auth.userId}).fetch()
           return true
         } catch (error) {
           sails.log.error(`GQL > [locationCreate]`, error, payload);
