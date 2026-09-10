@@ -222,6 +222,8 @@ export default {
         distanceKm: Float
         "How the road was estimated: haversine, a provider name, or none"
         travelTimeSource: String
+        "Why the order got this tariff and this time: the zone, the point source. For operators, not for customers"
+        diagnostics: [String]
       }`
     );
     
