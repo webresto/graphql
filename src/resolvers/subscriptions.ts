@@ -1,6 +1,15 @@
 import { withFilter } from 'apollo-server';
 import checkDeviceId from '../../lib/helper/checkDeviceId';
 
+/**
+ * Событие `order-changed` несёт запись заказа такой, какой её отдал ватерлайн:
+ * ассоциации в ней — идентификаторы, а не объекты. Отдать её подписчику как
+ * есть значит прислать `pickupPoint` из одних null: GraphQL разрешает поля
+ * типа на строке. Витрина мержит присланный заказ поверх своего, и выбранная
+ * точка пропадает через секунду после любой правки заказа. Поэтому подписка
+ * отвечает тем же заказом, что и запрос, — `Order.populate`.
+ */
+
 export default {
   Subscription: {
     orders: {
@@ -21,7 +30,7 @@ export default {
             return Array.isArray(args.orderIds) && args.orderIds.includes(payload.id);
           }
         ),
-        resolve: payload => payload,
+        resolve: payload => Order.populate(payload.id),
       }
     },
 
@@ -47,10 +56,7 @@ export default {
             return payload.deviceId === context.connectionParams.deviceId;
           }
         ),
-        resolve: payload => {
-          const order = payload;
-          return order;
-        }
+        resolve: payload => Order.populate(payload.id),
       }
     },
     message: {

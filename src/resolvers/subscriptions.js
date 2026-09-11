@@ -1,7 +1,18 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const apollo_server_1 = require("apollo-server");
-const checkDeviceId_1 = require("../../lib/helper/checkDeviceId");
+const checkDeviceId_1 = __importDefault(require("../../lib/helper/checkDeviceId"));
+/**
+ * Событие `order-changed` несёт запись заказа такой, какой её отдал ватерлайн:
+ * ассоциации в ней — идентификаторы, а не объекты. Отдать её подписчику как
+ * есть значит прислать `pickupPoint` из одних null: GraphQL разрешает поля
+ * типа на строке. Витрина мержит присланный заказ поверх своего, и выбранная
+ * точка пропадает через секунду после любой правки заказа. Поэтому подписка
+ * отвечает тем же заказом, что и запрос, — `Order.populate`.
+ */
 exports.default = {
     Subscription: {
         orders: {
@@ -19,7 +30,7 @@ exports.default = {
                 }, (payload, args, context, info) => {
                     return Array.isArray(args.orderIds) && args.orderIds.includes(payload.id);
                 }),
-                resolve: payload => payload,
+                resolve: payload => Order.populate(payload.id),
             }
         },
         order: {
@@ -37,10 +48,7 @@ exports.default = {
                 }, (payload, query, context, info) => {
                     return payload.deviceId === context.connectionParams.deviceId;
                 }),
-                resolve: payload => {
-                    const order = payload;
-                    return order;
-                }
+                resolve: payload => Order.populate(payload.id),
             }
         },
         message: {
