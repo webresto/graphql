@@ -15,6 +15,7 @@ import OrderAddress from "@webresto/core/interfaces/Address";
 import Customer from "@webresto/core/interfaces/Customer";
 import { SpendBonus } from "@webresto/core/interfaces/SpendBonus";
 import { JWTAuth } from "../../lib/jwt";
+import { getNewCart } from "./order";
 
 
 interface InputOrderCheckout {
@@ -91,6 +92,13 @@ export default {
       def: 'initCheckout(orderId: String): InitCheckout',
       fn: async function (_, { orderId }, ctx) {
         try {
+          // The storefront keeps its order id across a stand or archive that no
+          // longer has the order; `order` and `orderAddDish` answer that with a
+          // fresh cart under the same id, and checkout must not answer with a crash.
+          if (orderId && !(await Order.findOne({ id: orderId }))) {
+            sails.log.warn(`GQL > initCheckout: order with id ${orderId} not found. Trying make new cart.`);
+            await getNewCart(ctx, orderId);
+          }
           let populatedOrder = await Order.populate(orderId);
           return await OrderHelper.initCheckout(populatedOrder);
         } catch (error) {

@@ -546,7 +546,7 @@ export default {
 };
 
 // Generate new cart
-async function getNewCart(context?: any, orderId?: string) {
+export async function getNewCart(context?: any, orderId?: string) {
   try {
     checkDeviceId(context);
 
