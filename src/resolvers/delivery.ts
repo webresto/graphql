@@ -100,6 +100,34 @@ async function ancestorsOf(node: AddressRecord, cache: Map<string, string[]>): P
   return names;
 }
 
+/**
+ * What the customer reads, in the language they asked for.
+ *
+ * Core answers with a key, because `sails.__` there knows the installation's
+ * default locale and not the reader's. The request does know, so the last step
+ * before the wire is where the translation belongs — the same place the
+ * checkout refusals are translated, and out of the same dictionary.
+ *
+ * Line by line, because a zone with no description of its own is described by
+ * several sentences at once; each takes as many arguments as it has `%s`.
+ */
+function translateDeliveryMessage(delivery: any, context: any) {
+  // Anything that is not a key is passed through: an operator's own text, and
+  // the Error the catch below puts here.
+  const message = delivery?.message;
+  const i18n = context?.i18n;
+  if (typeof message !== "string" || !message || typeof i18n?.__ !== "function") return message;
+
+  const args = Array.isArray(delivery?.messageArgs) ? [...delivery.messageArgs] : [];
+  return message
+    .split("\n")
+    .map((line: string) => {
+      const placeholders = line.match(/%s/g)?.length ?? 0;
+      return placeholders ? i18n.__(line, ...args.splice(0, placeholders)) : i18n.__(line);
+    })
+    .join("\n");
+}
+
 export default {
   Query: {
     // What to offer for what the customer has typed. Without `parent` the
@@ -154,5 +182,12 @@ export default {
         }
       },
     },
+  },
+  // `message` is a key on both of the types that carry one, so is the resolver.
+  Delivery: {
+    message: (parent: any, _args: unknown, context: any) => translateDeliveryMessage(parent, context),
+  },
+  OrderDeliveryState: {
+    message: (parent: any, _args: unknown, context: any) => translateDeliveryMessage(parent, context),
   },
 };

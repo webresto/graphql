@@ -39,5 +39,11 @@ declare const _default: {
             }, _context: any) => Promise<Delivery>;
         };
     };
+    Delivery: {
+        message: (parent: any, _args: unknown, context: any) => any;
+    };
+    OrderDeliveryState: {
+        message: (parent: any, _args: unknown, context: any) => any;
+    };
 };
 export default _default;
