@@ -1,14 +1,18 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const checkExpression_1 = require("@webresto/core/libs/checkExpression");
+exports.getNewCart = getNewCart;
+const checkExpression_1 = __importDefault(require("@webresto/core/libs/checkExpression"));
 const adapters_1 = require("@webresto/core/adapters");
 // todo: fix types model instance to {%ModelName%}Record for Order"
 const jwt_1 = require("../../lib/jwt");
 const graphqlHelper_1 = require("@webresto/graphql/lib/graphqlHelper");
 (0, graphqlHelper_1.addToReplaceList)("Order.promotionState", "promotionState: [PromotionState]");
 (0, graphqlHelper_1.addToReplaceList)("Order.pickupPoint", "pickupPoint: PickupPoint");
-const graphqlHelper_2 = require("../../lib/graphqlHelper");
-const checkDeviceId_1 = require("../../lib/helper/checkDeviceId");
+const graphqlHelper_2 = __importDefault(require("../../lib/graphqlHelper"));
+const checkDeviceId_1 = __importDefault(require("../../lib/helper/checkDeviceId"));
 let captchaAdapter = adapters_1.Captcha.getAdapter();
 /**
  * Build a PromotionCodeResponse from an order after applyPromotionCode ran.
@@ -336,11 +340,14 @@ exports.default = {
                         throw `no passed updates`;
                     }
                     const orderUpd = {};
-                    if (order.address) {
+                    // An explicit null clears the field: the storefront drops the address
+                    // and the point when the customer switches city, since neither belongs
+                    // to the new one. An omitted field is left alone.
+                    if (order.address !== undefined) {
                         orderUpd['address'] = order.address;
                         orderToCartState = true;
                     }
-                    if (order.pickupPoint) {
+                    if (order.pickupPoint !== undefined) {
                         orderUpd['pickupPoint'] = order.pickupPoint;
                         orderToCartState = true;
                     }

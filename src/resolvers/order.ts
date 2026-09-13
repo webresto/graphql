@@ -425,12 +425,15 @@ export default {
 
         const orderUpd = {}
 
-        if(order.address) {
+        // An explicit null clears the field: the storefront drops the address
+        // and the point when the customer switches city, since neither belongs
+        // to the new one. An omitted field is left alone.
+        if(order.address !== undefined) {
           orderUpd['address'] = order.address
           orderToCartState = true
         }
 
-        if(order.pickupPoint) {
+        if(order.pickupPoint !== undefined) {
           orderUpd['pickupPoint'] = order.pickupPoint
           orderToCartState = true
         }
