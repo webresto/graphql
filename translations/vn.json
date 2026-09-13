@@ -34,6 +34,11 @@
     "Error: %s": "Lỗi: %s",
     "Ordering for a date in the past is not possible": "Không thể đặt hàng cho ngày đã qua",
     "The date should account for the minimum delivery time; choose a slightly later time": "Ngày phải tính đến thời gian giao hàng tối thiểu; chọn thời gian muộn hơn một chút",
-    "Date not allowed": "Ngày không được phép"
+    "Date not allowed": "Ngày không được phép",
+    "Choose either a delivery time or a maximum wait, not both": "Hãy chọn thời gian giao hàng hoặc thời gian chờ tối đa, không chọn cả hai",
+    "The order cannot be ready that quickly": "Đơn hàng không thể sẵn sàng nhanh như vậy",
+    "This order cannot be prepared as one order right now. Please contact us.": "Hiện không thể chuẩn bị đơn này thành một đơn duy nhất. Vui lòng liên hệ với chúng tôi.",
+    "The chosen location is closed right now": "Địa điểm đã chọn hiện đang đóng cửa",
+    "The chosen location does not take these orders": "Địa điểm đã chọn không nhận loại đơn này"
   }
   

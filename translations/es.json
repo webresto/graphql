@@ -34,5 +34,10 @@
   "Error: %s": "Error: %s",
   "Ordering for a date in the past is not possible": "No es posible pedir para una fecha pasada",
   "The date should account for the minimum delivery time; choose a slightly later time": "La fecha debe tener en cuenta el tiempo mínimo de entrega; elija una hora un poco más tarde",
-  "Date not allowed": "Fecha no permitida"
+  "Date not allowed": "Fecha no permitida",
+  "Choose either a delivery time or a maximum wait, not both": "Elige una hora de entrega o una espera máxima, pero no ambas",
+  "The order cannot be ready that quickly": "El pedido no puede estar listo tan rápido",
+  "This order cannot be prepared as one order right now. Please contact us.": "Ahora mismo este pedido no se puede preparar como un solo pedido. Ponte en contacto con nosotros.",
+  "The chosen location is closed right now": "El local elegido está cerrado ahora mismo",
+  "The chosen location does not take these orders": "El local elegido no acepta este tipo de pedidos"
 }

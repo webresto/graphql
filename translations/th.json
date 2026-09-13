@@ -34,6 +34,11 @@
     "Error: %s": "ข้อผิดพลาด: %s",
     "Ordering for a date in the past is not possible": "ไม่สามารถสั่งซื้อในวันที่ผ่านมาได้",
     "The date should account for the minimum delivery time; choose a slightly later time": "วันที่ต้องคำนึงถึงระยะเวลาการจัดส่งขั้นต่ำ กรุณาเลือกเวลาที่ช้ากว่านี้เล็กน้อย",
-    "Date not allowed": "วันที่ไม่อนุญาต"
+    "Date not allowed": "วันที่ไม่อนุญาต",
+    "Choose either a delivery time or a maximum wait, not both": "เลือกเวลาจัดส่งหรือเวลารอสูงสุดอย่างใดอย่างหนึ่ง ไม่ใช่ทั้งสองอย่าง",
+    "The order cannot be ready that quickly": "ออเดอร์ไม่สามารถเสร็จได้เร็วขนาดนั้น",
+    "This order cannot be prepared as one order right now. Please contact us.": "ขณะนี้ไม่สามารถจัดเตรียมออเดอร์นี้เป็นออเดอร์เดียวได้ กรุณาติดต่อเรา",
+    "The chosen location is closed right now": "สาขาที่เลือกปิดอยู่ในขณะนี้",
+    "The chosen location does not take these orders": "สาขาที่เลือกไม่รับออเดอร์ประเภทนี้"
   }
   

@@ -34,6 +34,11 @@
     "Error: %s": "오류: %s",
     "Ordering for a date in the past is not possible": "과거 날짜에 대한 주문은 불가능합니다",
     "The date should account for the minimum delivery time; choose a slightly later time": "날짜는 최소 배송 시간을 고려해야 합니다. 조금 더 늦은 시간을 선택하세요",
-    "Date not allowed": "허용되지 않는 날짜입니다"
+    "Date not allowed": "허용되지 않는 날짜입니다",
+    "Choose either a delivery time or a maximum wait, not both": "배달 시간 또는 최대 대기 시간 중 하나만 선택하세요",
+    "The order cannot be ready that quickly": "그렇게 빨리 준비할 수 없습니다",
+    "This order cannot be prepared as one order right now. Please contact us.": "지금은 이 주문을 하나의 주문으로 준비할 수 없습니다. 문의해 주세요.",
+    "The chosen location is closed right now": "선택한 매장은 지금 영업하지 않습니다",
+    "The chosen location does not take these orders": "선택한 매장은 이러한 주문을 받지 않습니다"
   }
   

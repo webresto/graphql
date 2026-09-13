@@ -34,6 +34,11 @@
 	"Error: %s": "Помилка: %s",
 	"Ordering for a date in the past is not possible": "Неможливо зробити замовлення на минулу дату",
 	"The date should account for the minimum delivery time; choose a slightly later time": "Дата повинна враховувати мінімальний час доставки; виберіть трохи пізніший час",
-	"Date not allowed": "Дата не дозволена"
+	"Date not allowed": "Дата не дозволена",
+	"Choose either a delivery time or a maximum wait, not both": "Виберіть або час доставки, або максимальне очікування, але не обидва одразу",
+	"The order cannot be ready that quickly": "Замовлення не встигне так швидко",
+	"This order cannot be prepared as one order right now. Please contact us.": "Зараз це замовлення не можна приготувати одним замовленням. Будь ласка, зв'яжіться з нами.",
+	"The chosen location is closed right now": "Обрана точка зараз зачинена",
+	"The chosen location does not take these orders": "Обрана точка не приймає такі замовлення"
   }
   
