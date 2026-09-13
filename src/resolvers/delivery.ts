@@ -35,6 +35,8 @@ graphqlHelper.addType(`#graphql
     name: String
     parent: String
     point: Json
+    """Names of the nodes above this one, from the root down. Empty for a node the city holds directly."""
+    ancestors: [String]
   }
 
   type Delivery {
@@ -62,14 +64,40 @@ graphqlHelper.addType(`#graphql
 `);
 
 /** A catalog row as the storefront reads it: the parent is an id, never an object. */
-function asNode(node: AddressRecord) {
+function asNode(node: AddressRecord, ancestors: string[] = []) {
   return {
     id: node.id,
     type: node.type,
     name: node.name,
     parent: typeof node.parent === "string" ? node.parent : node.parent?.id ?? null,
     point: node.point,
+    ancestors,
   };
+}
+
+function parentOf(node: AddressRecord): string | null {
+  return typeof node.parent === "string" ? node.parent : node.parent?.id ?? null;
+}
+
+/**
+ * The names above a suggestion, so two streets called "Ленина" can be told
+ * apart in the list.
+ *
+ * Read per suggestion rather than stored on the row: there are at most twenty of
+ * them and the graph is shallow, which is cheaper than an `ancestors` column
+ * that has to be rewritten every time a district is renamed. The path of one
+ * parent serves every child in the list, so it is read once.
+ */
+async function ancestorsOf(node: AddressRecord, cache: Map<string, string[]>): Promise<string[]> {
+  const parent = parentOf(node);
+  if (!parent) return [];
+
+  const known = cache.get(parent);
+  if (known) return known;
+
+  const names = (await Address.path(parent)).map((step) => step.name);
+  cache.set(parent, names);
+  return names;
 }
 
 export default {
@@ -81,7 +109,9 @@ export default {
       def: "addressSearch(city: String!, parent: String, query: String!): [AddressNode]",
       fn: async (_parent, args: { city: string; parent?: string; query: string }) => {
         try {
-          return (await Address.search(args)).map(asNode);
+          const found = await Address.search(args);
+          const paths = new Map<string, string[]>();
+          return await Promise.all(found.map(async (node) => asNode(node, await ancestorsOf(node, paths))));
         } catch (error) {
           sails.log.error(`GQL > [addressSearch]`, error, args);
           throw error;
@@ -94,7 +124,9 @@ export default {
       def: "addressPath(id: String!): [AddressNode]",
       fn: async (_parent, args: { id: string }) => {
         try {
-          return (await Address.path(args.id)).map(asNode);
+          // The path is its own answer here: everything before a node is above it.
+          const path = await Address.path(args.id);
+          return path.map((node, at) => asNode(node, path.slice(0, at).map((step) => step.name)));
         } catch (error) {
           sails.log.error(`GQL > [addressPath]`, error, args);
           throw error;

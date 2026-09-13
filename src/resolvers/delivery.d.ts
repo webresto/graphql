@@ -10,10 +10,11 @@ declare const _default: {
                 query: string;
             }) => Promise<{
                 id: string;
-                type: "alley" | "building" | "commune" | "district" | "entrance" | "house" | "place" | "quarter" | "street" | "ward";
+                type: "alley" | "building" | "commune" | "district" | "entrance" | "house" | "place" | "quarter" | "range" | "street" | "unit" | "ward";
                 name: string;
                 parent: string | null;
                 point: import("@webresto/core/lib/address").AddressPoint | null;
+                ancestors: string[];
             }[]>;
         };
         addressPath: {
@@ -22,10 +23,11 @@ declare const _default: {
                 id: string;
             }) => Promise<{
                 id: string;
-                type: "alley" | "building" | "commune" | "district" | "entrance" | "house" | "place" | "quarter" | "street" | "ward";
+                type: "alley" | "building" | "commune" | "district" | "entrance" | "house" | "place" | "quarter" | "range" | "street" | "unit" | "ward";
                 name: string;
                 parent: string | null;
                 point: import("@webresto/core/lib/address").AddressPoint | null;
+                ancestors: string[];
             }[]>;
         };
     };
