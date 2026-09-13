@@ -193,7 +193,7 @@ export default {
             } catch (e) {}
               
             if (additionalInfo && additionalInfo.defaultOrderDish) {
-              // Исключение на товар в каждую корзину
+              // The dish is exempt and may go into any cart
             } else {
               const error = `"${dish.name}" not promo item`
               sails.log.error(`GQL > orderAddDish`,error)

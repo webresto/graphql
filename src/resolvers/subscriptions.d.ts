@@ -1,10 +1,11 @@
 /**
- * Событие `order-changed` несёт запись заказа такой, какой её отдал ватерлайн:
- * ассоциации в ней — идентификаторы, а не объекты. Отдать её подписчику как
- * есть значит прислать `pickupPoint` из одних null: GraphQL разрешает поля
- * типа на строке. Витрина мержит присланный заказ поверх своего, и выбранная
- * точка пропадает через секунду после любой правки заказа. Поэтому подписка
- * отвечает тем же заказом, что и запрос, — `Order.populate`.
+ * The `order-changed` event carries the order record exactly as waterline
+ * handed it over: associations in it are identifiers, not objects. Sending it
+ * to a subscriber as is means sending a `pickupPoint` of nothing but nulls,
+ * because GraphQL resolves the fields of the type against a string. The
+ * storefront merges the pushed order over its own, and the chosen place
+ * disappears a second after any edit of the order. So the subscription answers
+ * with the same order the query does — `Order.populate`.
  */
 declare const _default: {
     Subscription: {

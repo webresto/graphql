@@ -67,7 +67,7 @@ export default {
           return false;
         }
 
-        // Проверка принадлежности: уведомление либо для этого пользователя, либо системное (user === null)
+        // Ownership check: the notification is either for this user or a system one (user === null)
         if (notification.user && notification.user !== userId) {
           return false;
         }
