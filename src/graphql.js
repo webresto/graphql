@@ -46,7 +46,7 @@ const path = require("path");
 var i18nFactory = require('i18n-2');
 const apollo_server_1 = require("apollo-server");
 const eventHelper_1 = __importDefault(require("../lib/eventHelper"));
-const product_availability_1 = require("@webresto/core/adapters/menu/product-availability");
+const product_availability_1 = require("@webresto/core/lib/menu/product-availability");
 const pubsub = new apollo_server_1.PubSub();
 sails.graphql = { pubsub };
 let server;
@@ -189,10 +189,6 @@ exports.default = {
          */
         helper.addCustomField("Dish", "discountAmount: Float");
         helper.addCustomField("Dish", "discountType: String");
-        /**
-         * @deprecated ???
-         */
-        helper.addCustomField("Dish", "oldPrice: Float");
         helper.addCustomField("Dish", "salePrice: Float");
         helper.addCustomField("Group", "discount: String");
         /**

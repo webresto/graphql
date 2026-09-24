@@ -1,7 +1,6 @@
 // const userAuth = sails.config.restographql.authService;
-import { Captcha } from "@webresto/core/adapters";
-import { OTP } from "@webresto/core/adapters"
-import { ResolvedCaptcha } from "@webresto/core/adapters/captcha/CaptchaAdapter"
+import { Adapter, Captcha } from "@webresto/core/adapters";
+import { ResolvedCaptcha } from "@webresto/core/adapters"
 import { Message, Action, Response } from "../../types/primitives";
 
 import graphqlHelper from "../../lib/graphqlHelper";
@@ -48,7 +47,7 @@ export default {
           if (await captchaAdapter.check(payload.captcha, `otpRequest:${payload.login}`) === false) { 
             throw `bad captcha`
           }
-          let OTPAdapter = await OTP.getAdapter();
+          let OTPAdapter = await Adapter.getOTPAdapter();
 
           let otp = await OTPAdapter.get(payload.login);
           let message: Message = {

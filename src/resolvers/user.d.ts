@@ -1,5 +1,5 @@
 import { Phone } from "@webresto/core/models/User";
-import { ResolvedCaptcha } from "@webresto/core/adapters/captcha/CaptchaAdapter";
+import { ResolvedCaptcha } from "@webresto/core/adapters";
 import { Response } from "../../types/primitives";
 interface UserResponse extends Response {
     user: User | undefined;

@@ -2,7 +2,7 @@ declare const _default: {
     Query: {
         maintenance: {
             def: string;
-            fn: (parent: any, args: any, context: any) => Promise<import("@webresto/core/models/Maintenance").default>;
+            fn: (parent: any, args: any, context: any) => Promise<import("@webresto/core").MaintenanceRecord>;
         };
     };
 };

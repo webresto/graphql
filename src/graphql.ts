@@ -11,8 +11,7 @@ import { PubSub } from "apollo-server";
 import { GraphQLError, GraphQLFormattedError } from "graphql";
 import eventHelper from "../lib/eventHelper";
 import { Action } from "../types/primitives";
-import { getDefaultCookingPlaceId } from "@webresto/core/adapters/menu/cooking-place";
-import { getEffectiveBalanceAcross } from "@webresto/core/adapters/menu/product-availability";
+import { getEffectiveBalanceAcross } from "@webresto/core/lib/menu/product-availability";
 const pubsub = new PubSub();
 sails.graphql = { pubsub };
 let server: ApolloServer;
@@ -164,12 +163,6 @@ export default {
      */
     helper.addCustomField("Dish", "discountAmount: Float");
     helper.addCustomField("Dish", "discountType: String");
-
-    /**
-     * @deprecated ??? 
-     */
-    helper.addCustomField("Dish", "oldPrice: Float");
-    
     helper.addCustomField("Dish", "salePrice: Float");
     helper.addCustomField("Group", "discount: String");
 

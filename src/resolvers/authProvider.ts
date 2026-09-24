@@ -2,9 +2,8 @@ import { JWTAuth } from "../../lib/jwt";
 import graphqlHelper from "../../lib/graphqlHelper";
 import checkDeviceId from "../../lib/helper/checkDeviceId";
 import { Message, Action, Response } from "../../types/primitives";
-import { Adapter } from "@webresto/core/adapters";
+import { Adapter, NormalizedProfile } from "@webresto/core/adapters";
 import AuthService from "@webresto/core/lib/AuthService";
-import { NormalizedProfile } from "@webresto/core/adapters/auth/AuthProviderAdapter";
 
 interface UserResponse extends Response {
   user: any;

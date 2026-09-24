@@ -171,11 +171,18 @@ export default {
             }
           }
 
+          let userId = null;
+          if (context && context.connectionParams.authorization) {
+            userId = (await JWTAuth.verify(context.connectionParams.authorization)).userId;
+          }
+
           if (serviceType === "delivery") {
             // A saved location is an order's address without the node, so it
             // takes the same fields as one typed at checkout, and nothing else.
+            // Only the caller's own: someone else's id is not found, as is any
+            // id without a signed-in caller.
             if (data.locationId) {
-              address = await UserLocation.findOne({id: data.locationId});
+              address = await UserLocation.findOne({id: data.locationId, user: userId});
               if (!address) throw `locationId not found`
             } else {
               address = data.address!;
@@ -217,16 +224,11 @@ export default {
 
           await Order.update({ id: order.id }, order).fetch();
 
-          let userId = null;
-          if (context && context.connectionParams.authorization) {
-            userId = (await JWTAuth.verify(context.connectionParams.authorization)).userId;
-          }
-
           await Order.check(
             {id: order.id},
             data.customer,
             serviceType,
-            data.address,
+            address,
             data.paymentMethodId,
             userId,
             data.spendBonus !== undefined && userId !== null ? data.spendBonus : null,

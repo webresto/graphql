@@ -1,6 +1,6 @@
 import { getRecommendElements } from "../../lib/getRecommended";
-import { getDefaultCookingPlaceId } from "@webresto/core/adapters/menu/cooking-place";
-import { getEffectiveBalances, isStopped, readEffectiveBalance } from "@webresto/core/adapters/menu/dish-place-balance";
+import { getDefaultCookingPlaceId } from "@webresto/core/lib/menu/cooking-place";
+import { getEffectiveBalances, isStopped, readEffectiveBalance } from "@webresto/core/lib/menu/dish-place-balance";
 
 /**
  * Drops products stopped at the cooking point the menu is served for.

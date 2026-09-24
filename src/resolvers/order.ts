@@ -1,7 +1,6 @@
 import * as eventHelper from "@webresto/graphql";
 import checkExpression from "@webresto/core/lib/checkExpression";
-import { Captcha } from "@webresto/core/adapters";
-import { ResolvedCaptcha } from "@webresto/core/adapters/captcha/CaptchaAdapter";
+import { Captcha, ResolvedCaptcha } from "@webresto/core/adapters";
 // todo: fix types model instance to {%ModelName%}Record for Order"
 import { JWTAuth } from "../../lib/jwt";
 

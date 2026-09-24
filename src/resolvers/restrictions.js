@@ -152,7 +152,7 @@ exports.default = {
             let allowedPhoneCountries = await Settings.get("ALLOWED_PHONE_COUNTRIES");
             if (Array.isArray(allowedPhoneCountries) && typeof allowedPhoneCountries[0] === "string") {
                 allowedPhoneCountries.forEach(allowedPhoneCountry => {
-                    let country = sails.hooks.restocore.dictionaries.countries[allowedPhoneCountry];
+                    let country = sails.dictionaries.countries[allowedPhoneCountry];
                     if (country) {
                         allowedPhoneCountriesList.push(country);
                     }
@@ -160,8 +160,8 @@ exports.default = {
             }
             // If not found allow any
             if (allowedPhoneCountriesList.length === 0) {
-                for (let countryCode in sails.hooks.restocore.dictionaries.countries) {
-                    let country = sails.hooks.restocore.dictionaries.countries[countryCode];
+                for (let countryCode in sails.dictionaries.countries) {
+                    let country = sails.dictionaries.countries[countryCode];
                     if (country) {
                         allowedPhoneCountriesList.push(country);
                     }

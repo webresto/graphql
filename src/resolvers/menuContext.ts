@@ -24,8 +24,6 @@ addType(`type MenuContext {
   diagnostics: [String]
   """The menu mode in force: default | single-place | multi-place-route."""
   mode: String
-  """Name of the registered route planner, or null when nothing can route an order across kitchens."""
-  routePlanner: String
 }`);
 
 export default {
@@ -56,7 +54,7 @@ export default {
             coordinate,
           });
 
-          return { ...context, mode: adapter.name, routePlanner: Menu.routePlanner()?.name ?? null };
+          return { ...context, mode: adapter.name };
         } catch (error) {
           sails.log.error(`GQL > [menuContext]`, error, args);
           throw error;

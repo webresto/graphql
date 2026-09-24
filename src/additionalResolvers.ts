@@ -1,5 +1,5 @@
-import { getDefaultCookingPlaceId } from "@webresto/core/adapters/menu/cooking-place";
-import { getEffectiveBalances, isStopped, readEffectiveBalance } from "@webresto/core/adapters/menu/dish-place-balance";
+import { getDefaultCookingPlaceId } from "@webresto/core/lib/menu/cooking-place";
+import { getEffectiveBalances, isStopped, readEffectiveBalance } from "@webresto/core/lib/menu/dish-place-balance";
 
 const DataLoader = require('dataloader');
 
@@ -22,29 +22,8 @@ async function withoutStopped(rows: any[]): Promise<any[]> {
 
 export const additionalResolver = {
   GroupModifier: {
-    modifierId: async (parent: { modifierId?: string;  id?: string /** here id means rmsID */}, args: any, context: { dataloaders: WeakMap<object, any>; }, info: { fieldNodes: any; }) => {
-      if (parent.modifierId) return parent.modifierId;
-      
-      if (!context.dataloaders) context.dataloaders = new WeakMap();
-      const dataloaders = context.dataloaders;
-
-      let dl = dataloaders.get(info.fieldNodes);
-      if (!dl) {
-        dl = new DataLoader(async (id: any) => {
-          const rows = await Group.find({
-            rmsId: id, isDeleted: false
-          });
-          const sortedInIdsOrder = id.map((id: string) => rows.find(x => {
-            return x.rmsId === id
-          }));
-          return sortedInIdsOrder;
-        });
-        dataloaders.set(info.fieldNodes, dl);
-      }
-      return (await dl.load(parent.id)).id;
-    },
-    group: async (parent: { modifierId?: string; id?: string /** here id means rmsID */ }, args: any, context: { dataloaders: WeakMap<object, any>; }, info: { fieldNodes: any; }) => {
-      if (!parent.modifierId && !parent.id) return;
+    group: async (parent: { id?: string /** here id means rmsID */ }, args: any, context: { dataloaders: WeakMap<object, any>; }, info: { fieldNodes: any; }) => {
+      if (!parent.id) return;
       if (!context.dataloaders) context.dataloaders = new WeakMap();
       const dataloaders = context.dataloaders;
 
@@ -61,33 +40,12 @@ export const additionalResolver = {
         });
         dataloaders.set(info.fieldNodes, dl);
       }
-      return await dl.load(parent.modifierId ? parent.modifierId : parent.id);
+      return await dl.load(parent.id);
     }
   },
   Modifier: {
-    modifierId: async (parent: { modifierId?: string;  id?: string /** here id means rmsID */}, args: any, context: { dataloaders: WeakMap<object, any>; }, info: { fieldNodes: any; }) => {
-      if (parent.modifierId) return parent.modifierId;
-      
-      if (!context.dataloaders) context.dataloaders = new WeakMap();
-      const dataloaders = context.dataloaders;
-
-      let dl = dataloaders.get(info.fieldNodes);
-      if (!dl) {
-        dl = new DataLoader(async (id: any) => {
-          const rows = await withoutStopped(await Dish.find({
-            rmsId: id, isDeleted: false
-          }));
-          const sortedInIdsOrder = id.map((id: string) => rows.find(x => {
-            return x.rmsId === id
-          }));
-          return sortedInIdsOrder;
-        });
-        dataloaders.set(info.fieldNodes, dl);
-      }
-      return (await dl.load(parent.id)).id;
-    },
-    dish: async (parent: { modifierId?: string;  id?: string /** here id means rmsID */}, args: any, context: { dataloaders: WeakMap<object, any>; }, info: { fieldNodes: any; }) => {
-      if (!parent.modifierId && !parent.id) return;
+    dish: async (parent: { id?: string /** here id means rmsID */}, args: any, context: { dataloaders: WeakMap<object, any>; }, info: { fieldNodes: any; }) => {
+      if (!parent.id) return;
       if (!context.dataloaders) context.dataloaders = new WeakMap();
       const dataloaders = context.dataloaders;
 
@@ -107,13 +65,13 @@ export const additionalResolver = {
         });
         dataloaders.set(info.fieldNodes, dl);
       }
-      return await dl.load(parent.modifierId ? parent.modifierId : parent.id);
+      return await dl.load(parent.id);
     }
   },
 
   OrderModifier: {
-    dish: async (parent: { id: string; modifierId: string}, args: any, context: any, info: any) => {
-      if (!parent.id && !parent.modifierId) return null
+    dish: async (parent: { id: string }, args: any, context: any, info: any) => {
+      if (!parent.id) return null
       return (await withoutStopped(await Dish.find({ where:
         {or: [
           {id: parent.id, isDeleted: false},

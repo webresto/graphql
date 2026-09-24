@@ -1,20 +1,9 @@
-// const userAuth = sails.config.restographql.authService;
 import { JWTAuth } from "../../lib/jwt";
-import { Phone } from "@webresto/core/models/User";
-// todo: fix types model instance to {%ModelName%}Record for User";
-import { Captcha } from "@webresto/core/adapters";
-import { ResolvedCaptcha } from "@webresto/core/adapters/captcha/CaptchaAdapter";
-import { Message, Action, Response } from "../../types/primitives";
-let captchaAdapter = Captcha.getAdapter();
-
-// define UserResponse
-interface UserResponse extends Response {
-  user: User | undefined;
-}
-
 
 // Saved addresses are written by delivered orders (`UserLocation.remember`),
-// never by the storefront: it only picks the default and deletes.
+// never by the storefront: it only picks the default and deletes. Both look a
+// location up by id and the caller together, so an id of someone else's
+// location is refused like one that does not exist.
 export default {
   Mutation: {
     // Authentication required
@@ -33,10 +22,7 @@ export default {
             context.connectionParams.authorization
           );
 
-          const user = (await UserLocation.findOne({id: payload.locationId})).user as string
-          if (user !== auth.userId) throw `User location not found`
-
-          await UserLocation.update({id: payload.locationId}, {isDefault: true}).fetch()
+          await UserLocation.setDefault(auth.userId, payload.locationId)
           return true
         } catch (error) {
           sails.log.error(`GQL > [locationSetIsDefault]`, error, payload);
@@ -59,8 +45,9 @@ export default {
           const auth = await JWTAuth.verify(
             context.connectionParams.authorization
           );
-          
-          await UserLocation.destroy({id: payload.locationId}).fetch()
+
+          const [location] = await UserLocation.destroy({id: payload.locationId, user: auth.userId}).fetch()
+          if (!location) throw `User location not found`
           return true
         } catch (error) {
           sails.log.error(`GQL > [locationDelete]`, error, payload);

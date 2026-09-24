@@ -1,12 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-// const userAuth = sails.config.restographql.authService;
 const jwt_1 = require("../../lib/jwt");
-// todo: fix types model instance to {%ModelName%}Record for User";
-const adapters_1 = require("@webresto/core/adapters");
-let captchaAdapter = adapters_1.Captcha.getAdapter();
 // Saved addresses are written by delivered orders (`UserLocation.remember`),
-// never by the storefront: it only picks the default and deletes.
+// never by the storefront: it only picks the default and deletes. Both look a
+// location up by id and the caller together, so an id of someone else's
+// location is refused like one that does not exist.
 exports.default = {
     Mutation: {
         // Authentication required
@@ -18,10 +16,7 @@ exports.default = {
             fn: async (parent, payload, context) => {
                 try {
                     const auth = await jwt_1.JWTAuth.verify(context.connectionParams.authorization);
-                    const user = (await UserLocation.findOne({ id: payload.locationId })).user;
-                    if (user !== auth.userId)
-                        throw `User location not found`;
-                    await UserLocation.update({ id: payload.locationId }, { isDefault: true }).fetch();
+                    await UserLocation.setDefault(auth.userId, payload.locationId);
                     return true;
                 }
                 catch (error) {
@@ -39,7 +34,9 @@ exports.default = {
             fn: async (parent, payload, context) => {
                 try {
                     const auth = await jwt_1.JWTAuth.verify(context.connectionParams.authorization);
-                    await UserLocation.destroy({ id: payload.locationId }).fetch();
+                    const [location] = await UserLocation.destroy({ id: payload.locationId, user: auth.userId }).fetch();
+                    if (!location)
+                        throw `User location not found`;
                     return true;
                 }
                 catch (error) {

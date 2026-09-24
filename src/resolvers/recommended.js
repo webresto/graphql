@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const getRecommended_1 = require("../../lib/getRecommended");
-const cooking_place_1 = require("@webresto/core/adapters/menu/cooking-place");
-const dish_place_balance_1 = require("@webresto/core/adapters/menu/dish-place-balance");
+const cooking_place_1 = require("@webresto/core/lib/menu/cooking-place");
+const dish_place_balance_1 = require("@webresto/core/lib/menu/dish-place-balance");
 /**
  * Drops products stopped at the cooking point the menu is served for.
  *

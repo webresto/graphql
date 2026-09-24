@@ -1,10 +1,9 @@
-import { Adapter, Delivery as DeliveryAdapter } from "@webresto/core/adapters/index";
+import { Adapter } from "@webresto/core/adapters/index";
 import graphqlHelper from "../../lib/graphqlHelper";
 import OrderAddress from "@webresto/core/interfaces/OrderAddress";
 import { AddressRecord } from "@webresto/core/models/Address";
 import { Delivery } from "@webresto/core/adapters/delivery/contracts";
-import { addressByCoordinate } from "@webresto/core/adapters/geo/address-by-coordinate";
-import { isValidCoordinate } from "@webresto/core/adapters/geo/delivery-location";
+import { isValidCoordinate } from "@webresto/core/lib/address/coordinate";
 
 graphqlHelper.addType(`#graphql
   """The address of an order: a node of the city catalog plus what no catalog knows."""
@@ -182,7 +181,7 @@ export default {
         try {
           const coordinate = { lat: args.lat, lon: args.lon };
           if (!isValidCoordinate(coordinate)) throw new Error("Coordinate is out of range");
-          return await addressByCoordinate(await Adapter.getGeoAdapter(), coordinate, args.city);
+          return await (await Adapter.getGeoAdapter()).addressByCoordinate(coordinate, args.city);
         } catch (error) {
           sails.log.error(`GQL > [addressByCoordinate]`, error, args);
           throw error;
@@ -195,7 +194,7 @@ export default {
       def: "checkDeliveryAbility(address: AddressInput): Delivery",
       fn: async (_parent, args: { address: OrderAddress }, _context): Promise<Delivery> => {
         try {
-          const adapter = await DeliveryAdapter.getAdapter();
+          const adapter = await Adapter.getDeliveryAdapter();
           return await adapter.checkAbility(args.address);
         } catch (error) {
           sails.log.error(`GQL > [checkDeliveryAbility]`, error, args);

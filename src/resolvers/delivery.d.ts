@@ -10,10 +10,10 @@ declare const _default: {
                 query: string;
             }) => Promise<{
                 id: string;
-                type: "alley" | "building" | "commune" | "district" | "entrance" | "house" | "place" | "quarter" | "range" | "street" | "unit" | "ward";
+                type: string;
                 name: string;
                 parent: string | null;
-                point: import("@webresto/core/adapters/geo/address").AddressPoint | null;
+                point: import("@webresto/core/interfaces/Geo").AddressPoint | null;
                 ancestors: string[];
             }[]>;
         };
@@ -23,10 +23,10 @@ declare const _default: {
                 id: string;
             }) => Promise<{
                 id: string;
-                type: "alley" | "building" | "commune" | "district" | "entrance" | "house" | "place" | "quarter" | "range" | "street" | "unit" | "ward";
+                type: string;
                 name: string;
                 parent: string | null;
-                point: import("@webresto/core/adapters/geo/address").AddressPoint | null;
+                point: import("@webresto/core/interfaces/Geo").AddressPoint | null;
                 ancestors: string[];
             }[]>;
         };

@@ -168,11 +168,17 @@ exports.default = {
                             });
                         }
                     }
+                    let userId = null;
+                    if (context && context.connectionParams.authorization) {
+                        userId = (await jwt_1.JWTAuth.verify(context.connectionParams.authorization)).userId;
+                    }
                     if (serviceType === "delivery") {
                         // A saved location is an order's address without the node, so it
                         // takes the same fields as one typed at checkout, and nothing else.
+                        // Only the caller's own: someone else's id is not found, as is any
+                        // id without a signed-in caller.
                         if (data.locationId) {
-                            address = await UserLocation.findOne({ id: data.locationId });
+                            address = await UserLocation.findOne({ id: data.locationId, user: userId });
                             if (!address)
                                 throw `locationId not found`;
                         }
@@ -212,11 +218,7 @@ exports.default = {
                         order.customData.callback = data.customData.callback;
                     }
                     await Order.update({ id: order.id }, order).fetch();
-                    let userId = null;
-                    if (context && context.connectionParams.authorization) {
-                        userId = (await jwt_1.JWTAuth.verify(context.connectionParams.authorization)).userId;
-                    }
-                    await Order.check({ id: order.id }, data.customer, serviceType, data.address, data.paymentMethodId, userId, data.spendBonus !== undefined && userId !== null ? data.spendBonus : null, data.platform);
+                    await Order.check({ id: order.id }, data.customer, serviceType, address, data.paymentMethodId, userId, data.spendBonus !== undefined && userId !== null ? data.spendBonus : null, data.platform);
                     order = await Order.populate(data.orderId);
                     if (!order) {
                         throw new Error(`Order with id: \`${data.orderId}\` not found`);

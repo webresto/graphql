@@ -1,15 +1,6 @@
 export declare const additionalResolver: {
     GroupModifier: {
-        modifierId: (parent: {
-            modifierId?: string;
-            id?: string; /** here id means rmsID */
-        }, args: any, context: {
-            dataloaders: WeakMap<object, any>;
-        }, info: {
-            fieldNodes: any;
-        }) => Promise<any>;
         group: (parent: {
-            modifierId?: string;
             id?: string; /** here id means rmsID */
         }, args: any, context: {
             dataloaders: WeakMap<object, any>;
@@ -18,16 +9,7 @@ export declare const additionalResolver: {
         }) => Promise<any>;
     };
     Modifier: {
-        modifierId: (parent: {
-            modifierId?: string;
-            id?: string; /** here id means rmsID */
-        }, args: any, context: {
-            dataloaders: WeakMap<object, any>;
-        }, info: {
-            fieldNodes: any;
-        }) => Promise<any>;
         dish: (parent: {
-            modifierId?: string;
             id?: string; /** here id means rmsID */
         }, args: any, context: {
             dataloaders: WeakMap<object, any>;
@@ -38,7 +20,6 @@ export declare const additionalResolver: {
     OrderModifier: {
         dish: (parent: {
             id: string;
-            modifierId: string;
         }, args: any, context: any, info: any) => Promise<any>;
         group: (parent: {
             id: string;

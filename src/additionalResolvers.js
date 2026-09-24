@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.additionalResolver = void 0;
-const cooking_place_1 = require("@webresto/core/adapters/menu/cooking-place");
-const dish_place_balance_1 = require("@webresto/core/adapters/menu/dish-place-balance");
+const cooking_place_1 = require("@webresto/core/lib/menu/cooking-place");
+const dish_place_balance_1 = require("@webresto/core/lib/menu/dish-place-balance");
 const DataLoader = require('dataloader');
 /**
  * Drops products stopped at the cooking point the menu is served for.
@@ -19,29 +19,8 @@ async function withoutStopped(rows) {
 }
 exports.additionalResolver = {
     GroupModifier: {
-        modifierId: async (parent, args, context, info) => {
-            if (parent.modifierId)
-                return parent.modifierId;
-            if (!context.dataloaders)
-                context.dataloaders = new WeakMap();
-            const dataloaders = context.dataloaders;
-            let dl = dataloaders.get(info.fieldNodes);
-            if (!dl) {
-                dl = new DataLoader(async (id) => {
-                    const rows = await Group.find({
-                        rmsId: id, isDeleted: false
-                    });
-                    const sortedInIdsOrder = id.map((id) => rows.find(x => {
-                        return x.rmsId === id;
-                    }));
-                    return sortedInIdsOrder;
-                });
-                dataloaders.set(info.fieldNodes, dl);
-            }
-            return (await dl.load(parent.id)).id;
-        },
         group: async (parent, args, context, info) => {
-            if (!parent.modifierId && !parent.id)
+            if (!parent.id)
                 return;
             if (!context.dataloaders)
                 context.dataloaders = new WeakMap();
@@ -59,33 +38,12 @@ exports.additionalResolver = {
                 });
                 dataloaders.set(info.fieldNodes, dl);
             }
-            return await dl.load(parent.modifierId ? parent.modifierId : parent.id);
+            return await dl.load(parent.id);
         }
     },
     Modifier: {
-        modifierId: async (parent, args, context, info) => {
-            if (parent.modifierId)
-                return parent.modifierId;
-            if (!context.dataloaders)
-                context.dataloaders = new WeakMap();
-            const dataloaders = context.dataloaders;
-            let dl = dataloaders.get(info.fieldNodes);
-            if (!dl) {
-                dl = new DataLoader(async (id) => {
-                    const rows = await withoutStopped(await Dish.find({
-                        rmsId: id, isDeleted: false
-                    }));
-                    const sortedInIdsOrder = id.map((id) => rows.find(x => {
-                        return x.rmsId === id;
-                    }));
-                    return sortedInIdsOrder;
-                });
-                dataloaders.set(info.fieldNodes, dl);
-            }
-            return (await dl.load(parent.id)).id;
-        },
         dish: async (parent, args, context, info) => {
-            if (!parent.modifierId && !parent.id)
+            if (!parent.id)
                 return;
             if (!context.dataloaders)
                 context.dataloaders = new WeakMap();
@@ -105,12 +63,12 @@ exports.additionalResolver = {
                 });
                 dataloaders.set(info.fieldNodes, dl);
             }
-            return await dl.load(parent.modifierId ? parent.modifierId : parent.id);
+            return await dl.load(parent.id);
         }
     },
     OrderModifier: {
         dish: async (parent, args, context, info) => {
-            if (!parent.id && !parent.modifierId)
+            if (!parent.id)
                 return null;
             return (await withoutStopped(await Dish.find({ where: { or: [
                         { id: parent.id, isDeleted: false },
