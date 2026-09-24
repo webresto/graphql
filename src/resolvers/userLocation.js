@@ -5,51 +5,10 @@ const jwt_1 = require("../../lib/jwt");
 // todo: fix types model instance to {%ModelName%}Record for User";
 const adapters_1 = require("@webresto/core/adapters");
 let captchaAdapter = adapters_1.Captcha.getAdapter();
-const graphqlHelper_1 = require("../../lib/graphqlHelper");
-graphqlHelper_1.default.addType(`#graphql    
-  input InputLocation {
-    street: String
-    streetId: String
-    home: String!
-    name: String
-    city: String
-    housing: String
-    isDefault: Boolean
-    index: String
-    entrance: String
-    floor: String
-    apartment: String
-    doorphone: String
-    comment: String
-    customFields: Json
-  } 
-  `);
+// Saved addresses are written by delivered orders (`UserLocation.remember`),
+// never by the storefront: it only picks the default and deletes.
 exports.default = {
     Mutation: {
-        // Authentication required
-        locationCreate: {
-            def: `#graphql
-      locationCreate(
-        location: InputLocation!
-      ): Boolean`,
-            fn: async (parent, payload, context) => {
-                try {
-                    const auth = await jwt_1.JWTAuth.verify(context.connectionParams.authorization);
-                    if (!payload.location.streetId && !payload.location.street)
-                        throw 'streetId or street are required';
-                    const userLocation = {
-                        ...payload.location,
-                        ...{ street: payload.location.streetId }
-                    };
-                    await UserLocation.create({ ...userLocation, user: auth.userId }).fetch();
-                    return true;
-                }
-                catch (error) {
-                    sails.log.error(`GQL > [locationCreate]`, error, payload);
-                    throw error;
-                }
-            }
-        },
         // Authentication required
         locationSetIsDefault: {
             def: `#graphql

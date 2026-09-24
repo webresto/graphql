@@ -1,10 +1,47 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const eventHelper = require("../../lib/eventHelper");
+const eventHelper = __importStar(require("../../lib/eventHelper"));
 // todo: fix types model instance to {%ModelName%}Record for Order"
-const OrderHelper_1 = require("@webresto/core/libs/helpers/OrderHelper");
-const graphqlHelper_1 = require("../../lib/graphqlHelper");
+const OrderHelper_1 = require("@webresto/core/lib/order/OrderHelper");
+const graphqlHelper_1 = __importDefault(require("../../lib/graphqlHelper"));
 const jwt_1 = require("../../lib/jwt");
+const order_1 = require("./order");
 graphqlHelper_1.default.addType(`#graphql    
   input InputOrderCheckout {
     orderId: String! 
@@ -12,12 +49,15 @@ graphqlHelper_1.default.addType(`#graphql
     platform: String
     customer: Customer! 
     spendBonus: InputSpendBonus 
-    selfService: Boolean
-    pickupPointId: String 
+    """How the customer gets the food: delivery, pickup or dine-in. Defaults to delivery."""
+    serviceType: String
+    pickupPointId: String
     locationId: String
-    address: Address
+    address: AddressInput
     date: String
-    comment: String 
+    """Longest the customer will wait, in minutes. Mutually exclusive with date."""
+    maxWaitMinutes: Int
+    comment: String
     personsCount: Int
     customData: Json
   }
@@ -54,6 +94,13 @@ exports.default = {
             def: 'initCheckout(orderId: String): InitCheckout',
             fn: async function (_, { orderId }, ctx) {
                 try {
+                    // The storefront keeps its order id across a stand or archive that no
+                    // longer has the order; `order` and `orderAddDish` answer that with a
+                    // fresh cart under the same id, and checkout must not answer with a crash.
+                    if (orderId && !(await Order.findOne({ id: orderId }))) {
+                        sails.log.warn(`GQL > initCheckout: order with id ${orderId} not found. Trying make new cart.`);
+                        await (0, order_1.getNewCart)(ctx, orderId);
+                    }
                     let populatedOrder = await Order.populate(orderId);
                     return await OrderHelper_1.OrderHelper.initCheckout(populatedOrder);
                 }
@@ -81,7 +128,7 @@ exports.default = {
                 //     data.date = date.format('YYYY-MM-DD HH:mm:ss');
                 //     }
                 // }
-                let isSelfService;
+                const serviceType = data.serviceType ?? "delivery";
                 let address = null;
                 let message;
                 try {
@@ -95,15 +142,13 @@ exports.default = {
                             message: context.i18n.__("Order with id %s not found", data.orderId),
                         });
                     }
-                    //@ts-ignore
-                    if (data.selfService) {
-                        isSelfService = true;
+                    if (serviceType !== "delivery") {
                         order.pickupPoint = data.pickupPointId;
                     }
                     else {
                         order.pickupPoint = null;
                         if (!data.address && !data.locationId)
-                            throw `Address is required for non self service orders`;
+                            throw `Address is required for delivery orders`;
                     }
                     if (Order.isOrderedState(order.state)) {
                         message = eventHelper.sendMessage({
@@ -123,35 +168,43 @@ exports.default = {
                             });
                         }
                     }
-                    if (!data.selfService) {
+                    if (serviceType === "delivery") {
+                        // A saved location is an order's address without the node, so it
+                        // takes the same fields as one typed at checkout, and nothing else.
                         if (data.locationId) {
                             address = await UserLocation.findOne({ id: data.locationId });
                             if (!address)
                                 throw `locationId not found`;
                         }
                         else {
-                            if (data.address) {
-                                address = data.address;
-                            }
-                            address = {
-                                city: address.city || await Settings.use("city"),
-                                street: address.street,
-                                ...address.streetId && { streetId: address.streetId },
-                                home: address.home,
-                                ...address.housing && { housing: address.housing },
-                                ...address.apartment && { apartment: address.apartment },
-                                ...address.index && { index: address.index },
-                                ...address.entrance && { entrance: address.entrance },
-                                ...address.floor && { floor: address.floor },
-                                ...address.apartment && { apartment: address.apartment },
-                                ...address.comment && { comment: address.comment },
-                            };
+                            address = data.address;
                         }
+                        address = {
+                            // The customer's city verbatim. There is no installation-wide
+                            // city to fall back on any more, and substituting one is what
+                            // used to send an address to the wrong town.
+                            city: address.city,
+                            node: address.node ?? null,
+                            formatted: address.formatted,
+                            ...address.home && { home: address.home },
+                            ...address.coordinate && { coordinate: address.coordinate },
+                            ...address.housing && { housing: address.housing },
+                            ...address.apartment && { apartment: address.apartment },
+                            ...address.entrance && { entrance: address.entrance },
+                            ...address.floor && { floor: address.floor },
+                            ...address.doorphone && { doorphone: address.doorphone },
+                            ...address.comment && { comment: address.comment },
+                        };
                     }
                     order.personsCount = data.personsCount ? data.personsCount + "" : "";
                     if (data.comment)
                         order.comment = data.comment;
                     order.date = data.date;
+                    // Written even when absent, so clearing it clears it. The two timing
+                    // modes are mutually exclusive and `Order.checkDate` refuses an order
+                    // carrying both — a stale value left behind here would be that refusal
+                    // firing at a customer who had already switched modes.
+                    order.maxWaitMinutes = typeof data.maxWaitMinutes === "number" ? data.maxWaitMinutes : null;
                     // callback: boolean -call back to clarify details
                     if (data.customData && data.customData.callback) {
                         if (!order.customData)
@@ -163,8 +216,8 @@ exports.default = {
                     if (context && context.connectionParams.authorization) {
                         userId = (await jwt_1.JWTAuth.verify(context.connectionParams.authorization)).userId;
                     }
-                    await Order.check({ id: order.id }, data.customer, isSelfService, data.address, data.paymentMethodId, userId, data.spendBonus !== undefined && userId !== null ? data.spendBonus : null, data.platform);
-                    order = await Order.findOne({ id: data.orderId });
+                    await Order.check({ id: order.id }, data.customer, serviceType, data.address, data.paymentMethodId, userId, data.spendBonus !== undefined && userId !== null ? data.spendBonus : null, data.platform);
+                    order = await Order.populate(data.orderId);
                     if (!order) {
                         throw new Error(`Order with id: \`${data.orderId}\` not found`);
                     }
@@ -220,7 +273,7 @@ exports.default = {
                         message.message = context.i18n.__("The wrong format of the customer phone number");
                     }
                     else if (e.code === 5) {
-                        message.message = context.i18n.__("No point of Street");
+                        message.message = context.i18n.__("No address given");
                     }
                     else if (e.code === 6) {
                         message.message = context.i18n.__("Not indicated the house number");
@@ -246,12 +299,34 @@ exports.default = {
                     else if (e.code === 17) {
                         message.message = context.i18n.__("The date should account for the minimum delivery time; choose a slightly later time");
                     }
+                    else if (e.code === 20) {
+                        message.message = context.i18n.__("Choose either a delivery time or a maximum wait, not both");
+                    }
+                    else if (e.code === 22) {
+                        // Not the customer's problem and not something they can act on, so
+                        // they are told the order cannot be taken rather than why. The code
+                        // and the route are in the order's journal for the operator.
+                        message.message = context.i18n.__("This order cannot be prepared as one order right now. Please contact us.");
+                    }
+                    else if (e.code === 21) {
+                        // The estimate itself is in `e.error`; it is the one number that makes
+                        // this actionable, so it is shown rather than replaced by a generic line.
+                        message.message = e.error ?? context.i18n.__("The order cannot be ready that quickly");
+                    }
+                    else if (e.code === 23) {
+                        message.message = context.i18n.__("The chosen location is closed right now");
+                    }
+                    else if (e.code === 24) {
+                        // Which point and which service type are in `e.error` and the order's
+                        // journal; the customer only needs to know to choose another one.
+                        message.message = context.i18n.__("The chosen location does not take these orders");
+                    }
                     else {
                         message.message = e.error
                             ? e.error
                             : context.i18n.__(`Problem when checking the order: %s`, e);
                     }
-                    order = await Order.findOne(data.orderId);
+                    order = await Order.populate(data.orderId);
                     sails.log.error(`GQL > [checkOrder]`, e, args);
                     eventHelper.sendMessage(message);
                     return {

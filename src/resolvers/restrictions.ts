@@ -1,4 +1,3 @@
-import slugify from "slugify";
 import graphqlHelper from "../../lib/graphqlHelper";
 import { TimeZoneIdentifier } from "@webresto/worktime"
 graphqlHelper.addType(`#graphql
@@ -36,7 +35,7 @@ graphqlHelper.addType(`#graphql
 
       "Time possible for order from now"
       possibleToOrderInMinutes: Int
-      timezone: String 
+      timezone: String
       "Server timezone utc offset in seconds"
       utcOffsetInSeconds: Int
 
@@ -51,27 +50,19 @@ graphqlHelper.addType(`#graphql
 
       "The backend checks the phone strictly based on the mask"
       strictPhoneInput: Boolean
-      
+
       "Allows you to make shipping calculations optional. Shipping calculations will occur. But it won't throw an error"
       softDeliveryCalculation: Boolean
 
-      "Brief description of delivery conditions"
-      deliveryTerms: String
-
       "Global delivery discription"
       deliveryDescription: Json
-      "The minimum time for which delivery of the order is possible"
-      minDeliveryTimeInMinutes: Int
 
-      "Fields needed to create new order"  
+      "Fields needed to create new order"
       fieldsForOrderInitialization: [String]
 
-      "City for current restoapp server"  
-      city: City
+      "Cities this installation delivers in. The customer picks one; it travels with the address and is what qualifies it for the geocoder."
+      cities: [City]
 
-      "The server is part of the several city delivery chain"
-      multipleCities: Boolean
-      
       "Group User restrictions"
       user: UserRestrictions
     }
@@ -96,9 +87,8 @@ export default {
         /**
          * GQL compatibility version
          */
-        gqlSchemaMinVersion: () => 5000,
+        gqlSchemaMinVersion: () => 6000,
         possibleToOrderInMinutes: async () => isNaN(await Settings.get('POSSIBLE_TO_ORDER_IN_MINUTES')) ? 7 * 24 * 60 : await Settings.get('POSSIBLE_TO_ORDER_IN_MINUTES'),
-        minDeliveryTimeInMinutes: async () => isNaN(await Settings.get('MIN_DELIVERY_TIME_IN_MINUTES')) ? 40 : await Settings.get('MIN_DELIVERY_TIME_IN_MINUTES'),
         timezone: async () => {
             // Timezone may be unset — propagate null to the frontend instead of a fake default.
             const tz = await Settings.get('TZ');
@@ -127,30 +117,15 @@ export default {
         softDeliveryCalculation: async () => {
             return await Settings.get("SOFT_DELIVERY_CALCULATION") ?? true;
         },
-        deliveryTerms: async () => {
-            return await Settings.get("DELIVERY_MESSAGE") ?? null;
-        },
         captchaType: async () => await Settings.get('CAPTCHA_TYPE') || "POW",
         deliveryDescription: async () => await Settings.get('DELIVERY_DESCRIPTION'),
         fieldsForOrderInitialization: async () => {
             return await Settings.get("FIELDS_FOR_ORDER_INITIALIZATION") ?? [];
         },
-        city: async () => {
-            let cityName = await Settings.get("CITY") as string;
-            if(!cityName) return null
-            let slug  = slugify(cityName, { remove: /[*+~.()'"!:@\\\/]/g, lower: true, strict: true, locale: 'en'});
-
-            let city = (await City.find({slug}))[0]
-            
-            if(!city && cityName !== undefined) {
-                //@ts-ignore
-                city = {name: cityName, slug: slug}
-            }
-                
-            return city
-        },
-        multipleCities: async () => {
-            return (await City.count({isDeleted: false})) > 1
+        cities: async () => {
+            // Real rows only. The synthetic city this used to invent from the
+            // `CITY` setting could not be ordered in: nothing points at it.
+            return await City.find({ where: { isDeleted: { "!=": true } }, sort: "name ASC" });
         },
         user: () => ({}), // Dummy resolver to nest the fields below
     },

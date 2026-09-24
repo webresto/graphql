@@ -12,7 +12,7 @@
     "Enter the customer's phone": "Entrez le numéro de téléphone du client",
     "The wrong format of the name of the customer": "Format incorrect du nom du client",
     "The wrong format of the customer phone number": "Format incorrect du numéro de téléphone du client",
-    "No point of Street": "Rue non indiquée",
+    "No address given": "Aucune adresse indiquée",
     "Not indicated the house number": "Numéro de maison non indiqué",
     "The city is not indicated": "La ville n'est pas indiquée",
     "The payment system is not available": "Le système de paiement n'est pas disponible",
@@ -34,6 +34,11 @@
     "Error: %s": "Erreur : %s",
     "Ordering for a date in the past is not possible": "Il est impossible de commander pour une date passée",
     "The date should account for the minimum delivery time; choose a slightly later time": "La date doit tenir compte du délai de livraison minimum ; choisissez une heure légèrement plus tardive",
-    "Date not allowed": "Date non autorisée"
+    "Date not allowed": "Date non autorisée",
+    "Choose either a delivery time or a maximum wait, not both": "Choisissez soit une heure de livraison, soit une attente maximale, pas les deux",
+    "The order cannot be ready that quickly": "La commande ne peut pas être prête aussi vite",
+    "This order cannot be prepared as one order right now. Please contact us.": "Cette commande ne peut pas être préparée en une seule commande pour le moment. Veuillez nous contacter.",
+    "The chosen location is closed right now": "Le point choisi est actuellement fermé",
+    "The chosen location does not take these orders": "Le point choisi n'accepte pas ce type de commandes"
   }
   

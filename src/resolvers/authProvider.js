@@ -4,7 +4,7 @@ const jwt_1 = require("../../lib/jwt");
 const graphqlHelper_1 = require("../../lib/graphqlHelper");
 const checkDeviceId_1 = require("../../lib/helper/checkDeviceId");
 const adapters_1 = require("@webresto/core/adapters");
-const AuthService_1 = require("@webresto/core/libs/AuthService");
+const AuthService_1 = require("@webresto/core/lib/AuthService");
 /** Turn a resolved UserDevice into a UserResponse with an Authorization action carrying the JWT. */
 async function buildAuthResponse(userDevice, context) {
     const authData = {

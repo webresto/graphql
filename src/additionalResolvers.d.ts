@@ -75,6 +75,9 @@ export declare const additionalResolver: {
             dishes: any;
             id: any;
         }, args: any, context: any, info: any) => Promise<any>;
+        cookingPoints: (parent: {
+            cookingPoints?: string[];
+        }) => Promise<(import("@webresto/core").PlaceRecord | undefined)[]>;
     };
     OrderDish: {
         dish: (parent: {

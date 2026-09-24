@@ -11,6 +11,8 @@ import { PubSub } from "apollo-server";
 import { GraphQLError, GraphQLFormattedError } from "graphql";
 import eventHelper from "../lib/eventHelper";
 import { Action } from "../types/primitives";
+import { getDefaultCookingPlaceId } from "@webresto/core/adapters/menu/cooking-place";
+import { getEffectiveBalanceAcross } from "@webresto/core/adapters/menu/product-availability";
 const pubsub = new PubSub();
 sails.graphql = { pubsub };
 let server: ApolloServer;
@@ -66,19 +68,6 @@ export default {
       code: String!
       number: String!
       additionalNumber: String
-    }
-    input Address {
-      streetId: String
-      home: String
-      comment: String
-      city: String
-      street: String
-      housing: String
-      index: String
-      entrance: String
-      floor: String
-      apartment: String
-      doorphone: String
     }
     type Message {
       id: String
@@ -185,11 +174,35 @@ export default {
     helper.addCustomField("Group", "discount: String");
 
     /**
+     * Stock of a product.
+     *
+     * It stopped being a column of `dish` and became a property of the pair
+     * "product + cooking point", so it is computed per request instead of read
+     * off the record. The field itself stays: storefronts read it to grey out a
+     * product, and `-1` still means unlimited while `0` still means stopped.
+     *
+     * The point comes from the menu adapter, the same one that decides which
+     * products are in the list at all. Reading it from `DEFAULT_COOKING_PLACE`
+     * here while the list was narrowed somewhere else is how a storefront ends
+     * up showing one kitchen's products with another kitchen's stock.
+     */
+    helper.addCustomField("Dish", "balance: Int");
+    helper.addResolvers({
+      Dish: {
+        balance: async (parent: { id?: string }) => {
+          const adapter = await Menu.getAdapter();
+          const context = await adapter.resolveContext({});
+          return getEffectiveBalanceAcross(String(parent?.id), context.placeIds);
+        },
+      },
+    });
+
+    /**
      * Types of complex order fields
      */
     helper.addType(`#graphql
       type OrderDeliveryState {
-        "Time it will take for delivery"
+        "The delivery leg alone, in minutes. The totals below include cooking."
         deliveryTimeMinutes: Int
         "If disabled, then delivery is not allowed and will be processed"
         allowed: Boolean
@@ -199,6 +212,18 @@ export default {
         item: String
         "Server message for current delivery"
         message: String
+        "The zone whose terms produced this result, when one matched"
+        zoneId: String
+        "Cooking time for this basket. Only products of type dish count."
+        preparationMinutes: Int
+        "The whole promise: cooking + the road + the safety margin. One number."
+        totalTimeMinutes: Int
+        "Straight-line kilometres from the kitchen, when both coordinates were known"
+        distanceKm: Float
+        "How the road was estimated: haversine, a provider name, or none"
+        travelTimeSource: String
+        "Why the order got this tariff and this time: the zone, the point source. For operators, not for customers"
+        diagnostics: [String]
       }`
     );
     

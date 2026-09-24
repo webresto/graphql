@@ -1,4 +1,4 @@
-import HookTools from "@webresto/core/libs/hookTools";
+import HookTools from "@webresto/core/lib/hookTools";
 import afterHook from "./afterHook";
 
 export default function ToInitialize() {

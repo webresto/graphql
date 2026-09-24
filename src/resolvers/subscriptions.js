@@ -1,7 +1,19 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const apollo_server_1 = require("apollo-server");
-const checkDeviceId_1 = require("../../lib/helper/checkDeviceId");
+const checkDeviceId_1 = __importDefault(require("../../lib/helper/checkDeviceId"));
+/**
+ * The `order-changed` event carries the order record exactly as waterline
+ * handed it over: associations in it are identifiers, not objects. Sending it
+ * to a subscriber as is means sending a `pickupPoint` of nothing but nulls,
+ * because GraphQL resolves the fields of the type against a string. The
+ * storefront merges the pushed order over its own, and the chosen place
+ * disappears a second after any edit of the order. So the subscription answers
+ * with the same order the query does — `Order.populate`.
+ */
 exports.default = {
     Subscription: {
         orders: {
@@ -19,7 +31,7 @@ exports.default = {
                 }, (payload, args, context, info) => {
                     return Array.isArray(args.orderIds) && args.orderIds.includes(payload.id);
                 }),
-                resolve: payload => payload,
+                resolve: payload => Order.populate(payload.id),
             }
         },
         order: {
@@ -37,10 +49,7 @@ exports.default = {
                 }, (payload, query, context, info) => {
                     return payload.deviceId === context.connectionParams.deviceId;
                 }),
-                resolve: payload => {
-                    const order = payload;
-                    return order;
-                }
+                resolve: payload => Order.populate(payload.id),
             }
         },
         message: {

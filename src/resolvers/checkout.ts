@@ -1,7 +1,7 @@
 import * as eventHelper from "../../lib/eventHelper";
 import { Action, Message } from "../../types/primitives";
 // todo: fix types model instance to {%ModelName%}Record for Order"
-import { OrderHelper } from "@webresto/core/libs/helpers/OrderHelper";
+import { OrderHelper } from "@webresto/core/lib/order/OrderHelper";
 
 
 type CheckResponse = {
@@ -11,22 +11,25 @@ type CheckResponse = {
 }
 
 import graphqlHelper from "../../lib/graphqlHelper";
-import Address from "@webresto/core/interfaces/Address";
+import OrderAddress from "@webresto/core/interfaces/OrderAddress";
 import Customer from "@webresto/core/interfaces/Customer";
 import { SpendBonus } from "@webresto/core/interfaces/SpendBonus";
 import { JWTAuth } from "../../lib/jwt";
+import { getNewCart } from "./order";
 
 
 interface InputOrderCheckout {
   orderId: string 
   paymentMethodId: string 
   platform?: string
-  selfService?: boolean
-  pickupPointId?: string 
-  address?: Address
+  serviceType?: "delivery" | "pickup" | "dine-in"
+  pickupPointId?: string
+  address?: OrderAddress
   locationId: string
   customer: Customer 
   date?: string
+  /** ASAP with a ceiling, in minutes. Mutually exclusive with `date`. */
+  maxWaitMinutes?: number
   personsCount?: number
   comment: string
   spendBonus: SpendBonus
@@ -40,12 +43,15 @@ graphqlHelper.addType(`#graphql
     platform: String
     customer: Customer! 
     spendBonus: InputSpendBonus 
-    selfService: Boolean
-    pickupPointId: String 
+    """How the customer gets the food: delivery, pickup or dine-in. Defaults to delivery."""
+    serviceType: String
+    pickupPointId: String
     locationId: String
-    address: Address
+    address: AddressInput
     date: String
-    comment: String 
+    """Longest the customer will wait, in minutes. Mutually exclusive with date."""
+    maxWaitMinutes: Int
+    comment: String
     personsCount: Int
     customData: Json
   }
@@ -86,6 +92,13 @@ export default {
       def: 'initCheckout(orderId: String): InitCheckout',
       fn: async function (_, { orderId }, ctx) {
         try {
+          // The storefront keeps its order id across a stand or archive that no
+          // longer has the order; `order` and `orderAddDish` answer that with a
+          // fresh cart under the same id, and checkout must not answer with a crash.
+          if (orderId && !(await Order.findOne({ id: orderId }))) {
+            sails.log.warn(`GQL > initCheckout: order with id ${orderId} not found. Trying make new cart.`);
+            await getNewCart(ctx, orderId);
+          }
           let populatedOrder = await Order.populate(orderId);
           return await OrderHelper.initCheckout(populatedOrder);
         } catch (error) {
@@ -115,8 +128,8 @@ export default {
         //     }
         // }
 
-        let isSelfService: boolean;
-        let address: Address = null
+        const serviceType = data.serviceType ?? "delivery";
+        let address: OrderAddress = null
 
         let message;
         try {
@@ -131,13 +144,11 @@ export default {
             });
           }
 
-          //@ts-ignore
-          if (data.selfService) {
-            isSelfService = true;
+          if (serviceType !== "delivery") {
             order.pickupPoint = data.pickupPointId;
           } else {
             order.pickupPoint = null;
-            if(!data.address && !data.locationId) throw `Address is required for non self service orders`
+            if(!data.address && !data.locationId) throw `Address is required for delivery orders`
           }
 
           if (Order.isOrderedState(order.state)) {
@@ -160,28 +171,31 @@ export default {
             }
           }
 
-          if (!data.selfService) {
+          if (serviceType === "delivery") {
+            // A saved location is an order's address without the node, so it
+            // takes the same fields as one typed at checkout, and nothing else.
             if (data.locationId) {
-              address = await UserLocation.findOne({id: data.locationId}) as Address;
+              address = await UserLocation.findOne({id: data.locationId});
               if (!address) throw `locationId not found`
             } else {
-              if (data.address) {
-                address = data.address;
-              }
-  
-              address = {
-                city: address.city || (await Settings.use("city") as string),
-                street: address.street,
-                ...address.streetId && {streetId: address.streetId},
-                home: address.home,
-                ...address.housing && {housing: address.housing},
-                ...address.apartment && {apartment: address.apartment},
-                ...address.index && {index: address.index},
-                ...address.entrance && {entrance: address.entrance},
-                ...address.floor && {floor: address.floor},
-                ...address.apartment && {apartment: address.apartment},
-                ...address.comment && {comment: address.comment},
-              }  
+              address = data.address!;
+            }
+
+            address = {
+              // The customer's city verbatim. There is no installation-wide
+              // city to fall back on any more, and substituting one is what
+              // used to send an address to the wrong town.
+              city: address.city,
+              node: address.node ?? null,
+              formatted: address.formatted,
+              ...address.home && {home: address.home},
+              ...address.coordinate && {coordinate: address.coordinate},
+              ...address.housing && {housing: address.housing},
+              ...address.apartment && {apartment: address.apartment},
+              ...address.entrance && {entrance: address.entrance},
+              ...address.floor && {floor: address.floor},
+              ...address.doorphone && {doorphone: address.doorphone},
+              ...address.comment && {comment: address.comment},
             }
           }
           
@@ -189,6 +203,11 @@ export default {
           if (data.comment) order.comment = data.comment;
 
           order.date = data.date;
+          // Written even when absent, so clearing it clears it. The two timing
+          // modes are mutually exclusive and `Order.checkDate` refuses an order
+          // carrying both — a stale value left behind here would be that refusal
+          // firing at a customer who had already switched modes.
+          order.maxWaitMinutes = typeof data.maxWaitMinutes === "number" ? data.maxWaitMinutes : null;
 
           // callback: boolean -call back to clarify details
           if (data.customData && data.customData.callback) {
@@ -206,7 +225,7 @@ export default {
           await Order.check(
             {id: order.id},
             data.customer,
-            isSelfService,
+            serviceType,
             data.address,
             data.paymentMethodId,
             userId,
@@ -214,7 +233,7 @@ export default {
             data.platform
           );
 
-          order = await Order.findOne({id: data.orderId});
+          order = await Order.populate(data.orderId);
           
           if(!order) {
             throw new Error(`Order with id: \`${data.orderId}\` not found`)
@@ -270,7 +289,7 @@ export default {
           } else if (e.code === 4) {
             message.message = context.i18n.__("The wrong format of the customer phone number");
           } else if (e.code === 5) {
-            message.message = context.i18n.__("No point of Street");
+            message.message = context.i18n.__("No address given");
           } else if (e.code === 6) {
             message.message = context.i18n.__("Not indicated the house number");
           } else if (e.code === 7) {
@@ -286,14 +305,31 @@ export default {
           } else if (e.code === 16) {
             message.message = context.i18n.__("Date not allowed");
           } else if (e.code === 17) {
-            message.message = context.i18n.__("The date should account for the minimum delivery time; choose a slightly later time");              
+            message.message = context.i18n.__("The date should account for the minimum delivery time; choose a slightly later time");
+          } else if (e.code === 20) {
+            message.message = context.i18n.__("Choose either a delivery time or a maximum wait, not both");
+          } else if (e.code === 22) {
+            // Not the customer's problem and not something they can act on, so
+            // they are told the order cannot be taken rather than why. The code
+            // and the route are in the order's journal for the operator.
+            message.message = context.i18n.__("This order cannot be prepared as one order right now. Please contact us.");
+          } else if (e.code === 21) {
+            // The estimate itself is in `e.error`; it is the one number that makes
+            // this actionable, so it is shown rather than replaced by a generic line.
+            message.message = e.error ?? context.i18n.__("The order cannot be ready that quickly");
+          } else if (e.code === 23) {
+            message.message = context.i18n.__("The chosen location is closed right now");
+          } else if (e.code === 24) {
+            // Which point and which service type are in `e.error` and the order's
+            // journal; the customer only needs to know to choose another one.
+            message.message = context.i18n.__("The chosen location does not take these orders");
           } else {
             message.message = e.error
               ? e.error
               : context.i18n.__(`Problem when checking the order: %s`, e);
           }
 
-          order = await Order.findOne(data.orderId);
+          order = await Order.populate(data.orderId);
           sails.log.error(`GQL > [checkOrder]`, e, args)
           eventHelper.sendMessage(message);
           return { 

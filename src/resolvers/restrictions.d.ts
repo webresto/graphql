@@ -12,19 +12,16 @@ declare const _default: {
          */
         gqlSchemaMinVersion: () => number;
         possibleToOrderInMinutes: () => Promise<string | number | boolean | string[]>;
-        minDeliveryTimeInMinutes: () => Promise<string | boolean | string[] | 40>;
         timezone: () => Promise<string>;
         utcOffsetInSeconds: () => Promise<number>;
         utcOffset: () => Promise<string>;
         dateFormat: () => Promise<string | boolean | string[]>;
         strictPhoneInput: () => Promise<string | boolean | string[]>;
         softDeliveryCalculation: () => Promise<string | boolean | string[]>;
-        deliveryTerms: () => Promise<string | boolean | string[]>;
         captchaType: () => Promise<string>;
         deliveryDescription: () => Promise<string | boolean | string[]>;
         fieldsForOrderInitialization: () => Promise<string | boolean | string[]>;
-        city: () => Promise<import("@webresto/core").CityRecord>;
-        multipleCities: () => Promise<boolean>;
+        cities: () => Promise<import("@webresto/core").CityRecord[]>;
         user: () => {};
     };
     UserRestrictions: {

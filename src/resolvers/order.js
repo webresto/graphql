@@ -1,14 +1,20 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const checkExpression_1 = require("@webresto/core/libs/checkExpression");
+exports.getNewCart = getNewCart;
+const checkExpression_1 = __importDefault(require("@webresto/core/lib/checkExpression"));
 const adapters_1 = require("@webresto/core/adapters");
 // todo: fix types model instance to {%ModelName%}Record for Order"
 const jwt_1 = require("../../lib/jwt");
 const graphqlHelper_1 = require("@webresto/graphql/lib/graphqlHelper");
 (0, graphqlHelper_1.addToReplaceList)("Order.promotionState", "promotionState: [PromotionState]");
 (0, graphqlHelper_1.addToReplaceList)("Order.pickupPoint", "pickupPoint: PickupPoint");
-const graphqlHelper_2 = require("../../lib/graphqlHelper");
-const checkDeviceId_1 = require("../../lib/helper/checkDeviceId");
+(0, graphqlHelper_1.addToReplaceList)("Order.cookingPoints", `"""The order's kitchens in route order; the first is the one that cooks it."""
+  cookingPoints: [Place!]!`);
+const graphqlHelper_2 = __importDefault(require("../../lib/graphqlHelper"));
+const checkDeviceId_1 = __importDefault(require("../../lib/helper/checkDeviceId"));
 let captchaAdapter = adapters_1.Captcha.getAdapter();
 /**
  * Build a PromotionCodeResponse from an order after applyPromotionCode ran.
@@ -51,11 +57,14 @@ graphqlHelper_2.default.addType(`#graphql
     trifleFrom: Int
     comment: String
     date: String
-    selfService: Boolean
+    """How the customer gets the food: delivery, pickup or dine-in."""
+    serviceType: String
     paymentMethodId: String
     promotionCodeString: String
     address: AddressInput
     pickupPoint: String
+    """How long the customer will wait, in minutes; null clears it. Needed before the first product when FIELDS_FOR_ORDER_INITIALIZATION names it."""
+    maxWaitMinutes: Int
   }
   `);
 graphqlHelper_2.default.addType(`#graphql
@@ -156,7 +165,7 @@ exports.default = {
                         }
                         catch (e) { }
                         if (additionalInfo && additionalInfo.defaultOrderDish) {
-                            // Исключение на товар в каждую корзину
+                            // The dish is exempt and may go into any cart
                         }
                         else {
                             const error = `"${dish.name}" not promo item`;
@@ -335,11 +344,14 @@ exports.default = {
                         throw `no passed updates`;
                     }
                     const orderUpd = {};
-                    if (order.address) {
+                    // An explicit null clears the field: the storefront drops the address
+                    // and the point when the customer switches city, since neither belongs
+                    // to the new one. An omitted field is left alone.
+                    if (order.address !== undefined) {
                         orderUpd['address'] = order.address;
                         orderToCartState = true;
                     }
-                    if (order.pickupPoint) {
+                    if (order.pickupPoint !== undefined) {
                         orderUpd['pickupPoint'] = order.pickupPoint;
                         orderToCartState = true;
                     }
@@ -353,8 +365,12 @@ exports.default = {
                         orderUpd['date'] = order.date;
                         orderToCartState = true;
                     }
-                    if (order.selfService !== undefined) {
-                        orderUpd['selfService'] = order.selfService;
+                    if (order.maxWaitMinutes !== undefined) {
+                        orderUpd['maxWaitMinutes'] = order.maxWaitMinutes;
+                        orderToCartState = true;
+                    }
+                    if (order.serviceType !== undefined) {
+                        orderUpd['serviceType'] = order.serviceType;
                         orderToCartState = true;
                     }
                     if (order.paymentMethodId) {

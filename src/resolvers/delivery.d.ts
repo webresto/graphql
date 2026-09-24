@@ -1,19 +1,57 @@
-import Address from "@webresto/core/interfaces/Address";
-import { Delivery } from "@webresto/core/adapters/delivery/DeliveryAdapter";
+import OrderAddress from "@webresto/core/interfaces/OrderAddress";
+import { Delivery } from "@webresto/core/adapters/delivery/contracts";
 declare const _default: {
     Query: {
-        streets: {
+        addressSearch: {
             def: string;
-            fn: () => Promise<import("@webresto/core").StreetRecord[]>;
+            fn: (_parent: any, args: {
+                city: string;
+                parent?: string;
+                query: string;
+            }) => Promise<{
+                id: string;
+                type: "alley" | "building" | "commune" | "district" | "entrance" | "house" | "place" | "quarter" | "range" | "street" | "unit" | "ward";
+                name: string;
+                parent: string | null;
+                point: import("@webresto/core/adapters/geo/address").AddressPoint | null;
+                ancestors: string[];
+            }[]>;
+        };
+        addressPath: {
+            def: string;
+            fn: (_parent: any, args: {
+                id: string;
+            }) => Promise<{
+                id: string;
+                type: "alley" | "building" | "commune" | "district" | "entrance" | "house" | "place" | "quarter" | "range" | "street" | "unit" | "ward";
+                name: string;
+                parent: string | null;
+                point: import("@webresto/core/adapters/geo/address").AddressPoint | null;
+                ancestors: string[];
+            }[]>;
+        };
+        addressByCoordinate: {
+            def: string;
+            fn: (_parent: any, args: {
+                lat: number;
+                lon: number;
+                city: string;
+            }) => Promise<OrderAddress | null>;
         };
     };
     Mutation: {
         checkDeliveryAbility: {
             def: string;
             fn: (_parent: any, args: {
-                address: Address;
+                address: OrderAddress;
             }, _context: any) => Promise<Delivery>;
         };
+    };
+    Delivery: {
+        message: (parent: any, _args: unknown, context: any) => any;
+    };
+    OrderDeliveryState: {
+        message: (parent: any, _args: unknown, context: any) => any;
     };
 };
 export default _default;

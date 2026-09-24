@@ -7,84 +7,16 @@ import { ResolvedCaptcha } from "@webresto/core/adapters/captcha/CaptchaAdapter"
 import { Message, Action, Response } from "../../types/primitives";
 let captchaAdapter = Captcha.getAdapter();
 
-import graphqlHelper from "../../lib/graphqlHelper";
-
 // define UserResponse
 interface UserResponse extends Response {
   user: User | undefined;
 }
 
 
-interface InputLocation {
-  street: string
-  streetId: string
-  home: string
-  name?: string
-  city?: string
-  housing?: string
-  isDefault?: boolean
-  index?: string
-  entrance?: string
-  floor?: string
-  apartment?: string
-  doorphone?: string
-  comment?: string
-  customData?: {
-    [key: string]: string | boolean | number;
-  }
-}
-
-graphqlHelper.addType(`#graphql    
-  input InputLocation {
-    street: String
-    streetId: String
-    home: String!
-    name: String
-    city: String
-    housing: String
-    isDefault: Boolean
-    index: String
-    entrance: String
-    floor: String
-    apartment: String
-    doorphone: String
-    comment: String
-    customFields: Json
-  } 
-  `);
-
+// Saved addresses are written by delivered orders (`UserLocation.remember`),
+// never by the storefront: it only picks the default and deletes.
 export default {
   Mutation: {
-    // Authentication required
-    locationCreate: {
-      def: `#graphql
-      locationCreate(
-        location: InputLocation!
-      ): Boolean`,
-      fn: async (
-        parent: any,
-        payload: { location: InputLocation },
-        context: { connectionParams: { authorization: string } }
-      ): Promise<boolean> => {
-        try {
-          const auth = await JWTAuth.verify(
-            context.connectionParams.authorization
-          );
-          
-          if (!payload.location.streetId && !payload.location.street) throw 'streetId or street are required'
-
-          const userLocation = {
-            ...payload.location,
-            ...{street: payload.location.streetId}
-          }
-          await UserLocation.create({...userLocation, user: auth.userId}).fetch()
-          return true
-        } catch (error) {
-          sails.log.error(`GQL > [locationCreate]`, error, payload);
-          throw error;
-        }
-      }
-    },
     // Authentication required
     locationSetIsDefault: {
       def: `#graphql
