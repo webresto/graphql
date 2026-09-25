@@ -174,6 +174,12 @@ export const additionalResolver = {
     },
   },
   OrderDish: {
+    // OrderDish is not auto-generated, so its associations get no resolvers of
+    // their own: without this the stored id comes back as an empty Place.
+    cookingPoint: async (parent: { cookingPoint?: string | null }) => {
+      if (!parent.cookingPoint) return null;
+      return await Place.findOne({ id: parent.cookingPoint });
+    },
     dish: async (parent: { dish: any; }, args: any, context: { dataloaders: WeakMap<object, any>; }, info: { fieldNodes: any; }) => {
       
       if (!parent.dish) return;
