@@ -208,7 +208,7 @@ exports.default = {
         helper.addResolvers({
             Dish: {
                 balance: async (parent) => {
-                    const adapter = await Menu.getAdapter();
+                    const adapter = await Adapter.get("menu");
                     const context = await adapter.resolveContext({});
                     return (0, product_availability_1.getEffectiveBalanceAcross)(String(parent?.id), context.placeIds);
                 },

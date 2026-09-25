@@ -183,7 +183,7 @@ export default {
     helper.addResolvers({
       Dish: {
         balance: async (parent: { id?: string }) => {
-          const adapter = await Menu.getAdapter();
+          const adapter = await Adapter.get("menu");
           const context = await adapter.resolveContext({});
           return getEffectiveBalanceAcross(String(parent?.id), context.placeIds);
         },

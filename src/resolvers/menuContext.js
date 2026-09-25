@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const graphqlHelper_1 = require("@webresto/graphql/lib/graphqlHelper");
+const product_availability_1 = require("@webresto/core/lib/menu/product-availability");
 /**
  * Which cooking point a menu is being read at, and why.
  *
@@ -42,13 +43,13 @@ exports.default = {
                     const coordinate = typeof args.lat === "number" && typeof args.lon === "number"
                         ? { lat: args.lat, lon: args.lon }
                         : null;
-                    const adapter = await Menu.getAdapter();
+                    const adapter = await Adapter.get("menu");
                     const context = await adapter.resolveContext({
                         order,
                         cookingPointId: args.cookingPointId ?? null,
                         coordinate,
                     });
-                    return { ...context, mode: adapter.name };
+                    return { ...context, mode: await (0, product_availability_1.getMenuPlaceBasedMode)() };
                 }
                 catch (error) {
                     sails.log.error(`GQL > [menuContext]`, error, args);

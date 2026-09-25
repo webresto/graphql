@@ -1,8 +1,7 @@
 import { Adapter } from "@webresto/core/adapters/index";
 import graphqlHelper from "../../lib/graphqlHelper";
 import OrderAddress from "@webresto/core/interfaces/OrderAddress";
-import { AddressRecord } from "@webresto/core/models/Address";
-import { Delivery } from "@webresto/core/adapters/delivery/contracts";
+import { Delivery } from "@webresto/core/interfaces/Delivery";
 import { isValidCoordinate } from "@webresto/core/lib/address/coordinate";
 
 graphqlHelper.addType(`#graphql
@@ -75,43 +74,6 @@ graphqlHelper.addType(`#graphql
   }
 `);
 
-/** A catalog row as the storefront reads it: the parent is an id, never an object. */
-function asNode(node: AddressRecord, ancestors: string[] = []) {
-  return {
-    id: node.id,
-    type: node.type,
-    name: node.name,
-    parent: typeof node.parent === "string" ? node.parent : node.parent?.id ?? null,
-    point: node.point,
-    ancestors,
-  };
-}
-
-function parentOf(node: AddressRecord): string | null {
-  return typeof node.parent === "string" ? node.parent : node.parent?.id ?? null;
-}
-
-/**
- * The names above a suggestion, so two streets called "Ленина" can be told
- * apart in the list.
- *
- * Read per suggestion rather than stored on the row: there are at most twenty of
- * them and the graph is shallow, which is cheaper than an `ancestors` column
- * that has to be rewritten every time a district is renamed. The path of one
- * parent serves every child in the list, so it is read once.
- */
-async function ancestorsOf(node: AddressRecord, cache: Map<string, string[]>): Promise<string[]> {
-  const parent = parentOf(node);
-  if (!parent) return [];
-
-  const known = cache.get(parent);
-  if (known) return known;
-
-  const names = (await Address.path(parent)).map((step) => step.name);
-  cache.set(parent, names);
-  return names;
-}
-
 /**
  * What the customer reads, in the language they asked for.
  *
@@ -149,9 +111,7 @@ export default {
       def: "addressSearch(city: String!, parent: String, query: String!): [AddressNode]",
       fn: async (_parent, args: { city: string; parent?: string; query: string }) => {
         try {
-          const found = await Address.search(args);
-          const paths = new Map<string, string[]>();
-          return await Promise.all(found.map(async (node) => asNode(node, await ancestorsOf(node, paths))));
+          return await (await Adapter.get("geo")).search(args);
         } catch (error) {
           sails.log.error(`GQL > [addressSearch]`, error, args);
           throw error;
@@ -164,9 +124,7 @@ export default {
       def: "addressPath(id: String!): [AddressNode]",
       fn: async (_parent, args: { id: string }) => {
         try {
-          // The path is its own answer here: everything before a node is above it.
-          const path = await Address.path(args.id);
-          return path.map((node, at) => asNode(node, path.slice(0, at).map((step) => step.name)));
+          return await (await Adapter.get("geo")).path(args.id);
         } catch (error) {
           sails.log.error(`GQL > [addressPath]`, error, args);
           throw error;
@@ -181,7 +139,7 @@ export default {
         try {
           const coordinate = { lat: args.lat, lon: args.lon };
           if (!isValidCoordinate(coordinate)) throw new Error("Coordinate is out of range");
-          return await (await Adapter.getGeoAdapter()).addressByCoordinate(coordinate, args.city);
+          return await (await Adapter.get("geo")).addressByCoordinate(coordinate, args.city);
         } catch (error) {
           sails.log.error(`GQL > [addressByCoordinate]`, error, args);
           throw error;
@@ -194,7 +152,7 @@ export default {
       def: "checkDeliveryAbility(address: AddressInput): Delivery",
       fn: async (_parent, args: { address: OrderAddress }, _context): Promise<Delivery> => {
         try {
-          const adapter = await Adapter.getDeliveryAdapter();
+          const adapter = await Adapter.get("delivery");
           return await adapter.checkAbility(args.address);
         } catch (error) {
           sails.log.error(`GQL > [checkDeliveryAbility]`, error, args);

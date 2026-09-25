@@ -34,7 +34,7 @@ declare const _default: {
                     promotionCodeDescription?: string | undefined;
                     promotionCodeString?: string | undefined;
                     promotionFlatDiscount?: number | undefined;
-                    promotionDelivery?: import("@webresto/core/adapters/delivery/contracts").Delivery | undefined;
+                    promotionDelivery?: import("@webresto/core/interfaces/Delivery").Delivery | undefined;
                     promotionCodeCheckValidTill?: string | undefined;
                     promotionUnorderable?: boolean | undefined;
                     isPromoting?: boolean | undefined;
@@ -60,7 +60,7 @@ declare const _default: {
                     cookingPoints?: string[] | undefined;
                     maxWaitMinutes?: number | undefined;
                     serviceType?: "delivery" | "dine-in" | "pickup" | undefined;
-                    delivery?: import("@webresto/core/adapters/delivery/contracts").Delivery | null | undefined;
+                    delivery?: import("@webresto/core/interfaces/Delivery").Delivery | null | undefined;
                     message?: string | undefined;
                     totalWeight?: number | undefined;
                     trifleFrom?: number | undefined;
@@ -106,7 +106,7 @@ declare const _default: {
                     promotionCodeDescription?: string | undefined;
                     promotionCodeString?: string | undefined;
                     promotionFlatDiscount?: number | undefined;
-                    promotionDelivery?: import("@webresto/core/adapters/delivery/contracts").Delivery | undefined;
+                    promotionDelivery?: import("@webresto/core/interfaces/Delivery").Delivery | undefined;
                     promotionCodeCheckValidTill?: string | undefined;
                     promotionUnorderable?: boolean | undefined;
                     isPromoting?: boolean | undefined;
@@ -132,7 +132,7 @@ declare const _default: {
                     cookingPoints?: string[] | undefined;
                     maxWaitMinutes?: number | undefined;
                     serviceType?: "delivery" | "dine-in" | "pickup" | undefined;
-                    delivery?: import("@webresto/core/adapters/delivery/contracts").Delivery | null | undefined;
+                    delivery?: import("@webresto/core/interfaces/Delivery").Delivery | null | undefined;
                     message?: string | undefined;
                     totalWeight?: number | undefined;
                     trifleFrom?: number | undefined;

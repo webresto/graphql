@@ -1,5 +1,5 @@
 import OrderAddress from "@webresto/core/interfaces/OrderAddress";
-import { Delivery } from "@webresto/core/adapters/delivery/contracts";
+import { Delivery } from "@webresto/core/interfaces/Delivery";
 declare const _default: {
     Query: {
         addressSearch: {
@@ -8,27 +8,13 @@ declare const _default: {
                 city: string;
                 parent?: string;
                 query: string;
-            }) => Promise<{
-                id: string;
-                type: string;
-                name: string;
-                parent: string | null;
-                point: import("@webresto/core/interfaces/Geo").AddressPoint | null;
-                ancestors: string[];
-            }[]>;
+            }) => Promise<import("@webresto/core/interfaces/Geo").AddressNode[]>;
         };
         addressPath: {
             def: string;
             fn: (_parent: any, args: {
                 id: string;
-            }) => Promise<{
-                id: string;
-                type: string;
-                name: string;
-                parent: string | null;
-                point: import("@webresto/core/interfaces/Geo").AddressPoint | null;
-                ancestors: string[];
-            }[]>;
+            }) => Promise<import("@webresto/core/interfaces/Geo").AddressNode[]>;
         };
         addressByCoordinate: {
             def: string;

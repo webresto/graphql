@@ -351,7 +351,7 @@ import { withFilter } from "apollo-server";
 async function dropStoppedDishes(modelname: string, records: any[], orderId?: string | null): Promise<any[]> {
   if (modelname !== "dish" || !Array.isArray(records) || !records.length) return records;
 
-  const adapter = await Menu.getAdapter();
+  const adapter = await Adapter.get("menu");
   const order = orderId ? await Order.findOne({ id: orderId }) : null;
   return adapter.filterProducts(records, await adapter.resolveContext({ order: order ?? null }));
 }

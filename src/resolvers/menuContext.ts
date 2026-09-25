@@ -1,4 +1,5 @@
 import { addType } from "@webresto/graphql/lib/graphqlHelper";
+import { getMenuPlaceBasedMode } from "@webresto/core/lib/menu/product-availability";
 
 /**
  * Which cooking point a menu is being read at, and why.
@@ -47,14 +48,14 @@ export default {
             ? { lat: args.lat, lon: args.lon }
             : null;
 
-          const adapter = await Menu.getAdapter();
+          const adapter = await Adapter.get("menu");
           const context = await adapter.resolveContext({
             order,
             cookingPointId: args.cookingPointId ?? null,
             coordinate,
           });
 
-          return { ...context, mode: adapter.name };
+          return { ...context, mode: await getMenuPlaceBasedMode() };
         } catch (error) {
           sails.log.error(`GQL > [menuContext]`, error, args);
           throw error;
