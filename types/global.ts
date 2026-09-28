@@ -2,7 +2,7 @@
 
 import sails from "@42pub/typed-sails";
 import { Config } from "@webresto/core/interfaces/Config";
-import AwaitEmitter from "@webresto/core/libs/AwaitEmitter";
+import AwaitEmitter from "@webresto/core/lib/AwaitEmitter";
 // todo: fix types model instance to {%ModelName%}Record for BonusProgram";
 // todo: fix types model instance to {%ModelName%}Record for PaymentMethod";
 // todo: fix types model instance to {%ModelName%}Record for Order";

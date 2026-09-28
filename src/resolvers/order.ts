@@ -1,13 +1,14 @@
 import * as eventHelper from "@webresto/graphql";
-import checkExpression from "@webresto/core/libs/checkExpression";
-import { Captcha } from "@webresto/core/adapters";
-import { ResolvedCaptcha } from "@webresto/core/adapters/captcha/CaptchaAdapter";
+import checkExpression from "@webresto/core/lib/checkExpression";
+import { Captcha, ResolvedCaptcha } from "@webresto/core/adapters";
 // todo: fix types model instance to {%ModelName%}Record for Order"
 import { JWTAuth } from "../../lib/jwt";
 
 import { addToReplaceList } from "@webresto/graphql/lib/graphqlHelper";
 addToReplaceList("Order.promotionState", "promotionState: [PromotionState]");
 addToReplaceList("Order.pickupPoint", "pickupPoint: PickupPoint");
+addToReplaceList("Order.cookingPoints", `"""The order's kitchens in route order; the first is the one that cooks it."""
+  cookingPoints: [Place!]!`);
 import graphqlHelper from "../../lib/graphqlHelper";
 import checkDeviceId from "../../lib/helper/checkDeviceId";
 import { OrderRecord } from "@webresto/core";
@@ -71,11 +72,14 @@ graphqlHelper.addType(`#graphql
     trifleFrom: Int
     comment: String
     date: String
-    selfService: Boolean
+    """How the customer gets the food: delivery, pickup or dine-in."""
+    serviceType: String
     paymentMethodId: String
     promotionCodeString: String
     address: AddressInput
     pickupPoint: String
+    """How long the customer will wait, in minutes; null clears it. Needed before the first product when FIELDS_FOR_ORDER_INITIALIZATION names it."""
+    maxWaitMinutes: Int
   }
   `);
 
@@ -192,7 +196,7 @@ export default {
             } catch (e) {}
               
             if (additionalInfo && additionalInfo.defaultOrderDish) {
-              // Исключение на товар в каждую корзину
+              // The dish is exempt and may go into any cart
             } else {
               const error = `"${dish.name}" not promo item`
               sails.log.error(`GQL > orderAddDish`,error)
@@ -424,12 +428,15 @@ export default {
 
         const orderUpd = {}
 
-        if(order.address) {
+        // An explicit null clears the field: the storefront drops the address
+        // and the point when the customer switches city, since neither belongs
+        // to the new one. An omitted field is left alone.
+        if(order.address !== undefined) {
           orderUpd['address'] = order.address
           orderToCartState = true
         }
 
-        if(order.pickupPoint) {
+        if(order.pickupPoint !== undefined) {
           orderUpd['pickupPoint'] = order.pickupPoint
           orderToCartState = true
         }
@@ -447,8 +454,13 @@ export default {
           orderToCartState = true
         }
 
-        if(order.selfService !== undefined) {
-          orderUpd['selfService'] = order.selfService
+        if(order.maxWaitMinutes !== undefined) {
+          orderUpd['maxWaitMinutes'] = order.maxWaitMinutes
+          orderToCartState = true
+        }
+
+        if(order.serviceType !== undefined) {
+          orderUpd['serviceType'] = order.serviceType
           orderToCartState = true
         }
 
@@ -545,7 +557,7 @@ export default {
 };
 
 // Generate new cart
-async function getNewCart(context?: any, orderId?: string) {
+export async function getNewCart(context?: any, orderId?: string) {
   try {
     checkDeviceId(context);
 

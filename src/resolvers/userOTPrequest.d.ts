@@ -1,4 +1,4 @@
-import { ResolvedCaptcha } from "@webresto/core/adapters/captcha/CaptchaAdapter";
+import { ResolvedCaptcha } from "@webresto/core/adapters";
 import { Message, Action } from "../../types/primitives";
 type OTPResponse = {
     id: Number;

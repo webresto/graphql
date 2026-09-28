@@ -1,30 +1,29 @@
+import { getDefaultCookingPlaceId } from "@webresto/core/lib/menu/cooking-place";
+import { getEffectiveBalances, isStopped, readEffectiveBalance } from "@webresto/core/lib/menu/dish-place-balance";
+
 const DataLoader = require('dataloader');
+
+/**
+ * Drops products stopped at the cooking point the menu is served for.
+ *
+ * Stock is no longer a column of the dish model, so `balance: { '!=': 0 }` can
+ * not be part of the criteria any more. Until the menu carries a real point
+ * (iteration 4) the configured default one is used.
+ */
+async function withoutStopped(rows: any[]): Promise<any[]> {
+  if (!Array.isArray(rows) || !rows.length) return rows;
+
+  const balances = await getEffectiveBalances(
+    rows.map((row) => String(row.id)),
+    await getDefaultCookingPlaceId(),
+  );
+  return rows.filter((row) => !isStopped(readEffectiveBalance(balances, row.id)));
+}
 
 export const additionalResolver = {
   GroupModifier: {
-    modifierId: async (parent: { modifierId?: string;  id?: string /** here id means rmsID */}, args: any, context: { dataloaders: WeakMap<object, any>; }, info: { fieldNodes: any; }) => {
-      if (parent.modifierId) return parent.modifierId;
-      
-      if (!context.dataloaders) context.dataloaders = new WeakMap();
-      const dataloaders = context.dataloaders;
-
-      let dl = dataloaders.get(info.fieldNodes);
-      if (!dl) {
-        dl = new DataLoader(async (id: any) => {
-          const rows = await Group.find({
-            rmsId: id, isDeleted: false
-          });
-          const sortedInIdsOrder = id.map((id: string) => rows.find(x => {
-            return x.rmsId === id
-          }));
-          return sortedInIdsOrder;
-        });
-        dataloaders.set(info.fieldNodes, dl);
-      }
-      return (await dl.load(parent.id)).id;
-    },
-    group: async (parent: { modifierId?: string; id?: string /** here id means rmsID */ }, args: any, context: { dataloaders: WeakMap<object, any>; }, info: { fieldNodes: any; }) => {
-      if (!parent.modifierId && !parent.id) return;
+    group: async (parent: { id?: string /** here id means rmsID */ }, args: any, context: { dataloaders: WeakMap<object, any>; }, info: { fieldNodes: any; }) => {
+      if (!parent.id) return;
       if (!context.dataloaders) context.dataloaders = new WeakMap();
       const dataloaders = context.dataloaders;
 
@@ -41,45 +40,24 @@ export const additionalResolver = {
         });
         dataloaders.set(info.fieldNodes, dl);
       }
-      return await dl.load(parent.modifierId ? parent.modifierId : parent.id);
+      return await dl.load(parent.id);
     }
   },
   Modifier: {
-    modifierId: async (parent: { modifierId?: string;  id?: string /** here id means rmsID */}, args: any, context: { dataloaders: WeakMap<object, any>; }, info: { fieldNodes: any; }) => {
-      if (parent.modifierId) return parent.modifierId;
-      
+    dish: async (parent: { id?: string /** here id means rmsID */}, args: any, context: { dataloaders: WeakMap<object, any>; }, info: { fieldNodes: any; }) => {
+      if (!parent.id) return;
       if (!context.dataloaders) context.dataloaders = new WeakMap();
       const dataloaders = context.dataloaders;
 
       let dl = dataloaders.get(info.fieldNodes);
       if (!dl) {
         dl = new DataLoader(async (id: any) => {
-          const rows = await Dish.find({
-            rmsId: id, balance: { "!=": 0 }, isDeleted: false
-          });
-          const sortedInIdsOrder = id.map((id: string) => rows.find(x => {
-            return x.rmsId === id
-          }));
-          return sortedInIdsOrder;
-        });
-        dataloaders.set(info.fieldNodes, dl);
-      }
-      return (await dl.load(parent.id)).id;
-    },
-    dish: async (parent: { modifierId?: string;  id?: string /** here id means rmsID */}, args: any, context: { dataloaders: WeakMap<object, any>; }, info: { fieldNodes: any; }) => {
-      if (!parent.modifierId && !parent.id) return;
-      if (!context.dataloaders) context.dataloaders = new WeakMap();
-      const dataloaders = context.dataloaders;
-
-      let dl = dataloaders.get(info.fieldNodes);
-      if (!dl) {
-        dl = new DataLoader(async (id: any) => {
-          const rows = await Dish.find({ where: 
+          const rows = await withoutStopped(await Dish.find({ where:
             {or: [
-              {id: id, balance: { "!=": 0 }, isDeleted: false},
-              {rmsId: id, balance: { "!=": 0 }, isDeleted: false}
+              {id: id, isDeleted: false},
+              {rmsId: id, isDeleted: false}
             ]}
-          });
+          }));
           const sortedInIdsOrder = id.map((id: string) => rows.find(x => {
             return x.id === id ? x.id === id : x.rmsId === id ? x.rmsId === id : false
           }));
@@ -87,20 +65,20 @@ export const additionalResolver = {
         });
         dataloaders.set(info.fieldNodes, dl);
       }
-      return await dl.load(parent.modifierId ? parent.modifierId : parent.id);
+      return await dl.load(parent.id);
     }
   },
 
   OrderModifier: {
-    dish: async (parent: { id: string; modifierId: string}, args: any, context: any, info: any) => {
-      if (!parent.id && !parent.modifierId) return null
-      return (await Dish.find({ where: 
+    dish: async (parent: { id: string }, args: any, context: any, info: any) => {
+      if (!parent.id) return null
+      return (await withoutStopped(await Dish.find({ where:
         {or: [
-          {id: parent.id, balance: { "!=": 0 }, isDeleted: false}, 
-          {rmsId: parent.id, balance: { "!=": 0 }, isDeleted: false}
+          {id: parent.id, isDeleted: false},
+          {rmsId: parent.id, isDeleted: false}
         ]}
-      // @ts-ignore //TODO: Deprecated populateAll 
-      }).populateAll())[0];
+      // @ts-ignore //TODO: Deprecated populateAll
+      }).populateAll()))[0];
     },
     group: async (parent: { id: string, groupId: string; }, args: any) => {
       if (!parent.id && !parent.groupId) return null
@@ -187,9 +165,21 @@ export const additionalResolver = {
 
       return await OrderDish.find({order: parent.id});
     },
-
+    // Stored as ids, in route order; served as the places, in the same order.
+    cookingPoints: async (parent: { cookingPoints?: string[] }) => {
+      const ids = parent.cookingPoints ?? [];
+      if (!ids.length) return [];
+      const places = await Place.find({ id: ids });
+      return ids.map((id) => places.find((place) => place.id === id)).filter(Boolean);
+    },
   },
   OrderDish: {
+    // OrderDish is not auto-generated, so its associations get no resolvers of
+    // their own: without this the stored id comes back as an empty Place.
+    cookingPoint: async (parent: { cookingPoint?: string | null }) => {
+      if (!parent.cookingPoint) return null;
+      return await Place.findOne({ id: parent.cookingPoint });
+    },
     dish: async (parent: { dish: any; }, args: any, context: { dataloaders: WeakMap<object, any>; }, info: { fieldNodes: any; }) => {
       
       if (!parent.dish) return;

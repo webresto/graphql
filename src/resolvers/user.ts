@@ -2,8 +2,7 @@
 import { JWTAuth } from "../../lib/jwt";
 import { Phone } from "@webresto/core/models/User";
 // todo: fix types model instance to {%ModelName%}Record for User";
-import { Captcha } from "@webresto/core/adapters";
-import { ResolvedCaptcha } from "@webresto/core/adapters/captcha/CaptchaAdapter";
+import { Captcha, ResolvedCaptcha } from "@webresto/core/adapters";
 import { Message, Action, Response } from "../../types/primitives";
 let captchaAdapter = Captcha.getAdapter();
 

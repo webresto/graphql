@@ -12,7 +12,7 @@
     "Enter the customer's phone": "请输入客户电话",
     "The wrong format of the name of the customer": "客户姓名格式错误",
     "The wrong format of the customer phone number": "客户电话号码格式错误",
-    "No point of Street": "未指定街道",
+    "No address given": "未填写地址",
     "Not indicated the house number": "未指定门牌号",
     "The city is not indicated": "未指定城市",
     "The payment system is not available": "支付系统不可用",
@@ -34,6 +34,11 @@
     "Error: %s": "错误: %s",
     "Ordering for a date in the past is not possible": "无法为过去的日期下单",
     "The date should account for the minimum delivery time; choose a slightly later time": "日期应考虑最小送货时间;请选择稍晚的时间",
-    "Date not allowed": "不允许该日期"
+    "Date not allowed": "不允许该日期",
+    "Choose either a delivery time or a maximum wait, not both": "请选择配送时间或最长等待时间，不能同时选择",
+    "The order cannot be ready that quickly": "订单无法这么快完成",
+    "This order cannot be prepared as one order right now. Please contact us.": "目前无法将此订单作为一个订单制作，请联系我们。",
+    "The chosen location is closed right now": "所选门店目前已关闭",
+    "The chosen location does not take these orders": "所选门店不接受此类订单"
   }
   

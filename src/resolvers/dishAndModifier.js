@@ -10,12 +10,10 @@ type GroupModifier {
   rmsId: String
   maxAmount: Int
   minAmount: Int
-  modifierId: String
   required: Boolean
   amount: Int
   defaultAmount: Int
   freeOfChargeAmount: Int
-  freeAmount: Int
   groupId: String
   isSingleModifierGroupWrapper: Boolean
   childModifiers: [Modifier]
@@ -24,7 +22,6 @@ type GroupModifier {
 type Modifier {
   id: String
   rmsId: String
-  modifierId: String
   maxAmount: Int
   minAmount: Int
   defaultAmount: Int
@@ -32,7 +29,6 @@ type Modifier {
   required: Boolean
   amount: Int
   freeOfChargeAmount: Int
-  freeAmount: Int
   dish: Dish
 }
 `);
@@ -40,7 +36,6 @@ type Modifier {
 type OrderModifier {
   id: String
   rmsId: String
-  modifierId: String
   dish: Dish
   amount: Int
   groupId: String

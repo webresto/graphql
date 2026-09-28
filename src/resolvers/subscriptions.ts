@@ -1,6 +1,16 @@
 import { withFilter } from 'apollo-server';
 import checkDeviceId from '../../lib/helper/checkDeviceId';
 
+/**
+ * The `order-changed` event carries the order record exactly as waterline
+ * handed it over: associations in it are identifiers, not objects. Sending it
+ * to a subscriber as is means sending a `pickupPoint` of nothing but nulls,
+ * because GraphQL resolves the fields of the type against a string. The
+ * storefront merges the pushed order over its own, and the chosen place
+ * disappears a second after any edit of the order. So the subscription answers
+ * with the same order the query does — `Order.populate`.
+ */
+
 export default {
   Subscription: {
     orders: {
@@ -21,7 +31,7 @@ export default {
             return Array.isArray(args.orderIds) && args.orderIds.includes(payload.id);
           }
         ),
-        resolve: payload => payload,
+        resolve: payload => Order.populate(payload.id),
       }
     },
 
@@ -47,10 +57,7 @@ export default {
             return payload.deviceId === context.connectionParams.deviceId;
           }
         ),
-        resolve: payload => {
-          const order = payload;
-          return order;
-        }
+        resolve: payload => Order.populate(payload.id),
       }
     },
     message: {

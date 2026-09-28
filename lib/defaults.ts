@@ -37,7 +37,6 @@ module.exports.restographql = {
     group: ['query', 'subscription'],
     dish: ['query', 'subscription'],
     city: ['query'],
-    street: ['query'],
     ...userConfig
   },
   blackList: [

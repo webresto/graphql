@@ -17,4 +17,3 @@ test/fixture/.tmp/localDiskDb/settings.db
 .gitlab-ci.yml
 todo.md
 .vscode/extensions.json
-test

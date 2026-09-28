@@ -2,7 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 // const userAuth = sails.config.restographql.authService;
 const adapters_1 = require("@webresto/core/adapters");
-const adapters_2 = require("@webresto/core/adapters");
 const graphqlHelper_1 = require("../../lib/graphqlHelper");
 graphqlHelper_1.default.addType(`#graphql    
   type OTPResponse {
@@ -32,7 +31,7 @@ exports.default = {
                     if (await captchaAdapter.check(payload.captcha, `otpRequest:${payload.login}`) === false) {
                         throw `bad captcha`;
                     }
-                    let OTPAdapter = await adapters_2.OTP.getAdapter();
+                    let OTPAdapter = await adapters_1.Adapter.getOTPAdapter();
                     let otp = await OTPAdapter.get(payload.login);
                     let message = {
                         deviceId: null,

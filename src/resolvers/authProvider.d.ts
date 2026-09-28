@@ -24,7 +24,7 @@ declare const _default: {
             def: string;
             fn: (parent: any, args: any, context: any) => Promise<{
                 stateId: any;
-                kind: import("@webresto/core/adapters/auth/AuthProviderAdapter").AuthFlowKind;
+                kind: import("@webresto/core/adapters").AuthFlowKind;
                 redirectUrl: string;
                 clientPayload: Record<string, unknown>;
             }>;
@@ -41,7 +41,7 @@ declare const _default: {
             def: string;
             fn: (parent: any, args: any, context: any) => Promise<{
                 stateId: any;
-                kind: import("@webresto/core/adapters/auth/AuthProviderAdapter").AuthFlowKind;
+                kind: import("@webresto/core/adapters").AuthFlowKind;
                 redirectUrl: string;
                 clientPayload: Record<string, unknown>;
             }>;

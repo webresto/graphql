@@ -4,19 +4,21 @@ type CheckResponse = {
     message: Message;
     action?: Action;
 };
-import Address from "@webresto/core/interfaces/Address";
+import OrderAddress from "@webresto/core/interfaces/OrderAddress";
 import Customer from "@webresto/core/interfaces/Customer";
 import { SpendBonus } from "@webresto/core/interfaces/SpendBonus";
 interface InputOrderCheckout {
     orderId: string;
     paymentMethodId: string;
     platform?: string;
-    selfService?: boolean;
+    serviceType?: "delivery" | "pickup" | "dine-in";
     pickupPointId?: string;
-    address?: Address;
+    address?: OrderAddress;
     locationId: string;
     customer: Customer;
     date?: string;
+    /** ASAP with a ceiling, in minutes. Mutually exclusive with `date`. */
+    maxWaitMinutes?: number;
     personsCount?: number;
     comment: string;
     spendBonus: SpendBonus;
@@ -30,7 +32,7 @@ declare const _default: {
             def: string;
             fn: (_: any, { orderId }: {
                 orderId: any;
-            }, ctx: any) => Promise<import("@webresto/core/libs/helpers/OrderHelper").InitCheckout>;
+            }, ctx: any) => Promise<import("@webresto/core").InitCheckout>;
         };
     };
     Mutation: {
@@ -48,18 +50,18 @@ declare const _default: {
                     deviceId: any;
                     type: string;
                     data: {
-                        link: string;
+                        link: string | undefined;
                     };
                 };
                 message?: undefined;
             } | {
+                action?: undefined;
                 order: import("@webresto/core").OrderRecord;
                 message: {
                     type: string;
                     title: any;
                     message: any;
                 };
-                action?: undefined;
             }>;
         };
     };

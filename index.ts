@@ -1,5 +1,5 @@
 'use strict';
-/// <reference path="../node_modules/@webresto/core/interfaces/globalTypes.d.ts"/>
+/// <reference path="../node_modules/@webresto/core/interfaces/globalTypes.ts"/>
 
 const helper = require('./lib/graphqlHelper').default;
 

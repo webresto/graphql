@@ -2,7 +2,6 @@
   "author": {
     "name": "Webresto"
   },
-  "bundleDependencies": [],
   "dependencies": {
     "@webresto/worktime": "^2.2.0",
     "accept-language-parser": "^1.5.0",
@@ -35,10 +34,9 @@
     "crypto-puzzle": "^4.0.0",
     "dotenv": "^16.4.5",
     "faker": "^4.1.0",
+    "i18n-2": "^0.7.3",
     "mocha": "^8.1.1",
-    "ts-node": "^10.9.2",
-    "typescript": "^7.0.2",
-    "i18n-2": "^0.7.3"
+    "typescript": "^7.0.2"
   },
   "deprecated": false,
   "description": "Webresto graphql api",
@@ -64,8 +62,8 @@
     "hookName": "restographql"
   },
   "scripts": {
-    "test": "mocha -r ts-node/register test/bootstrap.ts './test/{,!(fixture)/**}/*.test.ts' --exit",
-    "test:pattern": "mocha -r ts-node/register test/bootstrap.ts './test/{,!(fixture)/**}/*.test.ts' --exit --grep=${PATTERN}",
+    "test": "mocha -r tsx/cjs test/bootstrap.ts './test/{,!(fixture)/**}/*.test.ts' --exit",
+    "test:pattern": "mocha -r tsx/cjs test/bootstrap.ts './test/{,!(fixture)/**}/*.test.ts' --exit --grep=${PATTERN}",
     "test:js": "mocha test/bootstrap.js './test/{,!(fixture)/**}/*.test.js' --exit",
     "test:init": "cd ./test/fixture && npm i --no-package-lock --prefix ./ && cd -"
   },
