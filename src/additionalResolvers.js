@@ -1,22 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.additionalResolver = void 0;
-const cooking_place_1 = require("@webresto/core/lib/menu/cooking-place");
-const dish_place_balance_1 = require("@webresto/core/lib/menu/dish-place-balance");
+const graphqlHelper_1 = require("../lib/graphqlHelper");
 const DataLoader = require('dataloader');
-/**
- * Drops products stopped at the cooking point the menu is served for.
- *
- * Stock is no longer a column of the dish model, so `balance: { '!=': 0 }` can
- * not be part of the criteria any more. Until the menu carries a real point
- * (iteration 4) the configured default one is used.
- */
-async function withoutStopped(rows) {
-    if (!Array.isArray(rows) || !rows.length)
-        return rows;
-    const balances = await (0, dish_place_balance_1.getEffectiveBalances)(rows.map((row) => String(row.id)), await (0, cooking_place_1.getDefaultCookingPlaceId)());
-    return rows.filter((row) => !(0, dish_place_balance_1.isStopped)((0, dish_place_balance_1.readEffectiveBalance)(balances, row.id)));
-}
 exports.additionalResolver = {
     GroupModifier: {
         group: async (parent, args, context, info) => {
@@ -51,11 +37,11 @@ exports.additionalResolver = {
             let dl = dataloaders.get(info.fieldNodes);
             if (!dl) {
                 dl = new DataLoader(async (id) => {
-                    const rows = await withoutStopped(await Dish.find({ where: { or: [
+                    const rows = await Dish.find({ where: { or: [
                                 { id: id, isDeleted: false },
                                 { rmsId: id, isDeleted: false }
                             ] }
-                    }));
+                    });
                     const sortedInIdsOrder = id.map((id) => rows.find(x => {
                         return x.id === id ? x.id === id : x.rmsId === id ? x.rmsId === id : false;
                     }));
@@ -63,19 +49,27 @@ exports.additionalResolver = {
                 });
                 dataloaders.set(info.fieldNodes, dl);
             }
-            return await dl.load(parent.id);
+            // An option is offered only where the menu that shows its dish can sell
+            // it: the dish's own context, carried down from the query.
+            const row = await dl.load(parent.id);
+            if (!row)
+                return row;
+            const [offered] = await (await Adapter.get("menu")).filterProducts([row], await (0, graphqlHelper_1.menuContextOf)(parent));
+            return offered ?? null;
         }
     },
     OrderModifier: {
+        // Not filtered by stock: the option is already in the basket, and the
+        // basket's own recount is what judges it.
         dish: async (parent, args, context, info) => {
             if (!parent.id)
                 return null;
-            return (await withoutStopped(await Dish.find({ where: { or: [
+            return (await Dish.find({ where: { or: [
                         { id: parent.id, isDeleted: false },
                         { rmsId: parent.id, isDeleted: false }
                     ] }
                 // @ts-ignore //TODO: Deprecated populateAll
-            }).populateAll()))[0];
+            }).populateAll())[0];
         },
         group: async (parent, args) => {
             if (!parent.id && !parent.groupId)
@@ -177,14 +171,19 @@ exports.additionalResolver = {
                 return null;
             return await Place.findOne({ id: parent.cookingPoint });
         },
+        // The line's dish is read in its order's menu context: its `balance` is what
+        // that order's kitchens hold, not what every kitchen of every city does.
         dish: async (parent, args, context, info) => {
             if (!parent.dish)
                 return;
             if (!context.dataloaders)
                 context.dataloaders = new WeakMap();
             const dataloaders = context.dataloaders;
+            const orderId = typeof parent.order === "object" ? parent.order?.id : parent.order;
+            // A copy: one dish object can serve lines of several orders in one response.
+            const inOrder = (dish) => (dish ? (0, graphqlHelper_1.carryMenuContext)({ ...dish }, (0, graphqlHelper_1.menuContextFor)(orderId ?? null)) : dish);
             if (typeof parent.dish === "object") {
-                return parent.dish;
+                return inOrder(parent.dish);
             }
             let dl = dataloaders.get(info.fieldNodes);
             if (!dl) {
@@ -193,7 +192,7 @@ exports.additionalResolver = {
                 });
                 dataloaders.set(info.fieldNodes, dl);
             }
-            return await dl.load(parent.dish);
+            return inOrder(await dl.load(parent.dish));
         },
     }
 };

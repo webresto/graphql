@@ -1,3 +1,4 @@
+import type { MenuContext } from "@webresto/core/interfaces/Menu";
 /**
  * Adds a model to the list of models for creating GraphQL schema types
  *
@@ -65,6 +66,13 @@ declare function getSchema(): {
     typeDefs: string;
     resolvers: Resolvers;
 };
+type MenuContextPromise = Promise<MenuContext>;
+/** The context of an order the caller names, looked up rather than taken on trust; bare without one. */
+export declare function menuContextFor(orderId?: string | null): MenuContextPromise;
+/** The context the record was read in; a record read outside a menu query gets the bare one. */
+export declare function menuContextOf(record: any): MenuContextPromise;
+/** Marks records, and the modifiers of a dish, with the context they were read in. */
+export declare function carryMenuContext<T>(records: T, context: MenuContextPromise): T;
 /**
  * Adds whiteList
  * Example: setWhiteList({

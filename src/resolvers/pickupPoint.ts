@@ -27,8 +27,13 @@ exports.default = {
                     // narrows the list by the flags, which is why they are on the
                     // type. Splitting this into two queries would only make the
                     // storefront ask twice for one list.
+                    //
+                    // Only kitchens: a point that hands over food cooked elsewhere
+                    // is a particular case not supported for now — nothing says
+                    // which kitchen would cook for it.
                     let result = await Place.find({
                         enable: true,
+                        isCookingPoint: true,
                         or: [{ isPickupPoint: true }, { hasDiningArea: true }],
                     });
                     return result;

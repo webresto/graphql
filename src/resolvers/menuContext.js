@@ -9,13 +9,13 @@ const graphqlHelper_1 = require("@webresto/graphql/lib/graphqlHelper");
  * has a menu at all, to know whether it must ask for an address first.
  *
  * `diagnostics` is for operators and support, never for customers. It says which
- * input decided the point — a requested id, the order's own kitchen, or the
- * installation default — in the same words the server logs use.
+ * input decided the points — a requested id, the order's own kitchen, or the
+ * kitchens of its city or of every city — in the same words the server logs use.
  */
 (0, graphqlHelper_1.addType)(`type MenuContext {
-  """The points stock is read at; a product is in the menu if any of them can sell it. Empty means no point is known, and stock reads as unlimited."""
+  """The points stock is read at. With a kitchen, a product is in the menu if any of them can sell it; without one (city, all), only if each of them can. Empty means no point is known, and stock reads as unlimited."""
   placeIds: [String]
-  """Which input decided it: requested | order | coordinate | default | none."""
+  """Which input decided it: requested | order | coordinate | city | all | none."""
   source: String
   """Whether a point must be known before products can be added to a basket."""
   placeRequired: Boolean

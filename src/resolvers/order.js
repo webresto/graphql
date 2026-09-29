@@ -174,7 +174,9 @@ exports.default = {
                         }
                     }
                     await Order.addDish(order.id, args.dishId, args.amount, args.modifiers === undefined ? [] : args.modifiers, args.comment, 'user', args.replace, args.orderDishId);
-                    await Order.countCart({ id: order.id });
+                    // No second countCart: the model method already counted the basket, and
+                    // a recount would clear `message` — what that count removed — before
+                    // the customer sees it.
                     let fullOrder = await Order.populate(order.id);
                     await emitter.emit("http-api:before-response-order-add-dish", fullOrder);
                     return fullOrder;
@@ -205,7 +207,9 @@ exports.default = {
                     catch (error) {
                         throw error;
                     }
-                    await Order.countCart({ id: order.id });
+                    // No second countCart: the model method already counted the basket, and
+                    // a recount would clear `message` — what that count removed — before
+                    // the customer sees it.
                     let fullOrder = await Order.populate(order.id);
                     await emitter.emit("http-api:before-response-order-replace-dish", fullOrder);
                     return fullOrder;
@@ -236,7 +240,9 @@ exports.default = {
                     catch (error) {
                         throw error;
                     }
-                    await Order.countCart({ id: order.id });
+                    // No second countCart: the model method already counted the basket, and
+                    // a recount would clear `message` — what that count removed — before
+                    // the customer sees it.
                     let fullOrder = await Order.populate(order.id);
                     await emitter.emit("http-api:before-response-order-remove-dish", fullOrder);
                     return fullOrder;
@@ -277,7 +283,9 @@ exports.default = {
                     catch (error) {
                         throw error;
                     }
-                    await Order.countCart({ id: order.id });
+                    // No second countCart: the model method already counted the basket, and
+                    // a recount would clear `message` — what that count removed — before
+                    // the customer sees it.
                     let fullOrder = await Order.populate(order.id);
                     await emitter.emit("http-api:before-response-order-set-dish-amount", fullOrder);
                     return fullOrder;

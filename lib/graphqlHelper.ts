@@ -3,6 +3,7 @@ import { WorkTimeValidator } from '@webresto/worktime'
 
 import *  as WLCriteria from 'waterline-criteria';
 import { JWTAuth } from "./jwt";
+import type { MenuContext } from "@webresto/core/interfaces/Menu";
 
 import * as fs from 'fs';
 import * as path from 'path';
@@ -329,31 +330,64 @@ let modelsResolvers: { Query?: object, Subscription?: object } = { Query: {} };
 import { withFilter } from "apollo-server";
 
 /**
- * Removes products the menu's cooking point cannot sell.
+ * The menu context a record was read in, carried down the response.
+ *
+ * The `dish` and `group` queries take an `orderId`: the context is resolved
+ * once, at the root, and every record the response holds — a group, its child
+ * groups, their dishes, a dish's modifiers — carries it under this symbol. A
+ * nested field reads it from its parent, so one response is never assembled
+ * from two contexts. Not the GraphQL `context`: over a websocket that is one
+ * object for the whole connection, and one query's order would leak into the
+ * next.
+ *
+ * A symbol, not enumerable: it is not a field, is never written back and never
+ * reaches the client.
+ */
+const MENU_CONTEXT = Symbol("menuContext");
+
+type MenuContextPromise = Promise<MenuContext>;
+
+/** The context of an order the caller names, looked up rather than taken on trust; bare without one. */
+export async function menuContextFor(orderId?: string | null): MenuContextPromise {
+  const order = orderId ? await Order.findOne({ id: orderId }) : null;
+  return (await Adapter.get("menu")).resolveContext({ order: order ?? null });
+}
+
+/** The context the record was read in; a record read outside a menu query gets the bare one. */
+export function menuContextOf(record: any): MenuContextPromise {
+  return record?.[MENU_CONTEXT] ?? menuContextFor(null);
+}
+
+/** Marks records, and the modifiers of a dish, with the context they were read in. */
+export function carryMenuContext<T>(records: T, context: MenuContextPromise): T {
+  const mark = (record: any) => {
+    if (!record || typeof record !== "object") return;
+    Object.defineProperty(record, MENU_CONTEXT, { value: context, enumerable: false, configurable: true });
+  };
+  for (const record of (Array.isArray(records) ? records : [records]) as any[]) {
+    mark(record);
+    for (const group of Array.isArray(record?.modifiers) ? record.modifiers : []) {
+      mark(group);
+      for (const option of Array.isArray(group?.childModifiers) ? group.childModifiers : []) mark(option);
+    }
+  }
+  return records;
+}
+
+/**
+ * Removes products the menu cannot sell.
  *
  * Stock moved from a column of the dish model to the pair "product + cooking
  * point", so it can no longer be a query criterion: the rows are dropped after
  * the query instead.
  *
- * Which point, and what counts as unsellable, is the menu adapter's answer and
- * not this file's. This is the *second* place in the codebase that filters a
- * product list — `Dish.getDishes` is the first — and the fifth iteration exists
- * largely because two copies of that rule drift apart. Asking the adapter is
- * what keeps them one rule with two callers.
- *
- * The `dish` query takes an `orderId`, so a storefront with a basket can browse
- * the menu in that order's context: the adapter then reads it at the order's
- * kitchen, and a future adapter may react to the basket's contents. The order is
- * looked up rather than taken on trust, same as in `menuContext`. Without one
- * the context is resolved bare: the installation default in `default` mode, and
- * in `single-place` whatever the adapter falls back to.
+ * Which points, and what counts as unsellable, is the menu adapter's answer and
+ * not this file's. `Dish.getDishes` is the other place that filters a product
+ * list; asking the adapter is what keeps them one rule with two callers.
  */
-async function dropStoppedDishes(modelname: string, records: any[], orderId?: string | null): Promise<any[]> {
+async function dropStoppedDishes(modelname: string, records: any[], context: MenuContextPromise): Promise<any[]> {
   if (modelname !== "dish" || !Array.isArray(records) || !records.length) return records;
-
-  const adapter = await Adapter.get("menu");
-  const order = orderId ? await Order.findOne({ id: orderId }) : null;
-  return adapter.filterProducts(records, await adapter.resolveContext({ order: order ?? null }));
+  return (await Adapter.get("menu")).filterProducts(records, await context);
 }
 
 /**
@@ -422,9 +456,10 @@ function addModelResolver(modelname) {
   if (whiteList[modelname].includes('query') && !blackList.includes(`${modelName}`)) {
     models.add(modelname); // make schema Type for Model
     const methodName = firstLetterToLowerCase(modelName)
-    // Only the dish query carries an orderId: it is the one whose rows are
-    // narrowed by the menu adapter, and the order is what the adapter narrows by.
-    const orderArg = modelname === "dish" ? ", orderId: String" : "";
+    // The dish and group queries carry an orderId: dishes are narrowed by the
+    // menu adapter, directly or as a group's, and the order is what it narrows by.
+    const readsMenu = modelname === "dish" || modelname === "group";
+    const orderArg = readsMenu ? ", orderId: String" : "";
     let resolverQuery = {
       def: `""" [autogenerated] ${isAuthRequired(modelname) ? '\n[auth required]' : ''}""" ${methodName}(criteria: Json, skip: Int, limit: Int, sort: String${orderArg}): [${modelName}]`,
       fn: async function (parent, args, context) {
@@ -485,7 +520,8 @@ function addModelResolver(modelname) {
 
         emitter.emit(`graphql-query-${modelname}`, result);
 
-        result = await dropStoppedDishes(modelname, result, args.orderId);
+        const menuContext = readsMenu ? menuContextFor(args.orderId) : null;
+        if (menuContext) result = carryMenuContext(await dropStoppedDishes(modelname, result, menuContext), menuContext);
 
         //worktime filter
 
@@ -552,7 +588,7 @@ function addModelResolver(modelname) {
 
         let result = await ORMrequest
 
-        result = await dropStoppedDishes(modelname, result);
+        result = await dropStoppedDishes(modelname, result, menuContextFor(null));
 
         //worktime filter
         if (sails.models[modelname].attributes.worktime) {
@@ -683,7 +719,12 @@ function addModelResolver(modelname) {
             
             if (!result) result = []
 
-            result = await dropStoppedDishes(modelAttribute[modelRelationType], result);
+            // Dishes and groups are read in the parent's context, and hand it on.
+            const target = modelAttribute[modelRelationType];
+            if (target === "dish" || target === "group") {
+              const menuContext = menuContextOf(parent);
+              result = carryMenuContext(await dropStoppedDishes(target, result, menuContext), menuContext);
+            }
 
             // TODO: this need only for support legacy patching (discount)
             if (result && result.length) {

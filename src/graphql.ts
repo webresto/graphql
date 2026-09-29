@@ -174,18 +174,15 @@ export default {
      * off the record. The field itself stays: storefronts read it to grey out a
      * product, and `-1` still means unlimited while `0` still means stopped.
      *
-     * The point comes from the menu adapter, the same one that decides which
-     * products are in the list at all. Reading it from `DEFAULT_COOKING_PLACE`
-     * here while the list was narrowed somewhere else is how a storefront ends
-     * up showing one kitchen's products with another kitchen's stock.
+     * Read in the context the dish itself was read in — the order the query
+     * named — so a product is quoted the stock of the kitchens that decided
+     * whether it is in the list at all: as many as the basket will take.
      */
     helper.addCustomField("Dish", "balance: Int");
     helper.addResolvers({
       Dish: {
         balance: async (parent: { id?: string }) => {
-          const adapter = await Adapter.get("menu");
-          const context = await adapter.resolveContext({});
-          return getEffectiveBalanceAcross(String(parent?.id), context.placeIds);
+          return getEffectiveBalanceAcross(String(parent?.id), await helper.menuContextOf(parent));
         },
       },
     });

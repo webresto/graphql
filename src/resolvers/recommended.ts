@@ -1,21 +1,16 @@
 import { getRecommendElements } from "../../lib/getRecommended";
-import { getDefaultCookingPlaceId } from "@webresto/core/lib/menu/cooking-place";
-import { getEffectiveBalances, isStopped, readEffectiveBalance } from "@webresto/core/lib/menu/dish-place-balance";
+import { carryMenuContext, menuContextFor } from "../../lib/graphqlHelper";
 
 /**
- * Drops products stopped at the cooking point the menu is served for.
+ * Keeps what the menu can sell in the context given, and marks the rows with it.
  *
- * Stock left the dish model for the pair "product + cooking point", so it can
- * no longer be asked for in the criteria above.
+ * Asked once, of the whole list, rather than of each source that feeds it:
+ * a forced or a linked recommendation the kitchen cannot sell is as unsellable
+ * as a default one.
  */
-async function withoutStopped(rows: any[]): Promise<any[]> {
-  if (!Array.isArray(rows) || !rows.length) return rows;
-
-  const balances = await getEffectiveBalances(
-    rows.map((row) => String(row.id)),
-    await getDefaultCookingPlaceId(),
-  );
-  return rows.filter((row) => !isStopped(readEffectiveBalance(balances, row.id)));
+async function sellable(rows: any[], orderId: string | null): Promise<any[]> {
+  const context = menuContextFor(orderId);
+  return carryMenuContext(await (await Adapter.get("menu")).filterProducts(rows, await context), context);
 }
 
 export default {
@@ -64,7 +59,7 @@ export default {
                   
                   criteria['where']['and'].push({ 'parentGroup': { 'in': listOfAllowedGroups } })
                   if (currentDish) criteria['where']['and'].push({'parentGroup': { "!=": currentDish.parentGroup}})
-                  recommendedByDefault = getRecommendElements(await withoutStopped(await Dish.find(criteria)), 8);                
+                  recommendedByDefault = getRecommendElements(await Dish.find(criteria), 8);                
                 }
                 
 
@@ -73,7 +68,7 @@ export default {
                 result =  [...new Set(result.map(dish => dish.id))].map(id =>
                   result.find(dish => dish.id === id)
                 )
-                return result.splice(0, 24);
+                return (await sellable(result, null)).splice(0, 24);
               } catch (error) {
                 sails.log.error(`GQL > [recommended]`, error, args);
                 throw error
@@ -132,14 +127,14 @@ export default {
                 if (orderDishIds.length) {
                   criteria["where"]["and"].push({id : {"!=": orderDishIds}})
                 }
-                recommendedByDefault = getRecommendElements(await withoutStopped(await Dish.find(criteria)), 8);                
+                recommendedByDefault = getRecommendElements(await Dish.find(criteria), 8);                
               }
               result = result.concat(recommendedByDefault)
                 
               result =  [...new Set(result.map(dish => dish.id))].map(id =>
                 result.find(dish => dish.id === id)
               )
-              return result.splice(0, 24);
+              return (await sellable(result, args.orderId ?? null)).splice(0, 24);
             } catch (error) {
               sails.log.error(`GQL > [recommended]`, error, args);
               throw error

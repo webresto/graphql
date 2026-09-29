@@ -61,8 +61,12 @@ export declare const additionalResolver: {
         }) => Promise<(import("@webresto/core").PlaceRecord | undefined)[]>;
     };
     OrderDish: {
+        cookingPoint: (parent: {
+            cookingPoint?: string | null;
+        }) => Promise<import("@webresto/core").PlaceRecord | null>;
         dish: (parent: {
             dish: any;
+            order?: any;
         }, args: any, context: {
             dataloaders: WeakMap<object, any>;
         }, info: {
