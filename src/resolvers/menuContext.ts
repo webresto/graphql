@@ -18,7 +18,7 @@ addType(`type MenuContext {
   source: String
   """Whether a point must be known before products can be added to a basket."""
   placeRequired: Boolean
-  """Set when a point was required and none could be found: MENU_PLACE_REQUIRED."""
+  """Why the menu cannot be offered: MENU_PLACE_REQUIRED (a point is required and none was found) or PLACE_CLOSED (every point of the menu is closed now)."""
   code: String
   """Why the context ended up like this. For operators, not for customers."""
   diagnostics: [String]
