@@ -229,7 +229,7 @@ exports.default = {
                             type: "info",
                             title: context.i18n.__("Attention"),
                             message: order.message
-                                ? context.i18n.__(order.message, ...(order.messageArgs ?? []))
+                                ? context.i18n.__(order.message)
                                 : context.i18n.__("Ready for order"),
                         };
                     }
@@ -240,7 +240,7 @@ exports.default = {
                                 type: "error",
                                 title: "Attention",
                                 message: order.message
-                                    ? context.i18n.__(order.message, ...(order.messageArgs ?? []))
+                                    ? context.i18n.__(order.message)
                                     : context.i18n.__("It was not possible to check the order"),
                             };
                         }

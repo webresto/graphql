@@ -161,10 +161,6 @@ export const additionalResolver = {
       const places = await Place.find({ id: ids });
       return ids.map((id) => places.find((place) => place.id === id)).filter(Boolean);
     },
-    // Core writes a translation key and its `%s`; the reader's language is
-    // known here. Text that is not a key — a promotion's own — comes back as is.
-    message: (parent: { message?: string | null; messageArgs?: string[] | null }, _args: any, context: any) =>
-      parent.message ? context.i18n.__(parent.message, ...(parent.messageArgs ?? [])) : parent.message,
   },
   OrderDish: {
     // OrderDish is not auto-generated, so its associations get no resolvers of
