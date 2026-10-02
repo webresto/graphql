@@ -7,26 +7,33 @@ description: >
 
 ## Lyrics
 
-Registration can be flexibly configured through flags in restrictions. In fact, the two main cases that we want to cover are quick registration by phone or email.
+Every way into an account — a code by SMS, a flash-call, a messenger, linking a second method
+from the profile page, confirming an account deletion — is **one attempt object and one loop**.
+The client implements the loop once; a new sign-in method is a new *step type* inside it, never a
+new API.
 
-The email can be useful for corporate catering, or nutrition subscriptions. Email and phone are the same.
+```
+authStart(purpose, method?, login?) → { id, step }
+  ↓ poll authStatus(id) → { status, step }     ← the screen IS this response
+  ↓ authSubmit(id, step.id, input)             ← the phone number, or the code
+done → ticket → authExchange(ticket) → JWT
+                or the ticket is passed to the mutation it guards
+```
 
-We understand that in most cases the phone will be selected as the login for the webresto account account. therefore it is the default when the site is deployed.
+Six operations: `authMethods`, `authStart`, `authStatus`, `authSubmit`, `authSwitch`,
+`authResend`. The client never decides the next step on its own — at the moment of the click it
+cannot know whether the user will come back from the messenger, and two providers of the same
+method disagree on code length. The only source of truth is `step` from the last response.
 
-[There is a method for quick entry by OTP](#login) `login`, with quick registration. In this case, we register an account if there is none, or we carry out authorization
-
-If a `passwordPolicy` is required, then the user must also specify a password during registration. In next login, it will be possible to enter with a password. It is possible that the password is set from the last OTP `from_otp`. So the password may be, not be, or even the last of the OTP is put
-
-Other types of authorization must be implemented in-house and are not included in the basic package
-
-
-> ⚠️ By default setting `passwordPolicy = from_otp` it means what last OTP was setting as password, but you can get OTP in any time
+The full reference — steps, outcomes, purposes, tickets, the profile page, and what each field
+means — lives in the core module: **`@webresto/core/docs/Authorization.md`**.
 
 > ⚠️ `X-Device-Id` you should pass  [deviceId](./device-id.md)
 
-> ⚠️ read more about [mocks](./mocks.md) 
+> ⚠️ read more about [mocks](./mocks.md)
 
-
+> ⚠️ captcha is requested by the server through `step.captchaRequired` — solve it for the label
+> `authStart:%input%` and pass it to the call that carries the input, see [captcha](./captcha.md)
 
 ## User restrictions
 
@@ -35,167 +42,138 @@ To get user settings use the user section in restrictions
 ```gql
 {restrictions{
     user {
-        loginField # by default: `phone`
-        passwordPolicy # possible 3 variants ['required', 'from_otp', 'disabled'] by default: `from_otp` it means what need only OTP, for next logins  passwordRequired, disabled is means password forbidden and you need all time get OTP password
-        loginOTPRequired # by default: `false`
+        loginField # deprecated, always 'phone' — `authMethods` is the real answer
+        passwordPolicy # deprecated, always 'disabled' — there is no password in auth v2
+        loginOTPRequired # always true: every sign-in goes through a proven attempt
         allowedPhoneCountries # List of all countries allowed to login by phone
         linkToProcessingPersonalData # Link to doc
         linkToUserAgreement # Link to doc
-        customFields # Zodiac sign, Human desing type, Best Friend, referal link 
+        customFields # Zodiac sign, Human desing type, Best Friend, referal link
     }
 }}
 
 ```
 
+There is no password in auth v2: sign-in is proven through an `AuthMethod`, and `passwordPolicy`
+stays in the schema only so existing clients keep parsing — it always answers `'disabled'`.
+
+## Cart only for signed-in users
+
+`REQUIRE_AUTH_FOR_CART` — a boolean setting, off by default, switchable at runtime from the
+settings manager. On: a guest can neither open a cart nor put a dish in one. Off or not set: the
+guest cart keyed by `deviceId`, as always.
+
+```gql
+{restrictions{
+    requireAuthForCart # Boolean, never null — read it before the first "add to cart"
+}}
+```
+
+Show the login screen *before* the first dish. The refusal cannot be recognised by its error:
+`formatError` strips `extensions`, so there is no error code, and the message text is not a
+contract.
+
+The flag guards what the **customer puts in** a cart, not the existence of the cart: creating the
+row is the storefront asking for an `orderId`, and the server fills it itself
+(`ORDER_INIT_PRODUCT_ID`). Behind the flag, a request without a JWT (an expired one counts as
+none) gets:
+
+- `order` without `orderId` — a cart, exactly as with the flag off, init product included;
+- `orderAddDish` / `orderReplaceDish` / `orderRemoveDish` / `orderSetDishAmount` with an unknown
+  `orderId` — the cart is created, the customer's action on it is refused;
+- `orderAddDish` into an anonymous cart that already exists — an error from core, the cart is left
+  as it was;
+- checkout of an anonymous cart — an error from core, `{ code: 20 }`.
+
+The barrier lives in core (`Order.addDish`, `Order.doCart`), not only in this API, so every
+integration sees it. Items the server places itself (promotions, `ORDER_INIT_PRODUCT_ID`) are
+exempt. Checkout is guarded by the same flag: `Order.check` on an anonymous cart with no JWT
+answers `{ code: 20, error: "authorization required" }` — otherwise a cart assembled before the
+flag was switched on, or on another device, still reached an order with no account behind it.
+
+Issuing the JWT (`authExchange`) hands the anonymous carts of **this `deviceId`** (`NEW`/`CART`,
+unpaid) to the account, so the `orderId` the client held before signing in keeps working — with
+the flag off as well. Only the current device, only while that device is signed in as the
+account, and a cart that already has an owner is never re-pointed. One more limit: `deviceId`
+comes from the client and a device follows whoever last signed in with it, so only carts with
+nothing personal in them are taken — an empty `customer`, or a `customer.phone` this account has
+already proven. A cart left behind (it was built on another device, or it carries somebody
+else's checkout data) stays anonymous: request `order` without `orderId` for a fresh one.
+
 ---
 
 ## 🛡 Authentication
 
-Get JWTtoken from `action` field on `login` mutation responce, and next pass JWT token without any marks in header `Authorization` 
+Get the JWT from the `action` field of the `authExchange` response, and pass it without any marks
+in the `Authorization` header:
 ```
 header: {
     Authorization: "ciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InVzZX",
 }
 ```
 
+---
 
-## OTPRequest
-Send OTP for specific login
-
->  ⚠️ See stdout nodejs log in development mode you will see OTPcode
-
-### Definition
+## The loop
 
 ```gql
-mutation OTPRequest(
-login: String! (by loginField)
-captcha: Captcha! (solved captcha for label "OTPRequest:%login%")
-): OTPResponse
+# 1. what may be offered here at all — identity buttons and phone-proof methods in one round trip
+query { authMethods(purpose: "login") { identity { method title kind flow } proof { method title mode } phoneLoginAvailable } }
+
+# 2. open an attempt — `login` may be omitted, the server will ask for it with an enter_phone step
+mutation { authStart(purpose: "login", login: "+13450000123") { id status step { id type codeLength captchaRequired } } }
+
+# 3. the screen is a function of this response; poll it, it has no side effects
+query { authStatus(id: "…") { status step { id type expiresInSeconds } nextAttemptAfterSeconds attemptsLeft failReason } }
+
+# 4. answer the step the server is showing — `stepId` is what makes a stale screen fail loudly
+mutation { authSubmit(id: "…", stepId: "…", input: "123456") { status ticket } }
+
+# 5. spend the one-time ticket for a session
+mutation { authExchange(ticket: "…") { user { id name } action { type data } } }
 ```
 
-1. The OTPRequest mutation requests an OTP code for the provided phone or email login.
-2. The captcha provided must match the solved captcha for the label "OTPRequest:%login%".
-3. The OTP is generated and sent to the provided phone or email login.
+`authSwitch(id, method)` re-aims a live attempt at another method ("the call never came, send an
+SMS"); `authResend(id)` repeats the current one. Both are paced by the same per-target budget, so
+neither is a way around the pause.
 
- ### Error Handling
+A ticket is one-time and bound to its purpose: `userDelete`, `authUnlink` and
+`authSetPrimaryPhone` each take the ticket of the purpose they require, and a code minted for
+signing in cannot delete an account.
 
-If the provided captcha does not match, a generic error message with the message "bad captcha" will be thrown.
-Example
+`authExchange` is the only consumer of a `login` ticket. When the operator asks for a name, it
+answers `registrationRequired: true`, and the name is filled in by `registration` under the JWT it
+just issued — a second mutation cannot redeem the same ticket:
 
-```gql
-
-mutation {
-    OTPRequest(
-        login: "13450000123",
-        captcha: {
-            id: "uuid",
-            solution: "123n"
-        }
-    ) {
-        id
-        nextOTPSeconds
-        message {
-            id
-            title
-            type
-            message
-        }
-        action {
-            id
-            type
-            data
-        }
-    }
-}
+```graphql
+mutation { authExchange(ticket: "…") { registrationRequired action { data } } }
+mutation { registration(firstName: "Иван") { user { id firstName } registrationRequired } }
 ```
-
 
 ---
 
-## Login
+## What is gone
 
-If you getting account access by OTP for unknown account, server create new account. For cases when account is registred 
-server restore account and send login token automaticaly in action. When account is not registred, server make new account, (with `hasFilledAllCustomFields: false` ).  
+Removed without deprecated wrappers — there were no consumers in this repository:
 
-> ⚠️ It's funny but we first create an account and then go through the process of filling it out (registration)
-
->Step by step:
->1. get OTP
->2. Solve captcha
->3. Send auth mutatuion and receive JWT token
-
-> ⚠️ After login you receive JWT in action (login)
-
-### Definition
-
-```gql
-mutation login(
-  login: String!
-
-  "(required when login field is phone)"
-  phone: Phone 
-  
-  "(when passwordPolicy is required )"
-  password: String
-  
-  "from otpRequest"
-  otp: String! 
-  
-  "(solved captcha for label 'auth:%login%')"
-  captcha: Captcha! 
-): UserResponse
-```
-
-### Function
-
-1. if  `passwordPolicy ==  'required'` you should pass password for setup password in next time, in other case last OTP sets as password
-2. When `passwordPolicy ==  'from_otp'` you can pass password or OTP
-3. When `passwordPolicy ==  'disabled'` you not need pass password
-4. When loginField is phone you need pass Phone in Object format
-5. When `loginOTPRequired` you should pass OTP
-
-### Error Handling
-
-
-### Example
-
-```gql
-mutation {
-login(
-    login: "13450000123", 
-    password: "Password",
-    otp: "123456"
-    phone: { otp: "+1", number: "3450000123" }, 
-    captcha: {
-        id: "uuid",
-        solution: "123n"
-    }
-    ) {
-        user {
-            id
-            name
-        }
-        # Toast "You logined successfully", also this will be sent by Messages subscription
-        message {
-            id # unique id is equal subscription message id
-            title
-            type
-            message
-        }
-        # Here  recive JWT token, also this will be sent by Actions subscription
-        action {
-            id # unique id is equal subscription action id
-            type # returns `authorization`
-            data # retruns `JWT_TOKEN`
-        }
-}}
-```
+| was | now |
+|---|---|
+| `OTPRequest(login, captcha)` | `authStart(purpose: "login", login)` |
+| `login(login, phone, password, otp, captcha)` | `authStart` / `authSubmit` / `authExchange` |
+| `startAuth` / `completeAuth` / `authStatus(stateId)` | `authStart` / `authStatus(id)` |
+| `setAuthPhone` / `requestAuthOtp` / `resendAuthOtp` / `confirmAuthPhone` | `authSubmit` / `authResend` |
+| `myAuthProviders` | `authMethods(purpose: "link")` + `myAccount` |
+| `linkAuthProvider` / `unlinkAuthProvider` | `authStart(purpose: "link")` / `authUnlink` |
+| `registration(login, phone, password, otp, …)` | `registration(firstName, …)` under the JWT — profile only |
+| `restorePassword(login, phone, password, otp)` | removed: there is no password as a way in (auth v2) |
+| `userDelete(otp)` | `userDelete(ticket)` |
+| `restrictions.user.OTPlength` | `step.codeLength` (the field stayed, but it lies by construction) |
 
 ---
 
 ## Logout
 
-> 🛡 Authentication required 
+> 🛡 Authentication required
 >
 ```gql
 logout(
@@ -212,4 +190,3 @@ logout(
 ```gql
 logoutFromAllDevices: Response
 ```
-

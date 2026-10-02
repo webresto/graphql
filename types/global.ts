@@ -58,8 +58,5 @@ declare global {
     CAPTCHA_TYPE: string
     CUSTOM_FIELDS: string[]
 
-    // for tests
-    PASSWORD_REQUIRED: boolean
-    LOGIN_OTP_REQUIRED: boolean
   }
 }

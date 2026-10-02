@@ -29,6 +29,20 @@ function publishOrderDebounced(order: any, delay = 700) {
 
 const AdditionalResolvers: any = {};
 
+/**
+ * Best-effort client IP: trust the first hop of X-Forwarded-For (set by our own proxy), fall
+ * back to X-Real-IP, then to the raw socket. Used for UserDevice.lastIP and the auth audit trail
+ * (review1 §2 "IP не прокидывается") — never authoritative, but strictly better than a literal
+ * "0.0.0.0" that made every login look like it came from nowhere.
+ */
+function resolveIp(headers: Record<string, any> | undefined, socket?: { remoteAddress?: string }): string {
+  const forwarded = headers?.["x-forwarded-for"];
+  if (forwarded) return String(forwarded).split(",")[0].trim();
+  const real = headers?.["x-real-ip"];
+  if (real) return String(real).trim();
+  return socket?.remoteAddress ?? "";
+}
+
 export default {
   getPubsub: () => pubsub,
   getServer: () => server,
@@ -260,7 +274,9 @@ export default {
               if (connectionParams["x-device-id"] || connectionParams["X-Device-Id"]) {
                 connectionParams["deviceId"] = connectionParams["x-device-id"] ? connectionParams["x-device-id"] : connectionParams["X-Device-Id"];
               }
-              
+
+              connectionParams["IP"] = resolveIp(webSocket?.upgradeReq?.headers, webSocket?.upgradeReq?.socket ?? webSocket?.upgradeReq?.connection);
+
               exContext["connectionParams"] = connectionParams;
 
               /**
@@ -311,6 +327,8 @@ export default {
             if (!headers["authorization"] && headers["Authorization"]) {
               headers["authorization"] = headers["Authorization"];
             }
+
+            headers["IP"] = resolveIp(headers, req?.socket ?? req?.connection);
 
             // set context locale
             headers["locale"] = sails.config.i18n.defaultLocale
