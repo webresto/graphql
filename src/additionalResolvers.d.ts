@@ -75,6 +75,12 @@ export declare const additionalResolver: {
             dishes: any;
             id: any;
         }, args: any, context: any, info: any) => Promise<any>;
+        paymentMethod: (parent: {
+            paymentMethod: any;
+        }) => Promise<any>;
+        pickupPoint: (parent: {
+            pickupPoint: any;
+        }) => Promise<any>;
     };
     OrderDish: {
         dish: (parent: {
