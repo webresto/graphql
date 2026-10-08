@@ -1,5 +1,6 @@
 import graphqlHelper from "../../lib/graphqlHelper";
 import { TimeZoneIdentifier } from "@webresto/worktime"
+import AuthService from "@webresto/core/lib/AuthService";
 graphqlHelper.addType(`#graphql
   type UserRestrictions {
     "Indicate main login field"
@@ -10,8 +11,8 @@ graphqlHelper.addType(`#graphql
     "List of all custom user fields"
     customFields: [UserCustomField]
 
-    "Password is required in users accounts"
-    passwordPolicy: String
+    "Always \\"disabled\\": there is no password in auth v2. Kept so existing clients keep parsing."
+    passwordPolicy: String @deprecated(reason: "no password in auth v2; sign-in is a proven AuthMethod")
 
     "Countries for send OTP"
     allowedPhoneCountries: [Country],
@@ -62,6 +63,9 @@ graphqlHelper.addType(`#graphql
 
       "Cities this installation delivers in. The customer picks one; it travels with the address and is what qualifies it for the geocoder."
       cities: [City]
+
+      "A cart can only be created and filled by an authenticated user"
+      requireAuthForCart: Boolean
 
       "Group User restrictions"
       user: UserRestrictions
@@ -127,25 +131,50 @@ export default {
             // `CITY` setting could not be ordered in: nothing points at it.
             return await City.find({ where: { isDeleted: { "!=": true } }, sort: "name ASC" });
         },
+        /**
+         * Lets the client show the login screen *before* the first dish instead of learning the
+         * policy from a failed mutation: formatError strips `extensions`, so the refusal from
+         * getNewCart/addDish carries no code the client could branch on.
+         *
+         * The effective value, not the raw setting: while no sign-in method is enabled the core
+         * ignores the flag (require-auth-for-cart.md §3.5), and a client told otherwise would
+         * send the guest to a login screen with nothing on it.
+         */
+        requireAuthForCart: async () => {
+            return await AuthService.cartRequiresAuth();
+        },
         user: () => ({}), // Dummy resolver to nest the fields below
     },
     UserRestrictions: {
-        loginField: async () => {
-            let loginField = await Settings.get("CORE_LOGIN_FIELD");
-            return loginField || 'phone';
-        },
-        loginOTPRequired: async () => {
-            let loginOTPRequired = await Settings.get("LOGIN_OTP_REQUIRED");
-            return loginOTPRequired || false;
-        },
+        /**
+         * Always 'phone'. The field is a leftover of CORE_LOGIN_FIELD, which chose what an account
+         * was keyed by; it is kept in the schema only so clients that have not moved to
+         * `authMethods` keep parsing, and `authMethods` is the real answer.
+         *
+         * It used to be computed from the registry, to report 'email' when the only enabled
+         * phone_proof offer was an email-shaped one. There is no such offer any more: the core
+         * cannot prove an address, so a phone number is the one login string it knows (review3
+         * §1.2). The query behind this was a database round trip that could only ever return
+         * 'phone'.
+         */
+        loginField: async () => 'phone',
+        /**
+         * Always true. After design2 there is no alternative: every sign-in goes through an
+         * attempt that has to be proven, so "should we require an OTP" has stopped being a
+         * question — which is why LOGIN_OTP_REQUIRED (and its never-read twin
+         * CORE_LOGIN_OTP_REQUIRED) were deleted rather than defaulted.
+         */
+        loginOTPRequired: async () => true,
         customFields: async () => {
             let customFields = await Settings.get("CUSTOM_FIELDS");
             return customFields || [];
         },
-        passwordPolicy: async () => {
-            let passwordPolicy = await Settings.get("PASSWORD_POLICY");
-            return passwordPolicy || "from_otp";
-        },
+        /**
+         * @deprecated Always "disabled". The password subsystem is gone (remove-password.md):
+         * no setting is read, because the setting no longer exists — a client that still keys a
+         * form on "required" gets the one answer that draws no form.
+         */
+        passwordPolicy: () => "disabled",
         allowedPhoneCountries: async () => {
             let allowedPhoneCountriesList = [];
 
@@ -174,6 +203,8 @@ export default {
         },
         linkToProcessingPersonalData: async () => await Settings.get("LINK_TO_PROCESSING_PERSONAL_DATA") ?? null,
         linkToUserAgreement: async () => await Settings.get("LINK_TO_USER_AGREEMENT") ?? null,
+        /** @deprecated the authoritative length is AuthStep.codeLength — it varies per method
+         *  (flash-call is 4, SMS is 6) and per provider, so a constant here can only be wrong. */
         OTPlength: () => 6,
         allowBonusSpending: async () => {
             return await Settings.get("ALLOW_BONUS_SPENDING") ?? true;

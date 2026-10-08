@@ -481,6 +481,22 @@ async function getNewCart(context, orderId) {
         catch (error) {
             sails.log.error(`GQL > getNewCart JWT verify error:`, error);
         }
+        /**
+         * @setting: REQUIRE_AUTH_FOR_CART - deliberately NOT enforced here.
+         *
+         * The flag guards what the CUSTOMER puts in a cart, not the existence of the cart. Creating
+         * the row is the storefront asking for an `orderId` to work against, and the server fills it
+         * itself (ORDER_INIT_PRODUCT_ID); refusing that turned the very first query of an anonymous
+         * SPA — `order` without an orderId — into a GraphQL error on every page load
+         * (review2 §4.3, require-auth-for-cart.md §5.1).
+         *
+         * The barrier lives one step later and in core, where every integration passes:
+         * `Order.addDish(addedBy: "user")`, `Order.doCart` for a customer-started cart, and
+         * `Order.check` for checkout. The client learns it is coming from
+         * `restrictions.requireAuthForCart` and shows the login screen before the first dish —
+         * formatError (src/graphql.ts) drops `extensions`, so there is no error code to branch on
+         * and the message text is not a contract.
+         */
         let order;
         let initOrder = {};
         // Pass oredrId from frontend

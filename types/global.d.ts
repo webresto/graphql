@@ -48,8 +48,6 @@ declare global {
         RECOMMENDED_FORCE_DISHES: string;
         CAPTCHA_TYPE: string;
         CUSTOM_FIELDS: string[];
-        PASSWORD_REQUIRED: boolean;
-        LOGIN_OTP_REQUIRED: boolean;
     }
 }
 export {};

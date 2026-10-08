@@ -58,12 +58,18 @@ export declare const additionalResolver: {
         }, args: any, context: any, info: any) => Promise<any>;
         cookingPoints: (parent: {
             cookingPoints?: string[];
-        }) => Promise<(import("@webresto/core").PlaceRecord | undefined)[]>;
+        }) => Promise<import("@webresto/core/models/Place").PlaceRecord[]>;
+        paymentMethod: (parent: {
+            paymentMethod: any;
+        }) => Promise<any>;
+        pickupPoint: (parent: {
+            pickupPoint: any;
+        }) => Promise<any>;
     };
     OrderDish: {
         cookingPoint: (parent: {
             cookingPoint?: string | null;
-        }) => Promise<import("@webresto/core").PlaceRecord | null>;
+        }) => Promise<import("@webresto/core/models/Place").PlaceRecord>;
         dish: (parent: {
             dish: any;
             order?: any;

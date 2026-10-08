@@ -1,8 +1,7 @@
-import { Phone } from "@webresto/core/models/User";
-import { ResolvedCaptcha } from "@webresto/core/adapters";
 import { Response } from "../../types/primitives";
 interface UserResponse extends Response {
     user: User | undefined;
+    registrationRequired: boolean;
 }
 interface InputUser {
     firstName: string;
@@ -16,27 +15,25 @@ interface InputUser {
     };
 }
 type RegistrationPayload = {
-    login: string;
-    phone: Phone;
-    password: string;
-    otp: string;
     firstName: string;
     lastName: string;
     customFields: {
         [key: string]: string | boolean | number;
     };
-    captcha: ResolvedCaptcha;
 };
 declare const _default: {
     Mutation: {
-        login: {
-            def: string;
-            fn: (parent: any, payload: any, context: any, info: any) => Promise<UserResponse>;
-        };
-        restorePassword: {
-            def: string;
-            fn: (parent: any, payload: any, context: any) => Promise<UserResponse>;
-        };
+        /**
+         * Signing in is `authStart` → `authSubmit` → `authExchange` (src/resolvers/auth.ts), and
+         * there is no second way in: the old `login(login, phone, password, otp)` and its
+         * `OTPRequest` companion are gone, not deprecated. They were the last places where a code
+         * minted "for signing in" was accepted, where an account could be conjured from a password
+         * policy, and where `CORE_LOGIN_FIELD` decided what an account was keyed by. All three of
+         * those are answered by an AuthAttempt and an AuthIdentity now (design2 §6, extend §11).
+         *
+         * What is left here is the profile: naming the account, deleting it. There is no password
+         * (.ai-notes/auth/remove-password.md): a way in is a proven AuthMethod, nothing else.
+         */
         registration: {
             def: string;
             fn: (parent: any, payload: RegistrationPayload, context: any, info: any) => Promise<UserResponse>;

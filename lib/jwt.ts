@@ -38,7 +38,10 @@ export class JWTAuth {
     }
 
     if(decoded.userId && decoded.deviceId && decoded.sessionId) {
-      if (await User.findOne({id: decoded.userId})) {
+      // A soft-deleted account is no account: its devices are logged out by User.delete, but a
+      // token minted before that must not outlive the deletion either (review2 §3).
+      const user = await User.findOne({id: decoded.userId});
+      if (user && !user.isDeleted) {
 
         let device = await UserDevice.findOne({where: {id: decoded.deviceId, user: decoded.userId, sessionId: decoded.sessionId}});
         if(!device || device.isLoggedIn !== true) {

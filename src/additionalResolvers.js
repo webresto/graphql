@@ -162,6 +162,27 @@ exports.additionalResolver = {
             const places = await Place.find({ id: ids });
             return ids.map((id) => places.find((place) => place.id === id)).filter(Boolean);
         },
+        // checkOrder, sendOrder and the `order-changed` subscription payload return the order
+        // as Waterline gives it (Order.findOne / Order.update().fetch()): associations are ids.
+        // Without a resolver GraphQL resolves PaymentMethod / PickupPoint fields on a string and
+        // answers {id: null, title: null}, which then overwrites the client cache.
+        // Resolve the id the same way Order.populate does.
+        paymentMethod: async (parent) => {
+            if (!parent.paymentMethod)
+                return null;
+            if (typeof parent.paymentMethod === "object") {
+                return parent.paymentMethod;
+            }
+            return (await PaymentMethod.findOne({ id: parent.paymentMethod })) ?? null;
+        },
+        pickupPoint: async (parent) => {
+            if (!parent.pickupPoint)
+                return null;
+            if (typeof parent.pickupPoint === "object") {
+                return parent.pickupPoint;
+            }
+            return (await Place.findOne({ id: parent.pickupPoint })) ?? null;
+        },
     },
     OrderDish: {
         // OrderDish is not auto-generated, so its associations get no resolvers of

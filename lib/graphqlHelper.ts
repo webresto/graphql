@@ -217,6 +217,15 @@ function createType(model) {
         continue;
       }
       scalarType = scalarTypes[primaryKeyAttr.type.toLowerCase()]
+
+      // The related model may be hidden from the schema (graphql.public === false / blacklisted).
+      // Referencing its type would leave a dangling reference and break schema assembly — and
+      // exposing "only the foreign key" instead was how `User.primaryPhoneId` and
+      // `UserDevice.identityId` appeared in the public schema without anyone deciding they should
+      // (review2 §2.7). A hidden model leaves no trace: no relation field, no virtual id. What a
+      // client legitimately needs from such a model is projected by hand (myAccount, AuthAttemptView).
+      if (!models.has(attributes[prop].model.toLowerCase())) continue;
+
       const name = sails.models[attributes[prop].model.toLowerCase()].globalId;
       type += `  ${prop}: ${name}\n`;
 
@@ -238,6 +247,10 @@ function createType(model) {
         continue;
       }
       scalarType = scalarTypes[primaryKeyAttr.type.toLowerCase()];
+
+      // Same as above: skip collections whose model is hidden from the schema.
+      if (!models.has(attributes[prop].collection.toLowerCase())) continue;
+
       const name = sails.models[attributes[prop].collection.toLowerCase()].globalId;
       type += `  ${prop}: [${name}]\n`;
     }
@@ -473,7 +486,7 @@ function addModelResolver(modelname) {
             context.connectionParams.authorization
           );
 
-          if (auth.userId && UserDevice.checkSession(auth.sessionId, auth.userId, { lastIP: "IP", userAgent: context.connectionParams["user-agent"] })) {
+          if (auth.userId && UserDevice.checkSession(auth.sessionId, auth.userId, { lastIP: context.connectionParams["IP"] ?? "", userAgent: context.connectionParams["user-agent"] })) {
             if (modelName.toLowerCase() === "user") {
               criteria.id = auth.userId
             } else {
@@ -563,7 +576,7 @@ function addModelResolver(modelname) {
             context.connectionParams.authorization
           );
 
-          if (auth.userId && UserDevice.checkSession(auth.sessionId, auth.userId, { lastIP: "IP", userAgent: context.connectionParams["user-agent"] })) {
+          if (auth.userId && UserDevice.checkSession(auth.sessionId, auth.userId, { lastIP: context.connectionParams["IP"] ?? "", userAgent: context.connectionParams["user-agent"] })) {
             if (modelName.toLowerCase() === "user") {
               criteria.id = auth.userId
             } else {
@@ -629,6 +642,10 @@ function addModelResolver(modelname) {
         ? "collection"
         : "model";
 
+      // No field was generated for a relation to a hidden model (see the type generator), so
+      // no resolver either — a resolver without a field is a dangling entry in the schema.
+      if (!models.has(String(modelAttribute[modelRelationType]).toLowerCase())) return;
+
       let relationKey =
         modelAttribute.via !== undefined
           ? modelAttribute.via
@@ -649,7 +666,7 @@ function addModelResolver(modelname) {
                 context.connectionParams.authorization
               );
 
-              if (auth.userId && UserDevice.checkSession(auth.sessionId, auth.userId, { lastIP: "IP", userAgent: context.connectionParams["user-agent"] })) {
+              if (auth.userId && UserDevice.checkSession(auth.sessionId, auth.userId, { lastIP: context.connectionParams["IP"] ?? "", userAgent: context.connectionParams["user-agent"] })) {
                 if (modelName.toLowerCase() === "user") {
                   criteria["id"] = auth.userId
                 } else {
@@ -694,7 +711,7 @@ function addModelResolver(modelname) {
                 context.connectionParams.authorization
               );
 
-              if (auth.userId && UserDevice.checkSession(auth.sessionId, auth.userId, { lastIP: "IP", userAgent: context.connectionParams["user-agent"] })) {
+              if (auth.userId && UserDevice.checkSession(auth.sessionId, auth.userId, { lastIP: context.connectionParams["IP"] ?? "", userAgent: context.connectionParams["user-agent"] })) {
                 if (modelName.toLowerCase() === "user") {
                   criteria["id"] = auth.userId
                 } else {
