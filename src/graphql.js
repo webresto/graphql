@@ -130,6 +130,8 @@ exports.default = {
       title: String
       type: String
       message: String
+      """The code of the refusal of checkOrder (Order.check of the core: 1 - no name, 2 - no phone, 5 - no address, 15 - the date is past…); the text is translated, the code is what a storefront can branch on. Null otherwise."""
+      code: Int
     }
     type Action {
       id: String

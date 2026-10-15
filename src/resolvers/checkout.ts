@@ -280,8 +280,11 @@ export default {
             title: context.i18n.__("Error"),
             message: 
               cleanErrorMessage ? `${cleanErrorMessage} ...` : 
-              e.error ? e.error : 'unknown error'
-          } as Message;
+              e.error ? e.error : 'unknown error',
+            // The text below is translated and is not a contract; the code is. formatError drops
+            // `extensions`, so the refusal says it here, in the answer the storefront reads.
+            code: typeof e?.code === "number" ? e.code : null,
+          } as Message & { code: number | null };
           if (e.code === 1) {
             message.message = context.i18n.__("Enter the name of the customer");
           } else if (e.code === 2) {

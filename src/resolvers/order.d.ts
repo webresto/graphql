@@ -154,7 +154,7 @@ declare const _default: {
                 user?: string | import("@webresto/core").UserRecord | undefined;
                 customData?: any;
                 logs?: import("@webresto/core").OrderLogEntry[] | undefined;
-            }>;
+            } | null>;
         };
     };
     Mutation: {

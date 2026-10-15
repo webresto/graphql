@@ -118,7 +118,7 @@ export default {
 
     order: {
       def: `#graphql
-      """ if orderId is not set, a new cart will be returned """
+      """ by orderId - the order, or a new cart of that id (the storefront keeps the id of its cart); no id - a new cart; by shortId or orderNumber - the order, or null """
       order(orderId: String, shortId: String, orderNumber: String): Order`,
 
       fn: async function (parent, args, context) {
@@ -141,6 +141,9 @@ export default {
           }
   
           if (!order) {
+            // A short id or a number names an order somebody has placed (its page, a link of a
+            // payment): one that is not there is not found - not a fresh cart of a random id.
+            if (!args.orderId && (args.shortId || args.orderNumber)) return null;
             sails.log.error(
               "GQL > order resolver error: ",
               `order with id ${args.orderId}  not found. Trying make new cart.`
