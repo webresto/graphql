@@ -61,6 +61,12 @@ graphqlHelper.addType(`#graphql
     hasError: Boolean
     """The zone whose terms produced this result, when one matched."""
     zoneId: String
+    """That zone's name."""
+    zoneName: String
+    """That zone's minimum order total. Null when it sets none or no zone matched; message says the same in words."""
+    minOrderTotal: Float
+    """That zone delivers free from this total. Null when it sets none or no zone matched."""
+    freeDeliveryFrom: Float
     """Cooking time for this basket. Only products of type dish count."""
     preparationMinutes: Int
     """The whole promise: cooking + the road + the safety margin. One number."""
