@@ -68,7 +68,7 @@ declare function getSchema(): {
 };
 type MenuContextPromise = Promise<MenuContext>;
 /** The context of an order the caller names, looked up rather than taken on trust; bare without one. */
-export declare function menuContextFor(orderId?: string | null): MenuContextPromise;
+export declare function menuContextFor(orderId?: string | null, cookingPointId?: string | null): MenuContextPromise;
 /** The context the record was read in; a record read outside a menu query gets the bare one. */
 export declare function menuContextOf(record: any): MenuContextPromise;
 /** Marks records, and the modifiers of a dish, with the context they were read in. */
