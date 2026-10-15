@@ -12,6 +12,7 @@ import { GraphQLError, GraphQLFormattedError } from "graphql";
 import eventHelper from "../lib/eventHelper";
 import { Action } from "../types/primitives";
 import { getEffectiveBalanceAcross } from "@webresto/core/lib/menu/product-availability";
+import { Adapter } from "@webresto/core/adapters/index";
 const pubsub = new PubSub();
 sails.graphql = { pubsub };
 let server: ApolloServer;
@@ -26,6 +27,17 @@ function publishOrderDebounced(order: any, delay = 700) {
     orderUpdateTimers.delete(id);
     pubsub.publish("order-changed", order);
   }, delay));
+}
+
+/**
+ * Core names a discount `flat` or `percentage`; storefronts read `FIXED` or
+ * `PERCENT` (`DiscountType` of `@webresto/ng-gql`). Anything else is no
+ * discount a storefront could draw.
+ */
+function storefrontDiscountType(type: string | null | undefined): "FIXED" | "PERCENT" | null {
+  if (type === "flat") return "FIXED";
+  if (type === "percentage") return "PERCENT";
+  return null;
 }
 
 const AdditionalResolvers: any = {};
@@ -173,12 +185,36 @@ export default {
       }`);
 
     /**
-     * Discount fields global support
+     * The promotion on a dish, as the menu shows it: `salePrice` is the price of
+     * one after the promotion the basket would apply to a line of it,
+     * `discountAmount` and `discountType` are that promotion's (a percentage or
+     * an amount of money). All three null when no public promotion takes it.
+     *
+     * Asked per dish wherever a dish leaves the API — the menu, a group's
+     * dishes, recommendations, a modifier's option, a basket line — so no list
+     * can forget to. Core's `displayDish` answers; it writes the fields, so it
+     * gets a copy, and one answer serves all three fields of the same dish.
      */
     helper.addCustomField("Dish", "discountAmount: Float");
     helper.addCustomField("Dish", "discountType: String");
     helper.addCustomField("Dish", "salePrice: Float");
     helper.addCustomField("Group", "discount: String");
+    const shownDishes = new WeakMap<object, any>();
+    const shownDish = (dish: object) => {
+      if (!shownDishes.has(dish)) shownDishes.set(dish, Adapter.getPromotionAdapter().displayDish({ ...dish } as any));
+      return shownDishes.get(dish);
+    };
+    helper.addResolvers({
+      Dish: {
+        salePrice: (parent: object) => shownDish(parent)?.salePrice ?? null,
+        discountAmount: (parent: object) => shownDish(parent)?.discountAmount ?? null,
+        discountType: (parent: object) => storefrontDiscountType(shownDish(parent)?.discountType),
+      },
+      // A line's discount is the same kind of thing and reads the same words.
+      OrderDish: {
+        discountType: (parent: { discountType?: string | null }) => storefrontDiscountType(parent?.discountType),
+      },
+    });
 
     /**
      * Stock of a product.
@@ -218,6 +254,12 @@ export default {
         message: String
         "The zone whose terms produced this result, when one matched"
         zoneId: String
+        "That zone's name"
+        zoneName: String
+        "That zone's minimum order total. Null when it sets none or no zone matched"
+        minOrderTotal: Float
+        "That zone delivers free from this total. Null when it sets none or no zone matched"
+        freeDeliveryFrom: Float
         "Cooking time for this basket. Only products of type dish count."
         preparationMinutes: Int
         "The whole promise: cooking + the road + the safety margin. One number."
