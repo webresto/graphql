@@ -53,7 +53,7 @@ graphqlHelper_1.default.addType(`#graphql
   }
 
   type Delivery {
-    """The delivery leg alone, in minutes. Unchanged; the totals below include cooking."""
+    """The delivery leg alone, in minutes; for a zone, its minimum delivery time. Unchanged; the totals below include cooking."""
     deliveryTimeMinutes: Int
     allowed: Boolean!
     cost: Float
@@ -69,6 +69,14 @@ graphqlHelper_1.default.addType(`#graphql
     minOrderTotal: Float
     """That zone delivers free from this total. Null when it sets none or no zone matched."""
     freeDeliveryFrom: Float
+    """What that zone charges for delivery, whatever it decided about this basket; cost is what this basket pays. A delivery product's price when the zone charges one; 0 is free."""
+    deliveryCost: Float
+    """Whether that zone takes orders now, by zoneWorktime."""
+    zoneOpen: Boolean
+    """When that zone takes orders. Null: always."""
+    zoneWorktime: Json
+    """What the operator wrote about that zone, untranslated. Null: nothing."""
+    zoneDescription: String
     """Cooking time for this basket. Only products of type dish count."""
     preparationMinutes: Int
     """The whole promise: cooking + the road + the safety margin. One number."""

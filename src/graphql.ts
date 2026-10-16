@@ -244,7 +244,7 @@ export default {
      */
     helper.addType(`#graphql
       type OrderDeliveryState {
-        "The delivery leg alone, in minutes. The totals below include cooking."
+        "The delivery leg alone, in minutes; for a zone, its minimum delivery time. The totals below include cooking."
         deliveryTimeMinutes: Int
         "If disabled, then delivery is not allowed and will be processed"
         allowed: Boolean
@@ -262,6 +262,14 @@ export default {
         minOrderTotal: Float
         "That zone delivers free from this total. Null when it sets none or no zone matched"
         freeDeliveryFrom: Float
+        "What that zone charges for delivery, whatever it decided about this basket; cost is what this basket pays. A delivery product's price when the zone charges one; 0 is free"
+        deliveryCost: Float
+        "Whether that zone took orders when the order was last counted, by zoneWorktime"
+        zoneOpen: Boolean
+        "When that zone takes orders. Null: always"
+        zoneWorktime: Json
+        "What the operator wrote about that zone, untranslated. Null: nothing"
+        zoneDescription: String
         "Cooking time for this basket. Only products of type dish count."
         preparationMinutes: Int
         "The whole promise: cooking + the road + the safety margin. One number."
