@@ -1,7 +1,8 @@
 import _ = require("lodash");
 import { WorkTimeValidator } from '@webresto/worktime'
 
-import *  as WLCriteria from 'waterline-criteria';
+// the module is a function: a namespace import of it (`import * as`) is an object, not callable, in CommonJS
+import WLCriteria = require('waterline-criteria');
 import { JWTAuth } from "./jwt";
 import type { MenuContext } from "@webresto/core/interfaces/Menu";
 
@@ -798,6 +799,10 @@ function addModelResolver(modelname) {
           (rootValue, args, context, info) =>
             context.pubsub.asyncIterator(modelName),
           async (payload, args, context, info) => {
+            // no criteria - every record of the model
+            if (!args.criteria) {
+              args.criteria = {}
+            }
 
             // For User models
             if (sails.models[modelname].attributes.user || modelname === 'user') {
@@ -805,10 +810,6 @@ function addModelResolver(modelname) {
               let auth = await JWTAuth.verify(
                 context.connectionParams.authorization
               );
-
-              if (!args.criteria) {
-                args.criteria = {}
-              }
 
               if (auth.userId) {
                 if (modelName.toLowerCase() === "user") {
@@ -823,17 +824,17 @@ function addModelResolver(modelname) {
 
             return checkCriteria(payload, args.criteria)
 
-            // Filter by waterline criteria
+            // Filter by waterline criteria; WLCriteria takes a collection - the record goes as a list of one
             function checkCriteria(payload: any, criteria: any): boolean {
 
               // For id's array
               if (Array.isArray(criteria) || typeof criteria === "string") {
-                return (WLCriteria(payload, { where: { id: criteria } }).results).length > 0
+                return (WLCriteria([payload], { where: { id: criteria } }).results).length > 0
               }
 
               // Where cause
               if (typeof criteria === 'object' && !Array.isArray(criteria) && criteria !== null) {
-                return (WLCriteria(payload, { where: criteria }).results).length > 0
+                return (WLCriteria([payload], { where: criteria }).results).length > 0
               }
 
               return false
@@ -862,25 +863,24 @@ function addModelResolver(modelname) {
 function modelPublishExtend(modelname) {
   let modelName = sails.models[modelname].globalId;
 
-  let afterCreate = sails.models[modelname].afterCreate;
-  sails.models[modelname].afterCreate = async function (values, cb) {
-    await sails.models[modelname].publish(values.id);
-    if (afterCreate) {
-      afterCreate(values, cb);
-    } else {
-      cb();
-    }
-  };
-
-  let afterUpdate = sails.models[modelname].afterUpdate;
-  sails.models[modelname].afterUpdate = async function (values, cb) {
-    await sails.models[modelname].publish(values.id);
-    if (afterUpdate) {
-      afterUpdate(values, cb);
-    } else {
-      cb();
-    }
-  };
+  // Waterline copies the lifecycle callbacks of a model into _callbacks when the ORM starts and calls them from there:
+  // a callback set on the model afterwards is never called, so the publishing wraps the copies
+  const callbacks = sails.models[modelname]._callbacks;
+  for (const name of ["afterCreate", "afterUpdate"]) {
+    const own = callbacks[name];
+    callbacks[name] = async function (values, cb) {
+      try {
+        await sails.models[modelname].publish(values.id);
+      } catch (error) {
+        sails.log.error(`graphql > publish ${modelName} ${values.id}`, error);
+      }
+      if (own) {
+        own.call(callbacks, values, cb);
+      } else {
+        cb();
+      }
+    };
+  }
 
   let modelPublishExtendObj = {
     publish: async function (id) {

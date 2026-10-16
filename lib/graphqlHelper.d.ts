@@ -67,7 +67,10 @@ declare function getSchema(): {
     resolvers: Resolvers;
 };
 type MenuContextPromise = Promise<MenuContext>;
-/** The context of an order the caller names, looked up rather than taken on trust; bare without one. */
+/**
+ * The context of an order the caller names, looked up rather than taken on trust; bare without one. A point the caller
+ * names wins over the order's (MenuRequest.cookingPointId): "what this kitchen has" before the order is moved to it.
+ */
 export declare function menuContextFor(orderId?: string | null, cookingPointId?: string | null): MenuContextPromise;
 /** The context the record was read in; a record read outside a menu query gets the bare one. */
 export declare function menuContextOf(record: any): MenuContextPromise;
