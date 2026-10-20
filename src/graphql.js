@@ -65,6 +65,34 @@ function publishOrderDebounced(order, delay = 700) {
     }, delay));
 }
 /**
+ * What a storefront shows changed (subscription `storefrontChanged`): the changes of a moment go out together, one
+ * message per kind - an RMS sync touches hundreds of products, a storefront asks them again once. No points - every
+ * point, and it stays so for the message.
+ */
+const storefrontChanges = new Map();
+let storefrontTimer = null;
+function publishStorefrontChange(kind, dishIds = [], placeIds = null, delay = 300) {
+    let pending = storefrontChanges.get(kind);
+    if (!pending)
+        storefrontChanges.set(kind, (pending = { dishIds: new Set(), placeIds: new Set() }));
+    dishIds.forEach((id) => pending.dishIds.add(id));
+    if (!placeIds)
+        pending.placeIds = null;
+    else
+        placeIds.forEach((id) => pending.placeIds?.add(id));
+    if (storefrontTimer)
+        return;
+    storefrontTimer = setTimeout(() => {
+        storefrontTimer = null;
+        for (const [kind, { dishIds, placeIds }] of storefrontChanges) {
+            pubsub.publish("storefront-changed", { kind, dishIds: dishIds.size ? [...dishIds] : null, placeIds: placeIds ? [...placeIds] : null });
+        }
+        storefrontChanges.clear();
+    }, delay);
+}
+/** an association as the record holds it: its id, or the populated record */
+const idOf = (value) => String(value && typeof value === "object" ? value.id : value);
+/**
  * Core names a discount `flat` or `percentage`; storefronts read `FIXED` or
  * `PERCENT` (`DiscountType` of `@webresto/ng-gql`). Anything else is no
  * discount a storefront could draw.
@@ -319,9 +347,22 @@ exports.default = {
         emitter.on("send-message", "graphql", function ({ orderId, message }) {
             pubsub.publish("message", { orderId, message });
         });
-        emitter.on("core:product-after-update", "graphql", function (record) {
-            pubsub.publish("dish-changed", record);
+        // what a storefront shows: a product (an option of products - the menu, the products that have it are not known
+        // here), the stock and the stops of a product at a point, the groups, the promotions, the points, the cities,
+        // the settings
+        const productChanged = (dish) => (dish.modifier ? publishStorefrontChange("menu") : publishStorefrontChange("dishes", [dish.id]));
+        emitter.on("core:product-after-create", "graphql", productChanged);
+        emitter.on("core:product-after-update", "graphql", productChanged);
+        emitter.on("core:dish-place-changed", "graphql", (row) => publishStorefrontChange("dishes", [idOf(row.dish)], [idOf(row.place)]));
+        emitter.on("core:group-after-create", "graphql", () => publishStorefrontChange("menu"));
+        emitter.on("core:group-after-update", "graphql", () => publishStorefrontChange("menu"));
+        emitter.on("core:promotion-changed", "graphql", () => publishStorefrontChange("menu"));
+        emitter.on("core:place-changed", "graphql", (place) => {
+            publishStorefrontChange("menu", [], [place.id]);
+            publishStorefrontChange("places");
         });
+        emitter.on("core:city-changed", "graphql", () => publishStorefrontChange("cities"));
+        emitter.on("core:settings-changed", "graphql", () => publishStorefrontChange("settings"));
         emitter.on("core:maintenance-enabled", "graphql", function (record) {
             pubsub.publish("maintenance", record);
         });
