@@ -641,6 +641,10 @@ declare const _default: {
                 logs?: import("@webresto/core").OrderLogEntry[] | undefined;
             }>;
         };
+        orderShare: {
+            def: string;
+            fn: (parent: any, args: any, context: any) => Promise<string | undefined>;
+        };
         orderPromocodeApply: {
             def: string;
             fn: (parent: any, args: PromotionCodeApplyPayload, context: any) => Promise<PromotionCodeResponse>;

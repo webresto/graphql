@@ -427,6 +427,21 @@ exports.default = {
                 }
             },
         },
+        orderShare: {
+            def: `#graphql
+      """ A snapshot of the lines of the order for a link ("share the cart"): a new order with only the lines the customer added - no customer, no address; returns its shortId, the receiver reads it by order(shortId) """
+      orderShare(orderId: String!): String!`,
+            fn: async function (parent, args, context) {
+                try {
+                    const snapshot = await Order.share({ id: args.orderId });
+                    return snapshot.shortId;
+                }
+                catch (error) {
+                    sails.log.error(`GQL > [orderShare]`, error, args);
+                    throw error;
+                }
+            },
+        },
         orderPromocodeApply: {
             def: `#graphql
       orderPromocodeApply(
