@@ -7,9 +7,10 @@ its own context (the kitchen of its order, its language); one message cannot car
 """
 type StorefrontChange {
   """
-  dishes - the products of dishIds: their own fields, or their stock and stops at placeIds;
-  menu - the whole menu: the groups, the promotions, the options of products, a point;
-  places - the points; cities - the cities; settings - the settings of the restaurant
+  dishes - the products of dishIds: their own fields and photos, their stock and stops at placeIds, deleted;
+  menu - the whole menu: the groups, the promotions, the options of products, a point (opened or closed by its hours too);
+  places - the points; cities - the cities; settings - the settings of the restaurant;
+  zones - the delivery zones (opened or closed by their hours too): the terms of an address; payments - the ways to pay
   """
   kind: String!
   "the products of a change of the kind dishes"

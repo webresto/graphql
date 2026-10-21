@@ -29,7 +29,7 @@ function publishOrderDebounced(order: any, delay = 700) {
   }, delay));
 }
 
-type StorefrontChangeKind = "dishes" | "menu" | "places" | "cities" | "settings";
+type StorefrontChangeKind = "dishes" | "menu" | "places" | "cities" | "settings" | "zones" | "payments";
 
 /**
  * What a storefront shows changed (subscription `storefrontChanged`): the changes of a moment go out together, one
@@ -328,15 +328,27 @@ export default {
       pubsub.publish("message", { orderId, message });
     });
     // what a storefront shows: a product (an option of products - the menu, the products that have it are not known
-    // here), the stock and the stops of a product at a point, the groups, the promotions, the points, the cities,
-    // the settings
+    // here) and its photos, the stock and the stops of a product at a point, the groups, the promotions, the points,
+    // the cities, the settings, the delivery zones, the ways to pay; the hours of a point, a zone, a promotion turning
+    // them come as the same events (lib/hours-sweep of core)
     const productChanged = (dish) => (dish.modifier ? publishStorefrontChange("menu") : publishStorefrontChange("dishes", [dish.id]));
     emitter.on("core:product-after-create", "graphql", productChanged);
     emitter.on("core:product-after-update", "graphql", productChanged);
+    emitter.on("core:product-after-destroy", "graphql", productChanged);
+    emitter.on("core:selected-media-file-changed", "graphql", async (row) => {
+      if (row.group) return publishStorefrontChange("menu");
+      if (!row.dish) return;
+      // a product deleted with its photos is not here any more: a storefront drops it as it does any product it asks
+      const dish = await Dish.findOne({ id: idOf(row.dish) });
+      productChanged(dish ?? { id: idOf(row.dish) });
+    });
     emitter.on("core:dish-place-changed", "graphql", (row) => publishStorefrontChange("dishes", [idOf(row.dish)], [idOf(row.place)]));
     emitter.on("core:group-after-create", "graphql", () => publishStorefrontChange("menu"));
     emitter.on("core:group-after-update", "graphql", () => publishStorefrontChange("menu"));
+    emitter.on("core:group-after-destroy", "graphql", () => publishStorefrontChange("menu"));
     emitter.on("core:promotion-changed", "graphql", () => publishStorefrontChange("menu"));
+    emitter.on("core:delivery-zone-changed", "graphql", () => publishStorefrontChange("zones"));
+    emitter.on("core:payment-method-changed", "graphql", () => publishStorefrontChange("payments"));
     emitter.on("core:place-changed", "graphql", (place) => {
       publishStorefrontChange("menu", [], [place.id]);
       publishStorefrontChange("places");
