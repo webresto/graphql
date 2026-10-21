@@ -50,7 +50,8 @@ export class JWTAuth {
           return decoded;
         }
       } else {
-        throw `no user with id ${decoded.userId}`
+        // No account (deleted, or a token of another base) is the same end of the session for the client
+        throw `Logged in device not found`
       }
     } else {
       throw `JWT decoded user or device not found`
