@@ -328,6 +328,10 @@ export default {
             // Which point and which service type are in `e.error` and the order's
             // journal; the customer only needs to know to choose another one.
             message.message = context.i18n.__("The chosen location does not take these orders");
+          } else if (e.code === 27) {
+            // The device kept the cart of the account it was logged in as; the storefront starts
+            // a new one at the logout, so this is a client that did not.
+            message.message = context.i18n.__("This cart belongs to another account. Please start a new cart");
           } else {
             message.message = e.error
               ? e.error

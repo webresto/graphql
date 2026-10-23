@@ -39,6 +39,7 @@
     "The order cannot be ready that quickly": "订单无法这么快完成",
     "This order cannot be prepared as one order right now. Please contact us.": "目前无法将此订单作为一个订单制作，请联系我们。",
     "The chosen location is closed right now": "所选门店目前已关闭",
-    "The chosen location does not take these orders": "所选门店不接受此类订单"
+    "The chosen location does not take these orders": "所选门店不接受此类订单",
+    "This cart belongs to another account. Please start a new cart": "此购物车属于其他账户，请重新下单"
   }
   

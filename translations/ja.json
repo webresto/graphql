@@ -39,6 +39,7 @@
     "The order cannot be ready that quickly": "その時間内にご用意できません",
     "This order cannot be prepared as one order right now. Please contact us.": "現在、このご注文は1件としてお作りできません。お問い合わせください。",
     "The chosen location is closed right now": "選択した店舗は現在営業していません",
-    "The chosen location does not take these orders": "選択した店舗ではこの注文を受け付けていません"
+    "The chosen location does not take these orders": "選択した店舗ではこの注文を受け付けていません",
+    "This cart belongs to another account. Please start a new cart": "このカートは別のアカウントのものです。注文をやり直してください"
   }
   

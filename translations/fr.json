@@ -39,6 +39,7 @@
     "The order cannot be ready that quickly": "La commande ne peut pas être prête aussi vite",
     "This order cannot be prepared as one order right now. Please contact us.": "Cette commande ne peut pas être préparée en une seule commande pour le moment. Veuillez nous contacter.",
     "The chosen location is closed right now": "Le point choisi est actuellement fermé",
-    "The chosen location does not take these orders": "Le point choisi n'accepte pas ce type de commandes"
+    "The chosen location does not take these orders": "Le point choisi n'accepte pas ce type de commandes",
+    "This cart belongs to another account. Please start a new cart": "Ce panier appartient à un autre compte. Composez la commande à nouveau"
   }
   

@@ -39,6 +39,7 @@
 	"The order cannot be ready that quickly": "Замовлення не встигне так швидко",
 	"This order cannot be prepared as one order right now. Please contact us.": "Зараз це замовлення не можна приготувати одним замовленням. Будь ласка, зв'яжіться з нами.",
 	"The chosen location is closed right now": "Обрана точка зараз зачинена",
-	"The chosen location does not take these orders": "Обрана точка не приймає такі замовлення"
+	"The chosen location does not take these orders": "Обрана точка не приймає такі замовлення",
+	"This cart belongs to another account. Please start a new cart": "Цей кошик належить іншому акаунту. Зберіть замовлення заново"
   }
   

@@ -39,6 +39,7 @@
     "The order cannot be ready that quickly": "그렇게 빨리 준비할 수 없습니다",
     "This order cannot be prepared as one order right now. Please contact us.": "지금은 이 주문을 하나의 주문으로 준비할 수 없습니다. 문의해 주세요.",
     "The chosen location is closed right now": "선택한 매장은 지금 영업하지 않습니다",
-    "The chosen location does not take these orders": "선택한 매장은 이러한 주문을 받지 않습니다"
+    "The chosen location does not take these orders": "선택한 매장은 이러한 주문을 받지 않습니다",
+    "This cart belongs to another account. Please start a new cart": "이 장바구니는 다른 계정의 것입니다. 주문을 다시 담아 주세요"
   }
   
