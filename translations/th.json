@@ -41,6 +41,8 @@
     "The chosen location is closed right now": "สาขาที่เลือกปิดอยู่ในขณะนี้",
     "The chosen location does not take these orders": "สาขาที่เลือกไม่รับออเดอร์ประเภทนี้",
     "This cart belongs to another account. Please start a new cart": "ตะกร้านี้เป็นของบัญชีอื่น กรุณาเลือกสินค้าใหม่อีกครั้ง",
-    "The kitchen of this area is closed now - choose a time it works at, or pickup": "ครัวของพื้นที่นี้ปิดอยู่ในขณะนี้ กรุณาเลือกเวลาที่ครัวเปิด หรือรับเองที่ร้าน"
+    "The kitchen of this area is closed now - choose a time it works at, or pickup": "ครัวของพื้นที่นี้ปิดอยู่ในขณะนี้ กรุณาเลือกเวลาที่ครัวเปิด หรือรับเองที่ร้าน",
+    "Not enough bonuses: %s available": "โบนัสไม่เพียงพอ: ใช้ได้ %s",
+    "Paying with bonuses is not available now": "ขณะนี้ไม่สามารถชำระด้วยโบนัสได้"
   }
   

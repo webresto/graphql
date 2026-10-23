@@ -41,6 +41,8 @@
 	"The chosen location is closed right now": "Обрана точка зараз зачинена",
 	"The chosen location does not take these orders": "Обрана точка не приймає такі замовлення",
 	"This cart belongs to another account. Please start a new cart": "Цей кошик належить іншому акаунту. Зберіть замовлення заново",
-	"The kitchen of this area is closed now - choose a time it works at, or pickup": "Кухня цього району зараз зачинена — виберіть час, коли вона працює, або самовивіз"
+	"The kitchen of this area is closed now - choose a time it works at, or pickup": "Кухня цього району зараз зачинена — виберіть час, коли вона працює, або самовивіз",
+	"Not enough bonuses: %s available": "Недостатньо бонусів: доступно %s",
+	"Paying with bonuses is not available now": "Оплата бонусами зараз недоступна"
   }
   

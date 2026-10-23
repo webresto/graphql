@@ -41,5 +41,7 @@
   "The chosen location is closed right now": "El local elegido está cerrado ahora mismo",
   "The chosen location does not take these orders": "El local elegido no acepta este tipo de pedidos",
   "This cart belongs to another account. Please start a new cart": "Este carrito pertenece a otra cuenta. Arma el pedido de nuevo",
-  "The kitchen of this area is closed now - choose a time it works at, or pickup": "La cocina de esta zona está cerrada ahora: elige una hora en la que funcione o recogida en el local"
+  "The kitchen of this area is closed now - choose a time it works at, or pickup": "La cocina de esta zona está cerrada ahora: elige una hora en la que funcione o recogida en el local",
+  "Not enough bonuses: %s available": "Bonos insuficientes: hay %s disponibles",
+  "Paying with bonuses is not available now": "El pago con bonos no está disponible ahora"
 }

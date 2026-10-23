@@ -41,6 +41,8 @@
     "The chosen location is closed right now": "選択した店舗は現在営業していません",
     "The chosen location does not take these orders": "選択した店舗ではこの注文を受け付けていません",
     "This cart belongs to another account. Please start a new cart": "このカートは別のアカウントのものです。注文をやり直してください",
-    "The kitchen of this area is closed now - choose a time it works at, or pickup": "この地域のキッチンは現在営業していません。営業時間内の時刻か、店頭受け取りを選んでください"
+    "The kitchen of this area is closed now - choose a time it works at, or pickup": "この地域のキッチンは現在営業していません。営業時間内の時刻か、店頭受け取りを選んでください",
+    "Not enough bonuses: %s available": "ボーナスが不足しています: 利用可能 %s",
+    "Paying with bonuses is not available now": "現在ボーナスでのお支払いはご利用いただけません"
   }
   

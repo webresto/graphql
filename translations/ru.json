@@ -42,6 +42,8 @@
   "The chosen location does not take these orders": "Выбранная точка не принимает такие заказы",
   "This cart belongs to another account. Please start a new cart": "Эта корзина принадлежит другому аккаунту. Соберите заказ заново",
   "The kitchen of this area is closed now - choose a time it works at, or pickup": "Кухня этого района сейчас закрыта — выберите время, когда она работает, или самовывоз",
+  "Not enough bonuses: %s available": "Недостаточно бонусов: доступно %s",
+  "Paying with bonuses is not available now": "Оплата бонусами сейчас недоступна",
   "Coordinates not found": "Координаты не найдены",
   "Outside the delivery area": "За пределами зоны доставки",
   "Delivery is not available": "Доставка недоступна",

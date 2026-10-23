@@ -331,6 +331,13 @@ exports.default = {
                         // order's journal; the customer can choose a time or pickup.
                         message.message = context.i18n.__("The kitchen of this area is closed now - choose a time it works at, or pickup");
                     }
+                    else if (e.code === 28) {
+                        // what the bonus system says the customer has: the field can be set to it
+                        message.message = context.i18n.__("Not enough bonuses: %s available", e.available ?? 0);
+                    }
+                    else if (e.code === 29) {
+                        message.message = context.i18n.__("Paying with bonuses is not available now");
+                    }
                     else if (e.code === 27) {
                         // The device kept the cart of the account it was logged in as; the storefront starts
                         // a new one at the logout, so this is a client that did not.
