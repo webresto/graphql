@@ -42,6 +42,7 @@
     "The chosen location does not take these orders": "선택한 매장은 이러한 주문을 받지 않습니다",
     "This cart belongs to another account. Please start a new cart": "이 장바구니는 다른 계정의 것입니다. 주문을 다시 담아 주세요",
     "The kitchen of this area is closed now - choose a time it works at, or pickup": "이 지역의 주방은 지금 영업하지 않습니다. 영업 시간 중의 시간이나 포장을 선택해 주세요",
+    "No kitchen delivers to this address now": "지금은 이 주소로 배달하지 않습니다",
     "Not enough bonuses: %s available": "보너스가 부족합니다: 사용 가능 %s",
     "Paying with bonuses is not available now": "지금은 보너스로 결제할 수 없습니다"
   }

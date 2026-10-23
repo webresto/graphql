@@ -42,6 +42,7 @@
     "The chosen location does not take these orders": "所选门店不接受此类订单",
     "This cart belongs to another account. Please start a new cart": "此购物车属于其他账户，请重新下单",
     "The kitchen of this area is closed now - choose a time it works at, or pickup": "该区域的厨房目前已关闭，请选择其营业时间或到店自取",
+    "No kitchen delivers to this address now": "目前我们不配送到此地址",
     "Not enough bonuses: %s available": "积分不足：可用 %s",
     "Paying with bonuses is not available now": "目前无法使用积分支付"
   }

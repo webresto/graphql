@@ -3,6 +3,7 @@ import graphqlHelper from "../../lib/graphqlHelper";
 import OrderAddress from "@webresto/core/interfaces/OrderAddress";
 import { Delivery } from "@webresto/core/interfaces/Delivery";
 import { isValidCoordinate } from "@webresto/core/lib/address/coordinate";
+import { deliveryForAddress } from "@webresto/core/lib/order/kitchen-assignment";
 
 graphqlHelper.addType(`#graphql
   """The address of an order: a node of the city catalog plus what no catalog knows."""
@@ -85,6 +86,8 @@ graphqlHelper.addType(`#graphql
     diagnostics: [String]
     """How the road was estimated: haversine, a provider's name, or none."""
     travelTimeSource: String
+    """The kitchens that take this address are closed now: when the first opens and takes it, YYYY-MM-DD HH:mm by the restaurant's clock. Null: a kitchen takes it now, or it is not asked (soft delivery calculation)."""
+    kitchenOpensAt: String
   }
 `);
 
@@ -165,8 +168,8 @@ export default {
       def: "checkDeliveryAbility(address: AddressInput): Delivery",
       fn: async (_parent, args: { address: OrderAddress }, _context): Promise<Delivery> => {
         try {
-          const adapter = await Adapter.get("delivery");
-          return await adapter.checkAbility(args.address);
+          // the zone's terms, and whether a kitchen takes the address now
+          return await deliveryForAddress(args.address);
         } catch (error) {
           sails.log.error(`GQL > [checkDeliveryAbility]`, error, args);
           return {

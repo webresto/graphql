@@ -42,6 +42,7 @@
     "The chosen location does not take these orders": "Der gewählte Standort nimmt solche Bestellungen nicht an",
     "This cart belongs to another account. Please start a new cart": "Dieser Warenkorb gehört zu einem anderen Konto. Bitte stellen Sie die Bestellung neu zusammen",
     "The kitchen of this area is closed now - choose a time it works at, or pickup": "Die Küche dieses Gebiets ist gerade geschlossen - wählen Sie eine Zeit, zu der sie arbeitet, oder Abholung",
+    "No kitchen delivers to this address now": "An diese Adresse liefern wir derzeit nicht",
     "Not enough bonuses: %s available": "Nicht genügend Bonuspunkte: %s verfügbar",
     "Paying with bonuses is not available now": "Die Zahlung mit Bonuspunkten ist derzeit nicht möglich"
   }
