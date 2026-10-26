@@ -46,7 +46,6 @@
     "Not enough bonuses: %s available": "Bonus insuffisants : %s disponibles",
     "Paying with bonuses is not available now": "Le paiement avec des bonus n'est pas disponible pour le moment",
     "No point of Street": "Rue non indiquée",
-    "Order date is outside work time": "L'heure choisie est en dehors des heures d'ouverture",
     "The order date is not valid": "La date de la commande n'est pas valide",
     "The order has already been paid": "La commande est déjà payée",
     "The cart is empty": "Le panier est vide",

@@ -46,7 +46,6 @@
     "Not enough bonuses: %s available": "โบนัสไม่เพียงพอ: ใช้ได้ %s",
     "Paying with bonuses is not available now": "ขณะนี้ไม่สามารถชำระด้วยโบนัสได้",
     "No point of Street": "ไม่มีการระบุชื่อถนน",
-    "Order date is outside work time": "เวลาที่เลือกอยู่นอกเวลาทำการ",
     "The order date is not valid": "วันที่สั่งซื้อไม่ถูกต้อง",
     "The order has already been paid": "คำสั่งซื้อนี้ชำระเงินแล้ว",
     "The cart is empty": "ตะกร้าว่างเปล่า",

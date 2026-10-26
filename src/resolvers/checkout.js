@@ -329,9 +329,6 @@ exports.default = {
                     else if (e.code === 16) {
                         message.message = context.i18n.__("Date not allowed");
                     }
-                    else if (e.code === 18) {
-                        message.message = context.i18n.__("Order date is outside work time");
-                    }
                     else if (e.code === 17) {
                         message.message = context.i18n.__("The date should account for the minimum delivery time; choose a slightly later time");
                     }

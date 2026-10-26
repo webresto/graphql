@@ -46,7 +46,6 @@
     "Not enough bonuses: %s available": "보너스가 부족합니다: 사용 가능 %s",
     "Paying with bonuses is not available now": "지금은 보너스로 결제할 수 없습니다",
     "No point of Street": "도로가 입력되지 않았습니다",
-    "Order date is outside work time": "선택한 시간은 영업시간 외입니다",
     "The order date is not valid": "주문 날짜가 올바르지 않습니다",
     "The order has already been paid": "이미 결제된 주문입니다",
     "The cart is empty": "장바구니가 비어 있습니다",

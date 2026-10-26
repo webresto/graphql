@@ -46,7 +46,6 @@
     "Not enough bonuses: %s available": "ボーナスが不足しています: 利用可能 %s",
     "Paying with bonuses is not available now": "現在ボーナスでのお支払いはご利用いただけません",
     "No point of Street": "住所（通り）が指定されていません",
-    "Order date is outside work time": "選択した時間は営業時間外です",
     "The order date is not valid": "注文日時が正しくありません",
     "The order has already been paid": "この注文は支払い済みです",
     "The cart is empty": "カートが空です",

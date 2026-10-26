@@ -46,7 +46,6 @@
     "Not enough bonuses: %s available": "积分不足：可用 %s",
     "Paying with bonuses is not available now": "目前无法使用积分支付",
     "No point of Street": "未指定街道",
-    "Order date is outside work time": "所选时间不在营业时间内",
     "The order date is not valid": "订单日期无效",
     "The order has already been paid": "订单已支付",
     "The cart is empty": "购物车为空",
