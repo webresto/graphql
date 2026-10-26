@@ -74,11 +74,11 @@ graphqlHelper_1.default.addType(`#graphql
   type InitCheckout {
     "Order version number (always growing)"
     nonce: Int
-    "Intervals during which an order can be placed"
+    "When the order can be had: [from, to] in Unix seconds, from now to the latest moment it may be for (POSSIBLE_TO_ORDER_IN_MINUTES), by the hours of the kitchens that take its address (delivery) or of its point (pickup, dine-in). Empty: never - no address or point yet, or closed all along"
     worktimeIntervals: [[Int!]!]
-    "Will it be possible to order as quickly as possible?"
+    "Whether the order can be had as soon as possible: an interval holds now"
     allowSoonAsPossible: Boolean
-    "Allow order by time"
+    "Whether the order can be had by a time: there is an interval"
     allowOrderToTime: Boolean
     "Html chunk for place top of spending bonus section on checkout"
     bonusBannerHTMLChunk: String

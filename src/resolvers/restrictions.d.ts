@@ -6,7 +6,6 @@ declare const _default: {
         };
     };
     Restrictions: {
-        worktime: () => Promise<string | boolean | string[]>;
         /**
          * GQL compatibility version
          */

@@ -3,7 +3,7 @@
     "name": "Webresto"
   },
   "dependencies": {
-    "@webresto/worktime": "^2.2.0",
+    "@webresto/worktime": "^2.4.1",
     "accept-language-parser": "^1.5.0",
     "apollo-fetch": "=0.7.0",
     "apollo-server": "=2.25.2",

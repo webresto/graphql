@@ -33,9 +33,6 @@ graphqlHelper_1.default.addType(`#graphql
      "graphql scehma backward compatibility version"
       gqlSchemaMinVersion: Int
 
-     "Delivery service working time"
-      worktime: Json
-
       "Time possible for order from now"
       possibleToOrderInMinutes: Int
       timezone: String
@@ -89,7 +86,6 @@ exports.default = {
         }
     },
     Restrictions: {
-        worktime: async () => await Settings.get('WORK_TIME') ?? [],
         /**
          * GQL compatibility version
          */

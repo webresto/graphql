@@ -70,10 +70,6 @@ graphqlHelper.addType(`#graphql
     freeDeliveryFrom: Float
     """What that zone charges for delivery, whatever it decided about this basket; cost is what this basket pays. A delivery product's price when the zone charges one; 0 is free."""
     deliveryCost: Float
-    """Whether that zone takes orders now, by zoneWorktime."""
-    zoneOpen: Boolean
-    """When that zone takes orders. Null: always."""
-    zoneWorktime: Json
     """What the operator wrote about that zone, untranslated. Null: nothing."""
     zoneDescription: String
     """Cooking time for this basket. Only products of type dish count."""

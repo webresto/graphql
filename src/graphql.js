@@ -319,10 +319,6 @@ exports.default = {
         freeDeliveryFrom: Float
         "What that zone charges for delivery, whatever it decided about this basket; cost is what this basket pays. A delivery product's price when the zone charges one; 0 is free"
         deliveryCost: Float
-        "Whether that zone took orders when the order was last counted, by zoneWorktime"
-        zoneOpen: Boolean
-        "When that zone takes orders. Null: always"
-        zoneWorktime: Json
         "What the operator wrote about that zone, untranslated. Null: nothing"
         zoneDescription: String
         "Cooking time for this basket. Only products of type dish count."
@@ -349,7 +345,7 @@ exports.default = {
         });
         // what a storefront shows: a product (an option of products - the menu, the products that have it are not known
         // here) and its photos, the stock and the stops of a product at a point, the groups, the promotions, the points,
-        // the cities, the settings, the delivery zones, the ways to pay; the hours of a point, a zone, a promotion turning
+        // the cities, the settings, the delivery zones, the ways to pay; the hours of a point or a promotion turning
         // them come as the same events (lib/hours-sweep of core)
         const productChanged = (dish) => (dish.modifier ? publishStorefrontChange("menu") : publishStorefrontChange("dishes", [dish.id]));
         emitter.on("core:product-after-create", "graphql", productChanged);
