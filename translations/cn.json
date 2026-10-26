@@ -33,7 +33,19 @@
     "The user will be deleted": "用户将被删除",
     "Error: %s": "错误: %s",
     "Ordering for a date in the past is not possible": "无法为过去的日期下单",
+    "Order date is outside work time": "所选时间不在营业时间内",
     "The date should account for the minimum delivery time; choose a slightly later time": "日期应考虑最小送货时间;请选择稍晚的时间",
-    "Date not allowed": "不允许该日期"
-  }
-  
+    "Date not allowed": "不允许该日期",
+    "The order date is not valid": "订单日期无效",
+    "The order has already been paid": "订单已支付",
+    "The cart is empty": "购物车为空",
+    "Failed to calculate the cart": "无法计算购物车",
+    "Ordering is temporarily unavailable": "暂时无法下单",
+    "The bonus amount exceeds the allowed limit": "奖励金额超出允许的上限",
+    "Authorization required": "需要登录",
+    "Password was changed": "密码已更改",
+    "Phone confirmation required": "需要验证手机号",
+    "Please confirm your phone number": "请验证您的手机号",
+    "Provider unlinked": "已解除登录方式绑定",
+    "The payment of the payment has ended unsuccessfully": "支付失败"
+}
