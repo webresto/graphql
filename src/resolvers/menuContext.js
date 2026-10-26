@@ -19,7 +19,7 @@ const graphqlHelper_1 = require("@webresto/graphql/lib/graphqlHelper");
   source: String
   """Whether a point must be known before products can be added to a basket."""
   placeRequired: Boolean
-  """Why the menu cannot be offered: MENU_PLACE_REQUIRED (a point is required and none was found) or PLACE_CLOSED (every point of the menu is closed now)."""
+  """Why the menu cannot be offered: MENU_PLACE_REQUIRED (a point is required and none was found). Hours close no menu: a closed kitchen offers its menu to a time it works at."""
   code: String
   """Why the context ended up like this. For operators, not for customers."""
   diagnostics: [String]
