@@ -408,7 +408,9 @@ exports.default = {
                     if (order.comment) {
                         orderUpd['comment'] = order.comment;
                     }
-                    if (order.date) {
+                    // The time is given the moment the customer picks it, so the kitchen
+                    // working then takes the cart; null - as soon as possible again.
+                    if (order.date !== undefined) {
                         orderUpd['date'] = order.date;
                         orderToCartState = true;
                     }
