@@ -44,6 +44,19 @@
     "The kitchen of this area is closed now - choose a time it works at, or pickup": "この地域のキッチンは現在営業していません。営業時間内の時刻か、店頭受け取りを選んでください",
     "No kitchen delivers to this address now": "現在この住所へはお届けしていません",
     "Not enough bonuses: %s available": "ボーナスが不足しています: 利用可能 %s",
-    "Paying with bonuses is not available now": "現在ボーナスでのお支払いはご利用いただけません"
-  }
-  
+    "Paying with bonuses is not available now": "現在ボーナスでのお支払いはご利用いただけません",
+    "No point of Street": "住所（通り）が指定されていません",
+    "Order date is outside work time": "選択した時間は営業時間外です",
+    "The order date is not valid": "注文日時が正しくありません",
+    "The order has already been paid": "この注文は支払い済みです",
+    "The cart is empty": "カートが空です",
+    "Failed to calculate the cart": "カートを計算できませんでした",
+    "Ordering is temporarily unavailable": "現在ご注文いただけません",
+    "The bonus amount exceeds the allowed limit": "ボーナス額が上限を超えています",
+    "Authorization required": "ログインが必要です",
+    "Password was changed": "パスワードが変更されました",
+    "Phone confirmation required": "電話番号の確認が必要です",
+    "Please confirm your phone number": "電話番号を確認してください",
+    "Provider unlinked": "ログイン方法の連携を解除しました",
+    "The payment of the payment has ended unsuccessfully": "お支払いに失敗しました"
+}

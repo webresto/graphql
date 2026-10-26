@@ -55,5 +55,19 @@
   "At the moment, the delivery area does not work, try it later": "Сейчас зона доставки не работает, попробуйте позже",
   "Minimum order amount: %s": "Минимальная сумма заказа: %s",
   "Free delivery": "Бесплатная доставка",
-  "Shipping cost cannot be calculated": "Стоимость доставки не удалось рассчитать"
+  "Shipping cost cannot be calculated": "Стоимость доставки не удалось рассчитать",
+  "No point of Street": "Не указана улица",
+  "Order date is outside work time": "Выбранное время вне часов работы ресторана",
+  "The order date is not valid": "Дата заказа указана неверно",
+  "The order has already been paid": "Заказ уже оплачен",
+  "The cart is empty": "Корзина пуста",
+  "Failed to calculate the cart": "Не удалось рассчитать корзину",
+  "Ordering is temporarily unavailable": "Оформление заказов временно недоступно",
+  "The bonus amount exceeds the allowed limit": "Сумма бонусов превышает допустимую",
+  "Authorization required": "Требуется авторизация",
+  "Password was changed": "Пароль изменён",
+  "Phone confirmation required": "Требуется подтверждение телефона",
+  "Please confirm your phone number": "Пожалуйста, подтвердите номер телефона",
+  "Provider unlinked": "Способ входа отвязан",
+  "The payment of the payment has ended unsuccessfully": "Оплата не прошла"
 }

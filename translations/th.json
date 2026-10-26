@@ -44,6 +44,19 @@
     "The kitchen of this area is closed now - choose a time it works at, or pickup": "ครัวของพื้นที่นี้ปิดอยู่ในขณะนี้ กรุณาเลือกเวลาที่ครัวเปิด หรือรับเองที่ร้าน",
     "No kitchen delivers to this address now": "ขณะนี้เราไม่จัดส่งไปยังที่อยู่นี้",
     "Not enough bonuses: %s available": "โบนัสไม่เพียงพอ: ใช้ได้ %s",
-    "Paying with bonuses is not available now": "ขณะนี้ไม่สามารถชำระด้วยโบนัสได้"
-  }
-  
+    "Paying with bonuses is not available now": "ขณะนี้ไม่สามารถชำระด้วยโบนัสได้",
+    "No point of Street": "ไม่มีการระบุชื่อถนน",
+    "Order date is outside work time": "เวลาที่เลือกอยู่นอกเวลาทำการ",
+    "The order date is not valid": "วันที่สั่งซื้อไม่ถูกต้อง",
+    "The order has already been paid": "คำสั่งซื้อนี้ชำระเงินแล้ว",
+    "The cart is empty": "ตะกร้าว่างเปล่า",
+    "Failed to calculate the cart": "ไม่สามารถคำนวณตะกร้าได้",
+    "Ordering is temporarily unavailable": "ไม่สามารถสั่งซื้อได้ชั่วคราว",
+    "The bonus amount exceeds the allowed limit": "จำนวนโบนัสเกินขีดจำกัดที่อนุญาต",
+    "Authorization required": "ต้องเข้าสู่ระบบ",
+    "Password was changed": "เปลี่ยนรหัสผ่านแล้ว",
+    "Phone confirmation required": "ต้องยืนยันหมายเลขโทรศัพท์",
+    "Please confirm your phone number": "กรุณายืนยันหมายเลขโทรศัพท์ของคุณ",
+    "Provider unlinked": "ยกเลิกการเชื่อมต่อวิธีเข้าสู่ระบบแล้ว",
+    "The payment of the payment has ended unsuccessfully": "การชำระเงินไม่สำเร็จ"
+}

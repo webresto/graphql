@@ -44,6 +44,19 @@
 	"The kitchen of this area is closed now - choose a time it works at, or pickup": "Кухня цього району зараз зачинена — виберіть час, коли вона працює, або самовивіз",
 	"No kitchen delivers to this address now": "Зараз ми не доставляємо на цю адресу",
 	"Not enough bonuses: %s available": "Недостатньо бонусів: доступно %s",
-	"Paying with bonuses is not available now": "Оплата бонусами зараз недоступна"
-  }
-  
+	"Paying with bonuses is not available now": "Оплата бонусами зараз недоступна",
+	"No point of Street": "Не вказано вулицю",
+	"Order date is outside work time": "Обраний час поза годинами роботи ресторану",
+	"The order date is not valid": "Дату замовлення вказано неправильно",
+	"The order has already been paid": "Замовлення вже оплачено",
+	"The cart is empty": "Кошик порожній",
+	"Failed to calculate the cart": "Не вдалося розрахувати кошик",
+	"Ordering is temporarily unavailable": "Оформлення замовлень тимчасово недоступне",
+	"The bonus amount exceeds the allowed limit": "Сума бонусів перевищує допустиму",
+	"Authorization required": "Потрібна авторизація",
+	"Password was changed": "Пароль змінено",
+	"Phone confirmation required": "Потрібне підтвердження телефону",
+	"Please confirm your phone number": "Будь ласка, підтвердіть номер телефону",
+	"Provider unlinked": "Спосіб входу відв'язано",
+	"The payment of the payment has ended unsuccessfully": "Оплата не пройшла"
+}

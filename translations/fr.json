@@ -44,6 +44,19 @@
     "The kitchen of this area is closed now - choose a time it works at, or pickup": "La cuisine de ce secteur est fermée pour le moment - choisissez une heure d'ouverture ou le retrait",
     "No kitchen delivers to this address now": "Nous ne livrons pas cette adresse pour le moment",
     "Not enough bonuses: %s available": "Bonus insuffisants : %s disponibles",
-    "Paying with bonuses is not available now": "Le paiement avec des bonus n'est pas disponible pour le moment"
-  }
-  
+    "Paying with bonuses is not available now": "Le paiement avec des bonus n'est pas disponible pour le moment",
+    "No point of Street": "Rue non indiquée",
+    "Order date is outside work time": "L'heure choisie est en dehors des heures d'ouverture",
+    "The order date is not valid": "La date de la commande n'est pas valide",
+    "The order has already been paid": "La commande est déjà payée",
+    "The cart is empty": "Le panier est vide",
+    "Failed to calculate the cart": "Impossible de calculer le panier",
+    "Ordering is temporarily unavailable": "La commande est temporairement indisponible",
+    "The bonus amount exceeds the allowed limit": "Le montant des bonus dépasse la limite autorisée",
+    "Authorization required": "Connexion requise",
+    "Password was changed": "Le mot de passe a été modifié",
+    "Phone confirmation required": "Confirmation du téléphone requise",
+    "Please confirm your phone number": "Veuillez confirmer votre numéro de téléphone",
+    "Provider unlinked": "Méthode de connexion dissociée",
+    "The payment of the payment has ended unsuccessfully": "Le paiement a échoué"
+}

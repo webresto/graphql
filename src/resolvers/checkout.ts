@@ -256,7 +256,7 @@ export default {
               message = {
                 deviceId: context.connectionParams.deviceId,
                 type: "error",
-                title: "Attention",
+                title: context.i18n.__("Attention"),
                 message: order.message
                   ? context.i18n.__(order.message)
                   : context.i18n.__("It was not possible to check the order"),
@@ -274,18 +274,21 @@ export default {
           };
         } catch (e) {
           sails.log.error(`GQL > [checkOrder]`, e, args);
-          let cleanErrorMessage = e.message ? e.message?.replace(/[^\w\s]/gi, '').slice(0, 128) : null;
+          // Unknown errors: the core text is an English i18n key (`e.error`); technical
+          // exception text (`e.message`) stays in the log, the customer gets a translated message
           let message = {
             type: "error",
             title: context.i18n.__("Error"),
-            message: 
-              cleanErrorMessage ? `${cleanErrorMessage} ...` : 
-              e.error ? e.error : 'unknown error',
+            message: typeof e?.error === "string"
+              ? context.i18n.__(e.error)
+              : context.i18n.__("It was not possible to check the order"),
             // The text below is translated and is not a contract; the code is. formatError drops
             // `extensions`, so the refusal says it here, in the answer the storefront reads.
             code: typeof e?.code === "number" ? e.code : null,
           } as Message & { code: number | null };
-          if (e.code === 1) {
+          if (e.code === 0) {
+            message.message = context.i18n.__("It was not possible to check the order");
+          } else if (e.code === 1) {
             message.message = context.i18n.__("Enter the name of the customer");
           } else if (e.code === 2) {
             message.message = context.i18n.__("Enter the customer's phone");
@@ -303,16 +306,33 @@ export default {
             message.message = context.i18n.__("The payment system is not available");
           } else if (e.code === 11) {
             message.message = order.delivery?.message || "Delivery calculation error";
+          } else if (e.code === 9) {
+            message.message = context.i18n.__("The order date is not valid");
+          } else if (e.code === 12) {
+            message.message = context.i18n.__("The order has already been paid");
+          } else if (e.code === 13) {
+            message.message = context.i18n.__("The cart is empty");
+          } else if (e.code === 14) {
+            message.message = context.i18n.__("Failed to calculate the cart");
+          } else if (e.code === 19) {
+            // a missing or unsupported server timezone (the bonus limit is 28/29 here)
+            message.message = context.i18n.__("Ordering is temporarily unavailable");
+          } else if (e.code === 20) {
+            // core uses code 20 both for a cart that requires sign-in and for an order
+            // that asks for a delivery time and a maximum wait at once
+            message.message = e.error === "authorization required"
+              ? context.i18n.__("Authorization required")
+              : context.i18n.__("Choose either a delivery time or a maximum wait, not both");
           } else if (e.code === 10) {
             message.message = context.i18n.__("The date of execution of the order is not true");
           } else if (e.code === 15) {
               message.message = context.i18n.__("Ordering for a date in the past is not possible");
           } else if (e.code === 16) {
             message.message = context.i18n.__("Date not allowed");
+          } else if (e.code === 18) {
+            message.message = context.i18n.__("Order date is outside work time");
           } else if (e.code === 17) {
             message.message = context.i18n.__("The date should account for the minimum delivery time; choose a slightly later time");
-          } else if (e.code === 20) {
-            message.message = context.i18n.__("Choose either a delivery time or a maximum wait, not both");
           } else if (e.code === 22) {
             // Not the customer's problem and not something they can act on, so
             // they are told the order cannot be taken rather than why. The code
@@ -341,10 +361,6 @@ export default {
             // The device kept the cart of the account it was logged in as; the storefront starts
             // a new one at the logout, so this is a client that did not.
             message.message = context.i18n.__("This cart belongs to another account. Please start a new cart");
-          } else {
-            message.message = e.error
-              ? e.error
-              : context.i18n.__(`Problem when checking the order: %s`, e);
           }
 
           order = await Order.populate(data.orderId);

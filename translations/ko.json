@@ -44,6 +44,19 @@
     "The kitchen of this area is closed now - choose a time it works at, or pickup": "이 지역의 주방은 지금 영업하지 않습니다. 영업 시간 중의 시간이나 포장을 선택해 주세요",
     "No kitchen delivers to this address now": "지금은 이 주소로 배달하지 않습니다",
     "Not enough bonuses: %s available": "보너스가 부족합니다: 사용 가능 %s",
-    "Paying with bonuses is not available now": "지금은 보너스로 결제할 수 없습니다"
-  }
-  
+    "Paying with bonuses is not available now": "지금은 보너스로 결제할 수 없습니다",
+    "No point of Street": "도로가 입력되지 않았습니다",
+    "Order date is outside work time": "선택한 시간은 영업시간 외입니다",
+    "The order date is not valid": "주문 날짜가 올바르지 않습니다",
+    "The order has already been paid": "이미 결제된 주문입니다",
+    "The cart is empty": "장바구니가 비어 있습니다",
+    "Failed to calculate the cart": "장바구니를 계산할 수 없습니다",
+    "Ordering is temporarily unavailable": "현재 주문할 수 없습니다",
+    "The bonus amount exceeds the allowed limit": "보너스 금액이 허용 한도를 초과합니다",
+    "Authorization required": "로그인이 필요합니다",
+    "Password was changed": "비밀번호가 변경되었습니다",
+    "Phone confirmation required": "전화번호 인증이 필요합니다",
+    "Please confirm your phone number": "전화번호를 인증해 주세요",
+    "Provider unlinked": "로그인 방식 연결이 해제되었습니다",
+    "The payment of the payment has ended unsuccessfully": "결제에 실패했습니다"
+}

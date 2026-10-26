@@ -44,6 +44,19 @@
     "The kitchen of this area is closed now - choose a time it works at, or pickup": "该区域的厨房目前已关闭，请选择其营业时间或到店自取",
     "No kitchen delivers to this address now": "目前我们不配送到此地址",
     "Not enough bonuses: %s available": "积分不足：可用 %s",
-    "Paying with bonuses is not available now": "目前无法使用积分支付"
-  }
-  
+    "Paying with bonuses is not available now": "目前无法使用积分支付",
+    "No point of Street": "未指定街道",
+    "Order date is outside work time": "所选时间不在营业时间内",
+    "The order date is not valid": "订单日期无效",
+    "The order has already been paid": "订单已支付",
+    "The cart is empty": "购物车为空",
+    "Failed to calculate the cart": "无法计算购物车",
+    "Ordering is temporarily unavailable": "暂时无法下单",
+    "The bonus amount exceeds the allowed limit": "奖励金额超出允许的上限",
+    "Authorization required": "需要登录",
+    "Password was changed": "密码已更改",
+    "Phone confirmation required": "需要验证手机号",
+    "Please confirm your phone number": "请验证您的手机号",
+    "Provider unlinked": "已解除登录方式绑定",
+    "The payment of the payment has ended unsuccessfully": "支付失败"
+}
