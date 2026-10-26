@@ -33,7 +33,19 @@
     "The user will be deleted": "Người dùng sẽ bị xóa",
     "Error: %s": "Lỗi: %s",
     "Ordering for a date in the past is not possible": "Không thể đặt hàng cho ngày đã qua",
+    "Order date is outside work time": "Thời gian đã chọn nằm ngoài giờ làm việc",
     "The date should account for the minimum delivery time; choose a slightly later time": "Ngày phải tính đến thời gian giao hàng tối thiểu; chọn thời gian muộn hơn một chút",
-    "Date not allowed": "Ngày không được phép"
-  }
-  
+    "Date not allowed": "Ngày không được phép",
+    "The order date is not valid": "Ngày đặt hàng không hợp lệ",
+    "The order has already been paid": "Đơn hàng đã được thanh toán",
+    "The cart is empty": "Giỏ hàng trống",
+    "Failed to calculate the cart": "Không thể tính giỏ hàng",
+    "Ordering is temporarily unavailable": "Tạm thời không thể đặt hàng",
+    "The bonus amount exceeds the allowed limit": "Số điểm thưởng vượt quá giới hạn cho phép",
+    "Authorization required": "Yêu cầu đăng nhập",
+    "Password was changed": "Mật khẩu đã được thay đổi",
+    "Phone confirmation required": "Cần xác nhận số điện thoại",
+    "Please confirm your phone number": "Vui lòng xác nhận số điện thoại",
+    "Provider unlinked": "Đã hủy liên kết phương thức đăng nhập",
+    "The payment of the payment has ended unsuccessfully": "Thanh toán không thành công"
+}

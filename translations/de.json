@@ -33,7 +33,19 @@
     "The user will be deleted": "Der Benutzer wird gelöscht",
     "Error: %s": "Fehler: %s",
     "Ordering for a date in the past is not possible": "Eine Bestellung für ein Datum in der Vergangenheit ist nicht möglich",
+    "Order date is outside work time": "Die gewählte Zeit liegt außerhalb der Öffnungszeiten",
     "The date should account for the minimum delivery time; choose a slightly later time": "Das Datum sollte die Mindestlieferzeit berücksichtigen; wählen Sie eine etwas spätere Zeit",
-    "Date not allowed": "Datum nicht erlaubt"
-  }
-  
+    "Date not allowed": "Datum nicht erlaubt",
+    "The order date is not valid": "Das Bestelldatum ist ungültig",
+    "The order has already been paid": "Die Bestellung ist bereits bezahlt",
+    "The cart is empty": "Der Warenkorb ist leer",
+    "Failed to calculate the cart": "Der Warenkorb konnte nicht berechnet werden",
+    "Ordering is temporarily unavailable": "Bestellungen sind vorübergehend nicht möglich",
+    "The bonus amount exceeds the allowed limit": "Der Bonusbetrag überschreitet das zulässige Limit",
+    "Authorization required": "Anmeldung erforderlich",
+    "Password was changed": "Das Passwort wurde geändert",
+    "Phone confirmation required": "Telefonbestätigung erforderlich",
+    "Please confirm your phone number": "Bitte bestätigen Sie Ihre Telefonnummer",
+    "Provider unlinked": "Anmeldemethode getrennt",
+    "The payment of the payment has ended unsuccessfully": "Die Zahlung ist fehlgeschlagen"
+}

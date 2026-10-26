@@ -12,6 +12,39 @@ import graphqlHelper from "../../lib/graphqlHelper";
 import checkDeviceId from "../../lib/helper/checkDeviceId";
 import { OrderRecord } from "@webresto/core";
 
+/**
+ * Desired order date that has already passed (e.g. a cart left until the next day) is removed,
+ * otherwise the client keeps a date that cannot be ordered and offers no time slots for it.
+ * order.date is a wall-clock time "YYYY-MM-DD HH:mm[:ss]" in the server timezone.
+ * Only for orders that are still being checked out (CART / CHECKOUT); the order is moved back to CART.
+ */
+async function dropPastOrderDate(order: OrderRecord): Promise<void> {
+  if (!order.date || !["CART", "CHECKOUT"].includes(order.state)) return;
+  try {
+    const tzSetting = await Settings.get("TZ");
+    const timeZone = typeof tzSetting === "string" && tzSetting.trim() !== "" ? tzSetting : process.env.TZ;
+    if (!timeZone) return;
+
+    // sv-SE gives "YYYY-MM-DD HH:mm" — same shape as order.date, so the strings compare directly
+    const now = new Date().toLocaleString("sv-SE", {
+      timeZone,
+      year: "numeric", month: "2-digit", day: "2-digit",
+      hour: "2-digit", minute: "2-digit", hourCycle: "h23",
+    });
+    const orderDate = String(order.date).replace("T", " ").slice(0, 16);
+    if (!/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(orderDate) || orderDate >= now) return;
+
+    sails.log.info(`GQL > order: drop past date [${order.date}] (now ${now} ${timeZone}) for order ${order.id}`);
+    await Order.update({ id: order.id }, { date: null }).fetch();
+    if (order.state === "CHECKOUT") {
+      await Order.next({ id: order.id }, "CART");
+    }
+    order.date = null;
+  } catch (error) {
+    sails.log.error(`GQL > order: dropPastOrderDate`, error);
+  }
+}
+
 let captchaAdapter = Captcha.getAdapter();
 
 type PromotionCodeResponse = {
@@ -143,6 +176,8 @@ export default {
             );
             order = await getNewCart(context, args.orderId);
           }
+
+          await dropPastOrderDate(order);
   
           let fullOrder = await Order.populate(order.id);
           emitter.emit("http-api:before-response-order", fullOrder);

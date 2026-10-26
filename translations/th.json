@@ -33,7 +33,19 @@
     "The user will be deleted": "ผู้ใช้จะถูกลบ",
     "Error: %s": "ข้อผิดพลาด: %s",
     "Ordering for a date in the past is not possible": "ไม่สามารถสั่งซื้อในวันที่ผ่านมาได้",
+    "Order date is outside work time": "เวลาที่เลือกอยู่นอกเวลาทำการ",
     "The date should account for the minimum delivery time; choose a slightly later time": "วันที่ต้องคำนึงถึงระยะเวลาการจัดส่งขั้นต่ำ กรุณาเลือกเวลาที่ช้ากว่านี้เล็กน้อย",
-    "Date not allowed": "วันที่ไม่อนุญาต"
-  }
-  
+    "Date not allowed": "วันที่ไม่อนุญาต",
+    "The order date is not valid": "วันที่สั่งซื้อไม่ถูกต้อง",
+    "The order has already been paid": "คำสั่งซื้อนี้ชำระเงินแล้ว",
+    "The cart is empty": "ตะกร้าว่างเปล่า",
+    "Failed to calculate the cart": "ไม่สามารถคำนวณตะกร้าได้",
+    "Ordering is temporarily unavailable": "ไม่สามารถสั่งซื้อได้ชั่วคราว",
+    "The bonus amount exceeds the allowed limit": "จำนวนโบนัสเกินขีดจำกัดที่อนุญาต",
+    "Authorization required": "ต้องเข้าสู่ระบบ",
+    "Password was changed": "เปลี่ยนรหัสผ่านแล้ว",
+    "Phone confirmation required": "ต้องยืนยันหมายเลขโทรศัพท์",
+    "Please confirm your phone number": "กรุณายืนยันหมายเลขโทรศัพท์ของคุณ",
+    "Provider unlinked": "ยกเลิกการเชื่อมต่อวิธีเข้าสู่ระบบแล้ว",
+    "The payment of the payment has ended unsuccessfully": "การชำระเงินไม่สำเร็จ"
+}

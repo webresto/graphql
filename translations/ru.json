@@ -33,6 +33,19 @@
   "The user will be deleted": "Пользователь будет удален",
   "Error: %s": "Ошибка: %s",
   "Ordering for a date in the past is not possible": "Заказ на дату в прошлом невозможен",
+  "Order date is outside work time": "Выбранное время вне часов работы ресторана",
   "The date should account for the minimum delivery time; choose a slightly later time": "Дата должна учитывать минимальное время доставки",
-  "Date not allowed": "Доставка в эту дату не возможна"
+  "Date not allowed": "Доставка в эту дату не возможна",
+  "The order date is not valid": "Дата заказа указана неверно",
+  "The order has already been paid": "Заказ уже оплачен",
+  "The cart is empty": "Корзина пуста",
+  "Failed to calculate the cart": "Не удалось рассчитать корзину",
+  "Ordering is temporarily unavailable": "Оформление заказов временно недоступно",
+  "The bonus amount exceeds the allowed limit": "Сумма бонусов превышает допустимую",
+  "Authorization required": "Требуется авторизация",
+  "Password was changed": "Пароль изменён",
+  "Phone confirmation required": "Требуется подтверждение телефона",
+  "Please confirm your phone number": "Пожалуйста, подтвердите номер телефона",
+  "Provider unlinked": "Способ входа отвязан",
+  "The payment of the payment has ended unsuccessfully": "Оплата не прошла"
 }
