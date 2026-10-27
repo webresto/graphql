@@ -204,6 +204,8 @@ exports.default = {
       type: String
       message: String
       state: Json
+      """true - the entry of a promotion of the order's promo code; null - of one that applies by itself"""
+      byCode: Boolean
     }
 
     """Solved captcha"""

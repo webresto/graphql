@@ -140,7 +140,8 @@ for (const ext of ["ts", "js"]) {
       const anonymous = await check("mine", null);
       const missing = await check("nowhere", "user-1");
 
-      const refusal = "Problem when checking the order: locationId not found";
+      // the technical text stays in the log; the customer gets the general refusal
+      const refusal = "It was not possible to check the order";
       expect([foreign, anonymous, missing].map((response) => response.message.message)).to.deep.equal([
         refusal,
         refusal,
