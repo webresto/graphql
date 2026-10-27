@@ -12,7 +12,7 @@ import { addType } from "@webresto/graphql/lib/graphqlHelper";
  * kitchens of its city or of every city — in the same words the server logs use.
  */
 addType(`type MenuContext {
-  """The points stock is read at. With a kitchen, a product is in the menu if any of them can sell it; without one (city, all), only if each of them can. Empty means no point is known, and stock reads as unlimited."""
+  """The points stock is read at. A product is in the menu if any of them can sell it: with a kitchen - that kitchen, without one (city, all) - any kitchen the order may still go to. Empty means no point is known, and stock reads as unlimited."""
   placeIds: [String]
   """Which input decided it: requested | order | coordinate | city | all | none."""
   source: String
