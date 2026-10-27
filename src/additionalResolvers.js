@@ -50,12 +50,19 @@ exports.additionalResolver = {
                 dataloaders.set(info.fieldNodes, dl);
             }
             // An option is offered only where the menu that shows its dish can sell
-            // it: the dish's own context, carried down from the query.
+            // it: the dish's own context, carried down from the query. A stopped
+            // option is not shown even when the menu shows stopped dishes
+            // (SHOW_UNAVAILABLE_DISHES): it is chosen, not looked at - as
+            // Dish.getDishModifiers decides.
             const row = await dl.load(parent.id);
             if (!row)
                 return row;
-            const [offered] = await (await Adapter.get("menu")).filterProducts([row], await (0, graphqlHelper_1.menuContextOf)(parent));
-            return offered ?? null;
+            const adapter = await Adapter.get("menu");
+            const menuContext = await (0, graphqlHelper_1.menuContextOf)(parent);
+            const [offered] = await adapter.filterProducts([row], menuContext);
+            if (!offered || !(await adapter.canAddProduct(row, 1, menuContext)).available)
+                return null;
+            return offered;
         }
     },
     OrderModifier: {
