@@ -10,7 +10,7 @@ var i18nFactory = require('i18n-2');
 import { PubSub } from "apollo-server";
 import { GraphQLError, GraphQLFormattedError } from "graphql";
 import eventHelper from "../lib/eventHelper";
-import { Action } from "../types/primitives";
+import { Action, Message } from "../types/primitives";
 import { getEffectiveBalanceAcross } from "@webresto/core/lib/menu/product-availability";
 import { Adapter } from "@webresto/core/adapters/index";
 const pubsub = new PubSub();
@@ -29,7 +29,7 @@ function publishOrderDebounced(order: any, delay = 700) {
   }, delay));
 }
 
-type StorefrontChangeKind = "dishes" | "menu" | "places" | "cities" | "settings" | "zones" | "payments";
+type StorefrontChangeKind = "dishes" | "menu" | "places" | "cities" | "settings" | "zones" | "payments" | "bonuses";
 
 /**
  * What a storefront shows changed (subscription `storefrontChanged`): the changes of a moment go out together, one
@@ -322,13 +322,13 @@ export default {
     emitter.on("core:order-after-update", "graphql", function (order) {
       publishOrderDebounced(order);
     });
-    emitter.on("send-message", "graphql", function ({ orderId, message }) {
-      pubsub.publish("message", { orderId, message });
+    emitter.on("send-message", "graphql", function (message) {
+      eventHelper.sendMessage(message as Message);
     });
     // what a storefront shows: a product (an option of products - the menu, the products that have it are not known
     // here) and its photos, the stock and the stops of a product at a point, the groups, the promotions, the points,
-    // the cities, the settings, the delivery zones, the ways to pay; the hours of a point or a promotion turning
-    // them come as the same events (lib/hours-sweep of core)
+    // the cities, the settings, the delivery zones, the ways to pay, the bonus programs; the hours of a point or a
+    // promotion turning them come as the same events (lib/hours-sweep of core)
     const productChanged = (dish) => (dish.modifier ? publishStorefrontChange("menu") : publishStorefrontChange("dishes", [dish.id]));
     emitter.on("core:product-after-create", "graphql", productChanged);
     emitter.on("core:product-after-update", "graphql", productChanged);
@@ -347,6 +347,7 @@ export default {
     emitter.on("core:promotion-changed", "graphql", () => publishStorefrontChange("menu"));
     emitter.on("core:delivery-zone-changed", "graphql", () => publishStorefrontChange("zones"));
     emitter.on("core:payment-method-changed", "graphql", () => publishStorefrontChange("payments"));
+    emitter.on("core:bonus-program-changed", "graphql", () => publishStorefrontChange("bonuses"));
     emitter.on("core:place-changed", "graphql", (place) => {
       publishStorefrontChange("menu", [], [place.id]);
       publishStorefrontChange("places");

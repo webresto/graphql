@@ -159,7 +159,7 @@ export default {
             throw `Authentication failed`;
           }
 
-          await UserDevice.update({ id: deviceId }, { isLoggedIn: false }).fetch();
+          await UserDevice.logout({ id: deviceId, user: auth.userId });
 
           let message: Message = {
             deviceId: deviceId,
@@ -204,7 +204,7 @@ export default {
             throw `Authentication failed`;
           }
 
-          UserDevice.update({ user: auth.userId }, { isLoggedIn: false }).fetch();
+          await UserDevice.logout({ user: auth.userId });
 
           let message: Message = {
             deviceId: null,

@@ -36,8 +36,10 @@ declare global {
         "http-api:before-response-order": [Order];
         "graphql-return-bonus-program": [string, BonusProgram[]];
         "send-message": [{
-            orderId: string;
-            message: any;
+            deviceId: string;
+            type: string;
+            title: string;
+            message?: string;
         }];
     }
     interface SettingList {

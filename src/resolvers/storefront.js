@@ -11,7 +11,8 @@ type StorefrontChange {
   dishes - the products of dishIds: their own fields and photos, their stock and stops at placeIds, deleted;
   menu - the whole menu: the groups, the promotions, the options of products, a point (opened or closed by its hours too);
   places - the points; cities - the cities; settings - the settings of the restaurant;
-  zones - the delivery zones (opened or closed by their hours too): the terms of an address; payments - the ways to pay
+  zones - the delivery zones (opened or closed by their hours too): the terms of an address; payments - the ways to pay;
+  bonuses - the bonus programs: the bonuses of the user
   """
   kind: String!
   "the products of a change of the kind dishes"

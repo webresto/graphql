@@ -110,7 +110,7 @@ exports.default = {
                     }))) {
                         throw `Authentication failed`;
                     }
-                    await UserDevice.update({ id: deviceId }, { isLoggedIn: false }).fetch();
+                    await UserDevice.logout({ id: deviceId, user: auth.userId });
                     let message = {
                         deviceId: deviceId,
                         title: context.i18n.__("Success"),
@@ -141,7 +141,7 @@ exports.default = {
                     }))) {
                         throw `Authentication failed`;
                     }
-                    UserDevice.update({ user: auth.userId }, { isLoggedIn: false }).fetch();
+                    await UserDevice.logout({ user: auth.userId });
                     let message = {
                         deviceId: null,
                         title: context.i18n.__("Success"),
