@@ -295,7 +295,9 @@ exports.default = {
          Captcha label: 'authStart:<login>'.
          Errors with rate_limited when the device already holds AUTH_MAX_LIVE_ATTEMPTS_PER_DEVICE
          unfinished attempts — there is no attempt yet to carry a failReason. Restarting the same
-         purpose supersedes its own attempt and is never refused (send-caps.md §1.3)."""
+         purpose supersedes its own attempt and is never refused (send-caps.md §1.3) — except the
+         same number by the same method while its code is out and the pause before another runs:
+         then the live attempt comes back as it is, with its code and its countdown."""
       authStart(purpose: String!, method: String, login: String, salesChannel: String, country: String, redirectBack: String, captcha: Captcha): AuthAttemptView!`,
             fn: async function (parent, args, context) {
                 try {

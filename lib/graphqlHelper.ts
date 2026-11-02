@@ -409,6 +409,16 @@ async function dropUnoffered(modelname: string, records: any[], context: MenuCon
 }
 
 /**
+ * The order of a list asked without its own `sort`: sortOrder, then the order the rows were made in, then id.
+ * Postgres returns rows of an equal sortOrder as they lie on disk, and an updated row lies elsewhere — without
+ * the tie-breakers, editing a dish moved it within its section.
+ */
+function listSort(attributes: Record<string, unknown>): Array<Record<string, "ASC">> | null {
+  if (!attributes.sortOrder) return null;
+  return [{ sortOrder: "ASC" }, ...(attributes.createdAt ? [{ createdAt: "ASC" as const }] : []), { id: "ASC" }];
+}
+
+/**
  * Patches waterline criteria during auto-generation
  *
  * @param modelname
@@ -512,12 +522,6 @@ function addModelResolver(modelname) {
           query = criteria
         }
 
-        //sorting
-        if (sails.models[modelname].attributes.sortOrder) {
-          query.sort = 'sortOrder ASC'
-        }
-
-
         let ORMrequest = sails.models[modelname].find(query);
 
         if (args.skip) {
@@ -528,12 +532,11 @@ function addModelResolver(modelname) {
           ORMrequest.limit(args.limit)
         }
 
+        const defaultSort = listSort(sails.models[modelname].attributes);
         if (args.sort) {
           ORMrequest.sort(args.sort)
-        } else {
-          if (sails.models[modelname].attributes.sortOrder) {
-            ORMrequest.sort('sortOrder ASC')
-          }
+        } else if (defaultSort) {
+          ORMrequest.sort(defaultSort)
         }
 
         let result = await ORMrequest
