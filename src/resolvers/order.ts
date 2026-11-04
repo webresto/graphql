@@ -490,8 +490,9 @@ export default {
           orderUpd['trifleFrom'] = order.trifleFrom
         }
 
-        if(order.comment) {
-          orderUpd['comment'] = order.comment
+        // an empty comment clears it: the customer erased the text
+        if(order.comment !== undefined) {
+          orderUpd['comment'] = order.comment || ""
         }
 
         // The time is given the moment the customer picks it, so the kitchen
