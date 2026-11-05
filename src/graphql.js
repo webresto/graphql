@@ -398,6 +398,8 @@ exports.default = {
                 playground: true,
                 resolvers: [resolvers, AdditionalResolvers],
                 subscriptions: {
+                    // A storefront judges the connection by these: silent ones are dead, and idle ones survive a proxy.
+                    keepAlive: 15000,
                     onConnect: (connectionParams, webSocket) => {
                         let exContext = {};
                         if (connectionParams) {
