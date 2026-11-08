@@ -15,6 +15,7 @@ const graphqlHelper_1 = require("@webresto/graphql/lib/graphqlHelper");
   cookingPoints: [Place!]!`);
 const graphqlHelper_2 = __importDefault(require("../../lib/graphqlHelper"));
 const checkDeviceId_1 = __importDefault(require("../../lib/helper/checkDeviceId"));
+const readsOrder_1 = __importDefault(require("../../lib/helper/readsOrder"));
 /**
  * Desired order date that has already passed (e.g. a cart left until the next day) is removed,
  * otherwise the client keeps a date that cannot be ordered and offers no time slots for it.
@@ -118,12 +119,16 @@ exports.default = {
     Query: {
         orders: {
             def: `#graphql
-      """ Returns multiple orders by array of orderIds """
+      """ Returns multiple orders by array of orderIds: those of this device or of the signed-in account """
       orders(orderIds: [String!]!): [Order!]!`,
             fn: async function (parent, args, context) {
                 try {
                     const found = await Order.find({ id: args.orderIds });
-                    const populated = await Promise.all(found.map((o) => Order.populate(o.id)));
+                    const own = [];
+                    for (const o of found)
+                        if (await (0, readsOrder_1.default)(o, context))
+                            own.push(o);
+                    const populated = await Promise.all(own.map((o) => Order.populate(o.id)));
                     return populated;
                 }
                 catch (error) {
@@ -134,7 +139,7 @@ exports.default = {
         },
         order: {
             def: `#graphql
-      """ by orderId - the order, or a new cart of that id (the storefront keeps the id of its cart); no id - a new cart; by shortId or orderNumber - the order, or null """
+      """ by orderId - the order, or a new cart of that id (the storefront keeps the id of its cart); no id - a new cart; by shortId or orderNumber - the order, or null. Only an order of this device or of the signed-in account: another's is as none (by orderId - a new cart of a new id) """
       order(orderId: String, shortId: String, orderNumber: String): Order`,
             fn: async function (parent, args, context) {
                 try {
@@ -153,13 +158,18 @@ exports.default = {
                     if (Object.keys(criteria).length !== 0) {
                         order = (await Order.find(criteria))[0];
                     }
+                    // another device's or account's order is as none: its link opened elsewhere shows nothing
+                    const another = !!order && !(await (0, readsOrder_1.default)(order, context));
+                    if (another)
+                        order = undefined;
                     if (!order) {
                         // A short id or a number names an order somebody has placed (its page, a link of a
                         // payment): one that is not there is not found - not a fresh cart of a random id.
                         if (!args.orderId && (args.shortId || args.orderNumber))
                             return null;
-                        sails.log.error("GQL > order resolver error: ", `order with id ${args.orderId}  not found. Trying make new cart.`);
-                        order = await getNewCart(context, args.orderId);
+                        sails.log.error("GQL > order resolver error: ", `order with id ${args.orderId} ${another ? "is another's" : "not found"}. Trying make new cart.`);
+                        // the id of another's order is taken: the new cart gets its own
+                        order = await getNewCart(context, another ? undefined : args.orderId);
                     }
                     await dropPastOrderDate(order);
                     let fullOrder = await Order.populate(order.id);
@@ -454,6 +464,10 @@ exports.default = {
             fn: async function (parent, args, context) {
                 try {
                     let orderId = args.orderId;
+                    // the order "Repeat" takes or the snapshot of a shared cart: another's is not found
+                    const source = await Order.findOne({ id: orderId });
+                    if (!source || !(await (0, readsOrder_1.default)(source, context)))
+                        throw `Order with orderId ${orderId} not found`;
                     let newcart = await Order.clone({ id: orderId });
                     let fullOrder = await Order.populate({ id: newcart.id });
                     emitter.emit("http-api:before-response-order-update", fullOrder);
@@ -471,6 +485,10 @@ exports.default = {
       orderShare(orderId: String!): String!`,
             fn: async function (parent, args, context) {
                 try {
+                    // only the cart of this device or account is shared: another's is not found
+                    const source = await Order.findOne({ id: args.orderId });
+                    if (!source || !(await (0, readsOrder_1.default)(source, context)))
+                        throw `Order with orderId ${args.orderId} not found`;
                     const snapshot = await Order.share({ id: args.orderId });
                     return snapshot.shortId;
                 }

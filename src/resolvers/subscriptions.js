@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const apollo_server_1 = require("apollo-server");
 const checkDeviceId_1 = __importDefault(require("../../lib/helper/checkDeviceId"));
+const readsOrder_1 = __importDefault(require("../../lib/helper/readsOrder"));
 /**
  * The `order-changed` event carries the order record exactly as waterline
  * handed it over: associations in it are identifiers, not objects. Sending it
@@ -18,7 +19,7 @@ exports.default = {
     Subscription: {
         orders: {
             def: `#graphql
-      "Subscribe to updates for multiple orders by orderIds. Returns the single changed Order."
+      "Subscribe to updates for multiple orders by orderIds - those of this device or of the signed-in account. Returns the single changed Order."
       orders(orderIds: [String!]!, deviceId: String): Order
       `,
             fn: {
@@ -29,7 +30,7 @@ exports.default = {
                     (0, checkDeviceId_1.default)(context);
                     return context.pubsub.asyncIterator('order-changed');
                 }, (payload, args, context, info) => {
-                    return Array.isArray(args.orderIds) && args.orderIds.includes(payload.id);
+                    return Array.isArray(args.orderIds) && args.orderIds.includes(payload.id) && (0, readsOrder_1.default)(payload, context);
                 }),
                 resolve: payload => Order.populate(payload.id),
             }

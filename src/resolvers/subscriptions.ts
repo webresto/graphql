@@ -1,5 +1,6 @@
 import { withFilter } from 'apollo-server';
 import checkDeviceId from '../../lib/helper/checkDeviceId';
+import readsOrder from '../../lib/helper/readsOrder';
 
 /**
  * The `order-changed` event carries the order record exactly as waterline
@@ -15,7 +16,7 @@ export default {
   Subscription: {
     orders: {
       def: `#graphql
-      "Subscribe to updates for multiple orders by orderIds. Returns the single changed Order."
+      "Subscribe to updates for multiple orders by orderIds - those of this device or of the signed-in account. Returns the single changed Order."
       orders(orderIds: [String!]!, deviceId: String): Order
       `,
       fn: {
@@ -28,7 +29,7 @@ export default {
             return context.pubsub.asyncIterator('order-changed');
           },
           (payload, args, context, info) => {
-            return Array.isArray(args.orderIds) && args.orderIds.includes(payload.id);
+            return Array.isArray(args.orderIds) && args.orderIds.includes(payload.id) && readsOrder(payload, context);
           }
         ),
         resolve: payload => Order.populate(payload.id),
