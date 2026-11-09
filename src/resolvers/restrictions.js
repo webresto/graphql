@@ -63,7 +63,7 @@ graphqlHelper_1.default.addType(`#graphql
       "Cities this installation delivers in. The customer picks one; it travels with the address and is what qualifies it for the geocoder."
       cities: [City]
 
-      "A cart can only be created and filled by an authenticated user"
+      "A guest fills a cart, only an authenticated user orders it: the storefront asks for the login before the cart page"
       requireAuthForCart: Boolean
 
       "Group User restrictions"
