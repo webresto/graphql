@@ -5,6 +5,8 @@ import *  as langParser from "accept-language-parser"
 import { ApolloServer } from "apollo-server-express";
 const fs = require("fs");
 const path = require("path");
+// Always with `devMode: false`: in dev mode i18n-2 writes every missing key into the project's locale files as its
+// own translation ("Promo code": "Promo code"), and the admin panel takes those files over the core's dictionary.
 var i18nFactory = require('i18n-2');
 
 import { PubSub } from "apollo-server";
@@ -444,7 +446,7 @@ export default {
               if(acceptLanguge){
                 connectionParams["locale"] = langParser.parse(acceptLanguge)[0]?.code ?? sails.config.i18n.defaultLocale
               }
-              const i18n = new i18nFactory({...sails.config.i18n, directory: sails.config.i18n.localesDirectory, extension: ".json"})
+              const i18n = new i18nFactory({...sails.config.i18n, directory: sails.config.i18n.localesDirectory, extension: ".json", devMode: false})
               i18n.setLocale(connectionParams["locale"]);
               exContext["i18n"] = i18n;
 
@@ -493,7 +495,7 @@ export default {
               headers["locale"] = (langParser.parse(acceptLanguge))[0]?.code ?? sails.config.i18n.defaultLocale
             }
 
-            const i18n = new i18nFactory({...sails.config.i18n, directory: sails.config.i18n.localesDirectory, extension: ".json"})
+            const i18n = new i18nFactory({...sails.config.i18n, directory: sails.config.i18n.localesDirectory, extension: ".json", devMode: false})
             i18n.setLocale(headers["locale"]);
             return { ...req, connectionParams: headers, i18n: i18n };
           }

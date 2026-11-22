@@ -43,6 +43,8 @@ const langParser = __importStar(require("accept-language-parser"));
 const apollo_server_express_1 = require("apollo-server-express");
 const fs = require("fs");
 const path = require("path");
+// Always with `devMode: false`: in dev mode i18n-2 writes every missing key into the project's locale files as its
+// own translation ("Promo code": "Promo code"), and the admin panel takes those files over the core's dictionary.
 var i18nFactory = require('i18n-2');
 const apollo_server_1 = require("apollo-server");
 const eventHelper_1 = __importDefault(require("../lib/eventHelper"));
@@ -456,7 +458,7 @@ exports.default = {
                             if (acceptLanguge) {
                                 connectionParams["locale"] = langParser.parse(acceptLanguge)[0]?.code ?? sails.config.i18n.defaultLocale;
                             }
-                            const i18n = new i18nFactory({ ...sails.config.i18n, directory: sails.config.i18n.localesDirectory, extension: ".json" });
+                            const i18n = new i18nFactory({ ...sails.config.i18n, directory: sails.config.i18n.localesDirectory, extension: ".json", devMode: false });
                             i18n.setLocale(connectionParams["locale"]);
                             exContext["i18n"] = i18n;
                         }
@@ -500,7 +502,7 @@ exports.default = {
                         if (acceptLanguge) {
                             headers["locale"] = (langParser.parse(acceptLanguge))[0]?.code ?? sails.config.i18n.defaultLocale;
                         }
-                        const i18n = new i18nFactory({ ...sails.config.i18n, directory: sails.config.i18n.localesDirectory, extension: ".json" });
+                        const i18n = new i18nFactory({ ...sails.config.i18n, directory: sails.config.i18n.localesDirectory, extension: ".json", devMode: false });
                         i18n.setLocale(headers["locale"]);
                         return { ...req, connectionParams: headers, i18n: i18n };
                     }
