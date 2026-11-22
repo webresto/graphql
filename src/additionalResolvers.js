@@ -110,6 +110,26 @@ exports.additionalResolver = {
             }
             return await dl.load(parent.parentGroup);
         },
+        // The variants of a box (the type - graphql.ts, DishVariants): each mapping with its dish, read as a dish in the
+        // context the box was read in. A mapping whose dish is gone, deleted or switched off is left out.
+        variants: async (parent) => {
+            const variants = parent?.variants;
+            if (!variants?.mappings?.length)
+                return null;
+            const ids = variants.mappings.map((mapping) => mapping.rel).filter((id) => !!id);
+            const rows = ids.length ? await Dish.find({ id: ids, isDeleted: false, enable: true }) : [];
+            const context = (0, graphqlHelper_1.menuContextOf)(parent);
+            const byId = new Map(rows.map((row) => [row.id, (0, graphqlHelper_1.carryMenuContext)(row, context)]));
+            return {
+                options: variants.options ?? [],
+                mappings: variants.mappings
+                    .filter((mapping) => mapping.rel && byId.has(mapping.rel))
+                    .map((mapping) => ({ values: mapping.values, isDefault: mapping.isDefault === true, dish: byId.get(mapping.rel) })),
+            };
+        },
+        // A dish with variants (core's `interfaces/Variants.ts`) and its variant share their photos at reading, both ways:
+        // a variant without photos of its own shows its box's, a box without its own - its default variant's. No copies of
+        // files, and it serves the menu, the card of a dish and a line of the cart alike.
         images: async (parent, args, context, info) => {
             const sortImages = (images) => {
                 return images.sort((a, b) => {
@@ -130,7 +150,12 @@ exports.additionalResolver = {
                 });
                 dataloaders.set(info.fieldNodes, dl);
             }
-            return sortImages(await dl.load(parent.id));
+            const own = sortImages((await dl.load(parent.id)) ?? []);
+            if (own.length)
+                return own;
+            const mappings = parent.variants?.mappings ?? [];
+            const other = parent.parentId ?? (mappings.find((mapping) => mapping.isDefault) ?? mappings[0])?.rel;
+            return other ? sortImages((await dl.load(other)) ?? []) : own;
         }
     },
     Group: {
@@ -221,6 +246,16 @@ exports.additionalResolver = {
                 dataloaders.set(info.fieldNodes, dl);
             }
             return inOrder(await dl.load(parent.dish));
+        },
+        // The box of the line's dish when that dish is a variant (core's `OrderDish.parentDish`): its name and attributes
+        // name the line, in the order's menu context like the dish.
+        parentDish: async (parent) => {
+            if (!parent.parentDish)
+                return null;
+            const id = typeof parent.parentDish === "object" ? parent.parentDish.id : parent.parentDish;
+            const orderId = typeof parent.order === "object" ? parent.order?.id : parent.order;
+            const box = await Dish.findOne({ id });
+            return box ? (0, graphqlHelper_1.carryMenuContext)({ ...box }, (0, graphqlHelper_1.menuContextFor)(orderId ?? null)) : null;
         },
     }
 };

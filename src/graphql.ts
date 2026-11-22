@@ -270,6 +270,41 @@ export default {
     });
 
     /**
+     * A dish with variants (core's `interfaces/Variants.ts`): its attributes, and each variant with its dish - the
+     * price, the promotion, the stock, the photos, the slug a storefront chooses between. A variant is a dish of its
+     * own, so it is read as one, in the context the box was read in: its `balance` is the kitchens' of that menu.
+     * A row whose dish is gone, deleted or switched off is left out - for a storefront such a combination does not
+     * exist. A variant on stop stays, with `balance` 0.
+     */
+    helper.addType(`#graphql
+      type DishVariantValue {
+        "What a mapping and a recipe name the value by: a number or a string, as it is stored"
+        value: Json
+        title: String
+      }
+      type DishVariantOption {
+        key: String
+        name: String
+        "In the order of display"
+        values: [DishVariantValue]
+      }
+      type DishVariantMapping {
+        "A value of every attribute, by the attribute's key"
+        values: Json
+        "The variant chosen when the dish is opened"
+        isDefault: Boolean
+        dish: Dish
+      }
+      type DishVariants {
+        "In the order of display: of the switch and of the name of a variant"
+        options: [DishVariantOption]
+        mappings: [DishVariantMapping]
+      }
+    `);
+    // The resolver is in additionalResolvers: the resolvers of the model fields would override it here.
+    helper.addToReplaceList("Dish.variants", "variants: DishVariants");
+
+    /**
      * Types of complex order fields
      */
     helper.addType(`#graphql

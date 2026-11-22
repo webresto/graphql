@@ -423,9 +423,10 @@ function listSort(attributes: Record<string, unknown>): Array<Record<string, "AS
  *
  * @param modelname
  * @param criteria
+ * @param one - the criteria reads one record an association names by its id, not a list
  * @returns
  */
-function sanitizeCriteria(modelname, criteria) {
+function sanitizeCriteria(modelname, criteria, one = false) {
   let where = criteria.where !== undefined ? criteria.where : criteria;
 
 
@@ -443,6 +444,9 @@ function sanitizeCriteria(modelname, criteria) {
       // of this model any more, so stopped products are dropped from the result
       // by dropUnoffered() instead of being excluded by the query.
       where.isDeleted = false;
+      // A list of dishes has no variants: a variant of a dish is read inside its
+      // box. A record that names a variant by its id still reads it.
+      if (!one) where.parentId = null;
       break;
     case 'group':
       where.isDeleted = false;
@@ -668,7 +672,7 @@ function addModelResolver(modelname) {
           resolvers[key] = async (parent, args, context) => {
             let criteria = {};
             criteria[relationKey] = parent[key];
-            criteria = sanitizeCriteria(modelAttribute[modelRelationType], criteria);
+            criteria = sanitizeCriteria(modelAttribute[modelRelationType], criteria, true);
 
             // Check access rights
             if (isAuthRequired(modelAttribute[modelRelationType])) {

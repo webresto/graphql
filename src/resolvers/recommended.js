@@ -33,10 +33,12 @@ exports.default = {
                     let result = (recommendedByForce.concat(combinedRecommendedDishes));
                     if (result.length < 3) {
                         let criteria = {};
+                        // Without variants: they lie in the group of their box, and the menu shows the box.
                         criteria['where'] = {
                             'and': [
                                 { 'modifier': false },
-                                { 'isDeleted': false }
+                                { 'isDeleted': false },
+                                { 'parentId': null }
                             ]
                         };
                         if (dishHasEnable) {
@@ -76,7 +78,8 @@ exports.default = {
                     if (args.orderId) {
                         orderDishes = await OrderDish.find({ order: args.orderId }).populate("dish");
                     }
-                    const orderDishIds = orderDishes.map(orderDish => orderDish.dish.id);
+                    // A line of a variant counts as its box: recommendations are set at the box, as on the menu.
+                    const orderDishIds = orderDishes.map(orderDish => orderDish.parentDish ?? orderDish.dish.id);
                     const orderDishParentGroupIds = orderDishes
                         .map(orderDish => orderDish.dish.parentGroup)
                         .filter(parentGroup => parentGroup !== undefined && parentGroup !== null);
@@ -89,10 +92,12 @@ exports.default = {
                     let result = (recommendedByForce.concat(combinedRecommendedDishes));
                     if (result.length < 3) {
                         let criteria = {};
+                        // Without variants: they lie in the group of their box, and the menu shows the box.
                         criteria['where'] = {
                             'and': [
                                 { 'modifier': false },
-                                { 'isDeleted': false }
+                                { 'isDeleted': false },
+                                { 'parentId': null }
                             ]
                         };
                         if (dishHasEnable) {
