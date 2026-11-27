@@ -1,5 +1,17 @@
 import OrderAddress from "@webresto/core/interfaces/OrderAddress";
 import { Delivery } from "@webresto/core/interfaces/Delivery";
+/**
+ * What the customer reads, in the language they asked for.
+ *
+ * Core answers with a key, because `sails.__` there knows the installation's
+ * default locale and not the reader's. The request does know, so the last step
+ * before the wire is where the translation belongs — the same place the
+ * checkout refusals are translated, and out of the same dictionary.
+ *
+ * Line by line, because a zone with no description of its own is described by
+ * several sentences at once; each takes as many arguments as it has `%s`.
+ */
+export declare function translateDeliveryMessage(delivery: any, context: any): any;
 declare const _default: {
     Query: {
         addressSearch: {

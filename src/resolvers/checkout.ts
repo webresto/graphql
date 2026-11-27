@@ -16,6 +16,7 @@ import Customer from "@webresto/core/interfaces/Customer";
 import { SpendBonus } from "@webresto/core/interfaces/SpendBonus";
 import { JWTAuth } from "../../lib/jwt";
 import { getNewCart } from "./order";
+import { translateDeliveryMessage } from "./delivery";
 
 
 interface InputOrderCheckout {
@@ -305,7 +306,8 @@ export default {
           } else if (e.code === 8) {
             message.message = context.i18n.__("The payment system is not available");
           } else if (e.code === 11) {
-            message.message = order.delivery?.message || "Delivery calculation error";
+            // the words of the delivery with their numbers ("Minimum order amount: 600"), as the field of the order gives them
+            message.message = translateDeliveryMessage(order.delivery, context) || context.i18n.__("Delivery calculation error");
           } else if (e.code === 9) {
             message.message = context.i18n.__("The order date is not valid");
           } else if (e.code === 12) {

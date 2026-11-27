@@ -42,6 +42,7 @@ const OrderHelper_1 = require("@webresto/core/lib/order/OrderHelper");
 const graphqlHelper_1 = __importDefault(require("../../lib/graphqlHelper"));
 const jwt_1 = require("../../lib/jwt");
 const order_1 = require("./order");
+const delivery_1 = require("./delivery");
 graphqlHelper_1.default.addType(`#graphql    
   input InputOrderCheckout {
     orderId: String! 
@@ -295,7 +296,8 @@ exports.default = {
                         message.message = context.i18n.__("The payment system is not available");
                     }
                     else if (e.code === 11) {
-                        message.message = order.delivery?.message || "Delivery calculation error";
+                        // the words of the delivery with their numbers ("Minimum order amount: 600"), as the field of the order gives them
+                        message.message = (0, delivery_1.translateDeliveryMessage)(order.delivery, context) || context.i18n.__("Delivery calculation error");
                     }
                     else if (e.code === 9) {
                         message.message = context.i18n.__("The order date is not valid");

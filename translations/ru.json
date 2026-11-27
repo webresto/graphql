@@ -53,6 +53,7 @@
   "Minimum order price: %s": "Минимальная сумма заказа: %s",
   "Free delivery for orders above: %s": "Бесплатная доставка для заказов от: %s",
   "Minimum order amount: %s": "Минимальная сумма заказа: %s",
+  "Delivery calculation error": "Не удалось рассчитать доставку",
   "Free delivery": "Бесплатная доставка",
   "Shipping cost cannot be calculated": "Стоимость доставки не удалось рассчитать",
   "No point of Street": "Не указана улица",

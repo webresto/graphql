@@ -98,7 +98,7 @@ graphqlHelper.addType(`#graphql
  * Line by line, because a zone with no description of its own is described by
  * several sentences at once; each takes as many arguments as it has `%s`.
  */
-function translateDeliveryMessage(delivery: any, context: any) {
+export function translateDeliveryMessage(delivery: any, context: any) {
   // Anything that is not a key is passed through: an operator's own text.
   const message = delivery?.message;
   const i18n = context?.i18n;
