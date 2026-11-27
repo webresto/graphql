@@ -23,6 +23,9 @@ for (const ext of ["ts", "js"]) {
     let locations: Row[] = [];
     let checkedAddress: unknown;
     let defaultSetFor: unknown[];
+    let remembered: unknown[];
+    let Adapter: any;
+    let realAdapterGet: unknown;
 
     const matches = (row: Row, criteria: Row) => Object.entries(criteria).every(([key, value]) => row[key] === value);
 
@@ -50,6 +53,10 @@ for (const ext of ["ts", "js"]) {
         setDefault: async (...args: unknown[]) => {
           defaultSetFor = args;
         },
+        remember: async (...args: unknown[]) => {
+          remembered = args;
+          return true;
+        },
       };
 
       const order = { id: "cart", state: "CART" };
@@ -72,9 +79,17 @@ for (const ext of ["ts", "js"]) {
 
       locationResolvers = load(`./userLocation.${ext}`).default;
       checkoutResolvers = load(`./checkout.${ext}`).default;
+
+      // the catalog rebuilds the line of a node, as for an order
+      Adapter = load("@webresto/core/adapters/index").Adapter;
+      realAdapterGet = Adapter.get;
+      Adapter.get = async () => ({
+        describe: async (address: Row) => ({ formatted: address.node ? `${address.formatted} street, ${address.home}` : address.formatted, selfAddressed: false }),
+      });
     });
 
     after(function () {
+      Adapter.get = realAdapterGet;
       JWTAuth.verify = realVerify;
       for (const name of names) (global as any)[name] = realGlobals[name];
     });
@@ -86,6 +101,14 @@ for (const ext of ["ts", "js"]) {
       ];
       checkedAddress = undefined;
       defaultSetFor = [];
+      remembered = [];
+    });
+
+    it("keeps an address for the caller, with the line an order to it would keep", async function () {
+      const address = { node: "node-1", formatted: "Ленина", home: "5", coordinate: { lat: 56.8429, lon: 60.6408 } };
+      expect(await locationResolvers.Mutation.locationCreate.fn(null, { address }, as("user-1"))).to.equal(true);
+
+      expect(remembered).to.deep.equal(["user-1", { ...address, formatted: "Ленина street, 5" }]);
     });
 
     const remove = (locationId: string, userId: string) =>
