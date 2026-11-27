@@ -359,6 +359,10 @@ export default {
             // The device kept the cart of the account it was logged in as; the storefront starts
             // a new one at the logout, so this is a client that did not.
             message.message = context.i18n.__("This cart belongs to another account. Please start a new cart");
+          } else if (e.code === 30) {
+            // The RMS that cooks the order refused it, in its own words for the customer: its stop list, its least
+            // sum, its zones and times
+            message.message = e.error;
           }
 
           order = await Order.populate(data.orderId);
